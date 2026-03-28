@@ -10,15 +10,17 @@
 
     <style>
         :root {
-            --primary-color: #2563eb; 
-            --primary-hover: #1d4ed8;
-            --bg-color: #ffffff; /* 純白無邊界風格 */
-            --surface-color: #f8fafc; /* 用於稍微區分區塊的極淺灰 */
-            --text-main: #0f172a;
+            --primary-color: #6366f1; /* 你喜歡的現代感靛藍色 */
+            --primary-hover: #4f46e5;
+            --secondary-color: #10b981; /* 成功/確認的翡翠綠 */
+            --secondary-hover: #059669;
+            --bg-color: #ffffff; /* 拔掉卡片感，改成純白背景 */
+            --text-main: #1e293b;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
             --danger-color: #ef4444;
-            --radius-md: 8px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,82 +29,155 @@
             font-family: 'Inter', 'Noto Sans TC', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            display: flex; flex-direction: column; min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         /* --- 頂部導覽列 --- */
         .navbar {
             padding: 15px 30px;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
             border-bottom: 1px solid var(--border-color);
-            position: sticky; top: 0; background: rgba(255,255,255,0.95); z-index: 100;
+            z-index: 100;
         }
-        .nav-brand { font-size: 1.4em; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+
+        .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
         .nav-menu { display: flex; gap: 15px; align-items: center; }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 4px; transition: 0.2s; }
-        .nav-btn:hover { background-color: var(--surface-color); color: var(--text-main); }
-        .badge { background: #fffbeb; color: #d97706; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; font-weight: 700; margin-left: 5px; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s; }
+        .nav-btn:hover { background-color: #f8fafc; color: var(--primary-color); }
+        
+        /* 成就徽章 */
+        .badge { background: #fffbeb; color: #d97706; padding: 4px 10px; border-radius: 12px; font-size: 0.9em; font-weight: 700; margin-left: 5px; }
 
-        /* --- 主視圖區塊 (無卡片、平面化) --- */
+        /* --- 主視圖區塊 (無陰影、無卡片感) --- */
         .main-content {
-            flex: 1; display: flex; justify-content: center; align-items: flex-start;
-            padding: 60px 20px;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
         }
 
-        .container {
-            width: 100%; max-width: 650px; text-align: left; animation: fadeIn 0.4s ease-out;
+        /* 原本的 .card 變成了 .view-container，拔掉陰影跟背景色差異 */
+        .view-container {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            animation: fadeIn 0.4s ease-out;
         }
 
-        /* 針對置中需求特別調整的區塊 */
-        .centered-view { text-align: center; max-width: 450px; margin: 0 auto; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        h2 { font-size: 2em; margin-bottom: 25px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+        h3 { font-size: 1.3em; margin-bottom: 15px; color: var(--text-muted); }
 
-        h2 { font-size: 2em; margin-bottom: 10px; font-weight: 800; letter-spacing: -0.5px; }
-        .subtitle { color: var(--text-muted); margin-bottom: 30px; line-height: 1.6; }
-
-        /* --- 表單 --- */
+        /* --- 表單與輸入框 --- */
         .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9em; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9em; color: var(--text-muted); }
+        
         input[type="text"], input[type="password"], input[type="number"], select {
-            width: 100%; padding: 14px 16px; border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); font-size: 1em; background-color: var(--surface-color); transition: 0.2s;
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-color: #f8fafc;
+            font-family: inherit;
         }
-        input:focus, select:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
 
-        /* --- 按鈕系統 --- */
-        .btn {
-            padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1em; font-weight: 600;
-            cursor: pointer; transition: 0.1s; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background-color: #fff;
         }
+
+        /* --- 按鈕系統 (保留第二版的精緻感) --- */
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s, background-color 0.2s;
+            width: 100%;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
         .btn:active { transform: scale(0.98); }
-        .btn-primary { background-color: var(--primary-color); color: white; margin-bottom: 10px;}
+        .btn-primary { background-color: var(--primary-color); color: white; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.25); }
         .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-secondary { background-color: var(--surface-color); color: var(--text-main); border: 1px solid var(--border-color); margin-bottom: 10px; }
-        .btn-secondary:hover { background-color: #f1f5f9; }
+        .btn-secondary { background-color: white; color: var(--text-main); border: 2px solid var(--border-color); }
+        .btn-secondary:hover { background-color: #f8fafc; border-color: #cbd5e1; }
+        .btn-success { background-color: var(--secondary-color); color: white; }
+        .btn-success:hover { background-color: var(--secondary-hover); }
+        .btn-outline { background: transparent; color: var(--text-muted); padding: 10px; }
+        .btn-outline:hover { color: var(--primary-color); }
 
         /* --- 測驗介面 --- */
-        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
-        .question-card { font-size: 2.2em; font-weight: 800; color: var(--text-main); margin-bottom: 30px; word-break: break-word; }
-        
-        /* 平面化選項按鈕 */
-        .option-btn {
-            display: block; width: 100%; padding: 18px; margin-bottom: 12px;
-            background: var(--bg-color); border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 500; cursor: pointer; transition: 0.2s;
+        .quiz-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--border-color);
         }
-        .option-btn:hover { border-color: var(--primary-color); background: #eff6ff; }
-        .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
+
+        .progress-text { font-weight: 600; color: var(--text-muted); font-size: 0.9em; }
+        
+        .question-card {
+            background: #e0e7ff;
+            border: 2px solid #c7d2fe;
+            border-radius: var(--radius-lg);
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .option-btn {
+            display: block; width: 100%; padding: 16px; margin-bottom: 12px;
+            background: white; border: 2px solid var(--border-color);
+            border-radius: var(--radius-md); text-align: left;
+            font-size: 1.1em; font-weight: 600; color: var(--text-main);
+            cursor: pointer; transition: all 0.2s;
+        }
+
+        .option-btn:hover { border-color: var(--primary-color); background: #f5f3ff; }
+        .option-btn.selected {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
 
         /* --- 隱藏框架 --- */
         .view-section { display: none; }
         .view-section.active { display: block; }
-        
         .footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85em; }
+
+        /* --- 表格與錯題本樣式 --- */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .data-table th, .data-table td { padding: 15px 10px; border-bottom: 1px solid var(--border-color); }
+        .data-table th { background: #f8fafc; font-weight: 600; color: var(--text-muted); }
         
-        /* 列表樣式 */
-        .list-item { padding: 15px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; }
-        .medal { font-size: 1.5em; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        .review-card {
+            background: white; border: 2px solid var(--border-color); border-left: 6px solid var(--danger-color);
+            padding: 18px; border-radius: var(--radius-md); margin-bottom: 15px; text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -111,69 +186,73 @@
         <div class="nav-brand">VocabMaster</div>
         <div class="nav-menu">
             <span id="navWelcome" style="font-weight: 600; font-size: 0.9em; margin-right: 5px;"></span>
-            <span id="navStreak" class="badge" style="display:none;" title="連續登入測驗天數">🔥 0</span>
-            <span id="navMedal" style="display:none;" title="滿分金牌成就">🥇</span>
+            <span id="navStreak" class="badge" style="display:none;" title="連續測驗天數">🔥 0</span>
+            <span id="navMedal" style="font-size:1.2em; display:none;" title="滿分金牌成就">🥇</span>
             
-            <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')" style="display:none;">錯題本</button>
-            <button class="nav-btn" onclick="showView('leaderboardView')">排行榜</button>
-            <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')" style="display:none;">設定</button>
+            <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')" style="display:none;">📚 錯題本</button>
+            <button class="nav-btn" onclick="showView('leaderboardView')">🏆 排行榜</button>
+            <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')" style="display:none;">⚙️ 設定</button>
             <button class="nav-btn" style="color: var(--danger-color);" onclick="handleLogout()">登出</button>
         </div>
     </nav>
 
     <main class="main-content">
 
-        <div id="loginView" class="view-section active container centered-view">
+        <div id="loginView" class="view-section active view-container">
+            <div style="font-size: 3.5em; margin-bottom: 10px;">🎓</div>
             <h2>登入您的帳號</h2>
-            <p class="subtitle">開始你的學測單字挑戰</p>
             <div class="input-group">
-                <input type="text" id="loginUsername" placeholder="帳號 Username" required>
+                <label>帳號 (Username)</label>
+                <input type="text" id="loginUsername" placeholder="請輸入帳號" required>
             </div>
             <div class="input-group">
-                <input type="password" id="loginPassword" placeholder="密碼 Password" required>
+                <label>密碼 (Password)</label>
+                <input type="password" id="loginPassword" placeholder="請輸入密碼" required>
             </div>
-            <button class="btn btn-primary" onclick="handleLogin()">登入</button>
+            <button class="btn btn-primary" onclick="handleLogin()">安全登入</button>
             <button class="btn btn-secondary" onclick="showView('registerView')">建立新帳號</button>
-            <button class="btn btn-secondary" style="border:none; color:var(--text-muted);" onclick="handleGuestLogin()">以訪客身分體驗</button>
+            <button class="btn btn-outline" onclick="handleGuestLogin()">先以訪客身分體驗</button>
         </div>
 
-        <div id="registerView" class="view-section container centered-view">
+        <div id="registerView" class="view-section view-container">
+            <div style="font-size: 3.5em; margin-bottom: 10px;">✍️</div>
             <h2>建立新帳號</h2>
-            <p class="subtitle">紀錄成就，稱霸排行榜</p>
             <div class="input-group">
-                <input type="text" id="regUsername" placeholder="設定帳號 (中英文數字皆可)" required>
+                <label>設定帳號</label>
+                <input type="text" id="regUsername" placeholder="中英文或數字皆可" required>
             </div>
             <div class="input-group">
-                <input type="password" id="regPassword" placeholder="設定密碼 (最少4碼)" required>
+                <label>設定密碼</label>
+                <input type="password" id="regPassword" placeholder="長度至少 4 碼" required>
             </div>
             <button class="btn btn-primary" onclick="handleRegister()">立即註冊</button>
-            <button class="btn btn-secondary" style="border:none; color:var(--text-muted);" onclick="showView('loginView')">返回登入</button>
+            <button class="btn btn-outline" onclick="showView('loginView')">返回登入</button>
         </div>
 
-        <div id="setupView" class="view-section container">
-            <h2>開始測驗</h2>
-            <p class="subtitle">選擇範圍與題數，測驗滿分即可獲得 🥇 專屬金牌，每日測驗維持 🔥 火焰連擊！</p>
+        <div id="setupView" class="view-section view-container">
+            <h2>準備開始挑戰</h2>
+            <p style="color: var(--text-muted); margin-bottom: 25px;">測驗滿分獲得 🥇 金牌，每日測驗維持 🔥 火焰連擊！</p>
             <div class="input-group">
-                <label>測驗題數 (建議 10-20 題)</label>
+                <label>測驗題數</label>
                 <input type="number" id="numQuestionsInput" value="10" min="1" max="100">
             </div>
             <div class="input-group">
                 <label>難度級別</label>
                 <select id="difficultySelect">
-                    <option value="mixed" selected>綜合學測比例 (Lv.1 - Lv.6)</option>
-                    <option value="3">Level 3</option>
-                    <option value="4">Level 4</option>
-                    <option value="5">Level 5</option>
-                    <option value="6">Level 6</option>
+                    <option value="mixed" selected>🔥 綜合學測比例 (Lv.1 - Lv.6)</option>
+                    <option value="3">⭐ Level 3</option>
+                    <option value="4">⭐⭐ Level 4</option>
+                    <option value="5">⭐⭐⭐ Level 5</option>
+                    <option value="6">👑 Level 6</option>
                 </select>
             </div>
-            <button class="btn btn-primary" onclick="startGame(false)" style="margin-top: 10px;">🚀 開始隨機測驗</button>
+            <button class="btn btn-primary" onclick="startGame(false)" style="margin-top: 10px; padding: 18px; font-size: 1.15em;">🚀 開始隨機測驗</button>
         </div>
 
-        <div id="quizView" class="view-section container">
+        <div id="quizView" class="view-section view-container" style="max-width: 700px;">
             <div class="quiz-header">
                 <div id="quizInstruction" style="font-weight: 700; color: var(--primary-color);"></div>
-                <div style="font-weight: 600; color: var(--text-muted);"><span id="currentQNum"></span> / <span id="totalQNum"></span></div>
+                <div class="progress-text"><span id="currentQNum"></span> / <span id="totalQNum"></span></div>
             </div>
             <div id="meaningDisplay" class="question-card">載入中...</div>
             <div id="optionsContainer"></div>
@@ -184,73 +263,84 @@
             </div>
         </div>
 
-        <div id="resultView" class="view-section container">
-            <h2>測驗分析報告</h2>
-            <p id="summary" class="subtitle" style="font-size: 1.1em; color: var(--primary-color); font-weight:600;"></p>
+        <div id="resultView" class="view-section view-container" style="max-width: 800px;">
+            <h2>📊 測驗分析報告</h2>
+            <p id="summary" style="font-size: 1.2em; font-weight: 700; color: var(--primary-color); margin-bottom: 20px;"></p>
             <div style="width: 200px; height: 200px; margin: 0 auto 30px auto;">
                 <canvas id="scoreChart"></canvas>
             </div>
-            <div id="detailResults" style="margin-bottom: 30px;"></div>
+            <div id="detailResults" style="text-align: left; max-height: 400px; overflow-y: auto; padding-right: 10px; margin-bottom: 20px;"></div>
             <button class="btn btn-primary" onclick="showView('setupView')">返回主頁</button>
         </div>
 
-        <div id="reviewPage" class="view-section container">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2>錯題本實戰</h2>
-                <button class="btn btn-primary" style="width:auto; padding: 10px 20px;" onclick="startGame(true)">🗡️ 開始錯題重測</button>
-            </div>
-            <p class="subtitle">將錯題當作考卷重測，答對的題目將會從清單中消滅！</p>
-            <div id="incorrectQuestionsList" style="margin-top: 20px;"></div>
+        <div id="reviewPage" class="view-section view-container" style="max-width: 800px;">
+            <h2>📚 個人錯題本</h2>
+            <button class="btn btn-primary" onclick="startGame(true)" style="margin-bottom: 20px;">🗡️ 抽出錯題進行實戰復仇</button>
+            <div id="incorrectQuestionsList" style="max-height: 500px; overflow-y: auto;"></div>
+            <button class="btn btn-outline" onclick="showView('setupView')" style="margin-top: 20px;">返回</button>
         </div>
 
-        <div id="profileView" class="view-section container">
-            <h2>帳號設定</h2>
-            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 30px;">
-                <div style="font-size: 60px;" id="profileAvatarDisplay">👤</div>
-                <div>
-                    <h3 id="profileUsernameDisplay" style="font-size: 1.5em; margin-bottom: 5px;"></h3>
-                    <div id="profileBadgesDisplay"></div>
-                </div>
-            </div>
+        <div id="profileView" class="view-section view-container">
+            <h2>⚙️ 帳號設定</h2>
+            <div style="font-size: 80px; margin-bottom: 10px;" id="profileAvatarDisplay">👤</div>
+            <h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800;"></h3>
+            <div id="profileBadgesDisplay" style="margin-bottom: 20px; font-size: 1.2em;"></div>
             
-            <div style="display: flex; gap: 40px; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
-                <div><div style="font-size: 0.9em; color: var(--text-muted);">總答對率</div><div id="profileCorrectRate" style="font-size: 1.5em; font-weight: 700;">--</div></div>
-                <div><div style="font-size: 0.9em; color: var(--text-muted);">總答題數</div><div id="profileTotalAnswered" style="font-size: 1.5em; font-weight: 700;">0</div></div>
+            <div style="background: #f8fafc; border: 2px solid var(--border-color); padding: 20px; border-radius: var(--radius-md); margin-bottom: 25px; display: flex; justify-content: space-around;">
+                <div>
+                    <div style="font-size: 0.9em; color: var(--text-muted);">總答對率</div>
+                    <div id="profileCorrectRate" style="font-size: 1.5em; font-weight: 800; color: var(--primary-color);">--</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.9em; color: var(--text-muted);">總答題數</div>
+                    <div id="profileTotalAnswered" style="font-size: 1.5em; font-weight: 800; color: var(--text-main);">0</div>
+                </div>
             </div>
 
             <div class="input-group">
                 <label>更新頭像 (輸入 Emoji 或圖片網址)</label>
                 <input type="text" id="newAvatarInput" placeholder="例如: 🚀 或 https://...">
             </div>
-            <button class="btn btn-secondary" onclick="handleAvatarUpdate()">儲存設定</button>
+            <button class="btn btn-success" onclick="handleAvatarUpdate()">儲存設定</button>
+            <button class="btn btn-outline" onclick="showView('setupView')">返回</button>
         </div>
 
-        <div id="leaderboardView" class="view-section container">
-            <h2>全球榮譽榜</h2>
-            <p class="subtitle">依照答對率與解鎖成就排行</p>
-            <div id="leaderboardTableContainer"></div>
+        <div id="leaderboardView" class="view-section view-container" style="max-width: 800px;">
+            <h2>🏆 全球榮譽榜</h2>
+            <div id="leaderboardTableContainer" style="overflow-x: auto;"></div>
+            <button class="btn btn-secondary" onclick="showView('setupView')" style="margin-top: 20px;">返回</button>
         </div>
 
     </main>
 
-    <footer class="footer"> &copy; 2026 Yang Technology </footer>
+    <footer class="footer">
+        &copy; 2026 Yang Technology | Crafted for Excellence
+    </footer>
 
     <script>
-        // --- 記得替換成你剛剛重新部署的 GAS 網址 ---
+        // ⚠️ 記得替換成你的 GAS 網址
         const API_URL = 'https://script.google.com/macros/s/AKfycbyXAx1jgdExUKrNHWpd4v8crV0KI4QXVMGr4Kzht8OG314UfxZKlPbLKlDYc_YqTVM2/exec';
         
-        const showLoading = (text) => { Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); };
+        const showLoading = (text) => {
+            Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+        };
 
         async function apiCall(action, data = {}) {
             try {
-                const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action, data }) });
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: action, data: data })
+                });
                 return await response.json();
-            } catch (error) { return { success: false, message: "網路異常" }; }
+            } catch (error) {
+                return { success: false, message: "網路異常，請稍後再試。" };
+            }
         }
 
         let quizData = [], currentQuestionIndex = 0, userAnswers = {}, totalQuestions = 0;
         let currentUser = localStorage.getItem('user'), sessionToken = localStorage.getItem('token');
-        let isReviewQuizMode = false; // 判斷是否為錯題重測模式
+        let isReviewQuizMode = false; // 新增：錯題重測模式狀態
 
         const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'profileView', 'leaderboardView'];
         
@@ -260,63 +350,103 @@
 
             if (currentUser) {
                 document.getElementById('topNavbar').style.display = 'flex';
-                document.getElementById('navWelcome').textContent = currentUser;
+                document.getElementById('navWelcome').textContent = currentUser === '訪客' ? '👋 嗨, 訪客' : `👋 嗨, ${currentUser}`;
+                
                 const isGuest = currentUser === '訪客';
                 document.getElementById('navReviewBtn').style.display = isGuest ? 'none' : 'block';
                 document.getElementById('navProfileBtn').style.display = isGuest ? 'none' : 'block';
+                
                 if(viewId === 'quizView') document.getElementById('topNavbar').style.display = 'none';
                 
-                // 每次切換頁面時默默更新成就顯示
+                // 更新 Navbar 徽章
                 if (!isGuest && viewId !== 'quizView') updateNavbarBadges();
-            } else { document.getElementById('topNavbar').style.display = 'none'; }
+
+            } else {
+                document.getElementById('topNavbar').style.display = 'none';
+            }
 
             if (viewId === 'reviewPage') loadIncorrectQuestions();
             if (viewId === 'profileView') showProfileView();
             if (viewId === 'leaderboardView') loadLeaderboardData();
         }
 
-        // --- 登入/註冊 (保留原本邏輯，簡化代碼) ---
         function handleGuestLogin() {
-            currentUser = '訪客'; sessionToken = null; localStorage.removeItem('user'); localStorage.removeItem('token'); showView('setupView');
+            Swal.fire({
+                title: '訪客模式', text: '訪客無法解鎖成就、使用錯題本及排行榜，確定繼續嗎？',
+                icon: 'info', showCancelButton: true, confirmButtonText: '確定', cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    currentUser = '訪客'; sessionToken = null;
+                    localStorage.removeItem('user'); localStorage.removeItem('token');
+                    showView('setupView');
+                }
+            });
         }
+
         function handleRegister() {
-            const username = document.getElementById('regUsername').value.trim(); const password = document.getElementById('regPassword').value;
-            if (username.length < 3 || password.length < 4) return Swal.fire('格式錯誤', '帳號最少3碼，密碼4碼', 'warning');
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            
+            if (username.length < 3 || password.length < 4) {
+                Swal.fire('格式錯誤', '帳號至少3碼，密碼至少4碼', 'warning'); return;
+            }
+
             showLoading('註冊中...');
             apiCall('registerUser', { username, password }).then(res => {
-                if (res.success) Swal.fire('成功', '請登入', 'success').then(() => { showView('loginView'); document.getElementById('loginUsername').value = username; });
-                else Swal.fire('失敗', res.message, 'error');
+                if (res.success) {
+                    Swal.fire('註冊成功！', '請使用新帳號登入', 'success').then(() => {
+                        showView('loginView'); document.getElementById('loginUsername').value = username;
+                    });
+                } else { Swal.fire('註冊失敗', res.message, 'error'); }
             });
         }
-        function handleLogin() {
-            const username = document.getElementById('loginUsername').value.trim(); const password = document.getElementById('loginPassword').value;
-            showLoading('驗證中...');
-            apiCall('loginUser', { username, password }).then(res => {
-                if (res.success) { currentUser = res.user; sessionToken = res.token; localStorage.setItem('user', currentUser); localStorage.setItem('token', sessionToken); Swal.close(); showView('setupView'); } 
-                else Swal.fire('失敗', res.message, 'error');
-            });
-        }
-        function handleLogout() { currentUser = null; sessionToken = null; localStorage.removeItem('user'); localStorage.removeItem('token'); showView('loginView'); }
 
-        // --- 核心：開始測驗 (整合錯題模式) ---
+        function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            showLoading('驗證身分中...');
+            apiCall('loginUser', { username, password }).then(res => {
+                if (res.success) {
+                    currentUser = res.user; sessionToken = res.token;
+                    localStorage.setItem('user', currentUser); localStorage.setItem('token', sessionToken);
+                    Swal.close(); showView('setupView');
+                } else { Swal.fire('登入失敗', res.message, 'error'); }
+            });
+        }
+
+        function handleLogout() {
+            Swal.fire({ title: '確定要登出嗎？', icon: 'question', showCancelButton: true, confirmButtonColor: '#ef4444' })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    currentUser = null; sessionToken = null;
+                    localStorage.removeItem('user'); localStorage.removeItem('token');
+                    showView('loginView');
+                }
+            });
+        }
+
+        // --- 核心測驗邏輯 ---
         function startGame(isReview = false) {
             isReviewQuizMode = isReview;
-            
+
             if (isReviewQuizMode) {
-                showLoading('抽取錯題產生試卷中...');
+                showLoading('為您生成專屬復仇試卷中...');
                 apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res));
             } else {
                 const numQuestions = parseInt(document.getElementById('numQuestionsInput').value);
                 const mode = document.getElementById('difficultySelect').value;
-                if (isNaN(numQuestions) || numQuestions < 1) return Swal.fire('錯誤', '題數無效', 'warning');
-                showLoading('從資料庫抽取中...');
-                apiCall('getAllQuestions', { numQuestions, sessionToken: currentUser === '訪客' ? null : sessionToken, mode }).then(res => processQuizData(res));
+                if (isNaN(numQuestions) || numQuestions < 1) { Swal.fire('錯誤', '請輸入有效的題數', 'warning'); return; }
+
+                showLoading('從資料庫抽取題目中...');
+                apiCall('getAllQuestions', { numQuestions, sessionToken: currentUser === '訪客' ? null : sessionToken, mode })
+                .then(res => processQuizData(res));
             }
         }
 
         function processQuizData(res) {
             Swal.close();
-            if (res.error) return Swal.fire('提示', res.error, 'info');
+            if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; }
             quizData = res.questions; totalQuestions = res.totalQuestions;
             if (quizData && quizData.length > 0) {
                 currentQuestionIndex = 0; userAnswers = {};
@@ -331,32 +461,42 @@
             document.getElementById('quizInstruction').textContent = isReviewQuizMode ? `🗡️ 錯題復仇戰：${q.instruction}` : q.instruction;
             document.getElementById('meaningDisplay').textContent = q.questionText;
             
-            const container = document.getElementById('optionsContainer'); container.innerHTML = '';
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
             q.options.forEach(word => {
                 const btn = document.createElement('button');
                 btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`;
                 btn.textContent = word;
-                btn.onclick = () => { userAnswers[q.id] = word; Array.from(container.children).forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); };
+                btn.onclick = () => {
+                    userAnswers[q.id] = word;
+                    Array.from(container.children).forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                };
                 container.appendChild(btn);
             });
             updateNavButtons();
         }
 
-        function changeQuestion(delta) { const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
+        function changeQuestion(delta) {
+            const newIdx = currentQuestionIndex + delta;
+            if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx);
+        }
 
         function updateNavButtons() {
             const isLast = currentQuestionIndex === quizData.length - 1;
             document.getElementById('prevButton').disabled = currentQuestionIndex === 0;
             const nextBtn = document.getElementById('nextButton');
-            nextBtn.textContent = isLast ? '交卷' : '下一題';
+            nextBtn.textContent = isLast ? '交卷送出' : '下一題';
             nextBtn.onclick = isLast ? submitQuiz : () => changeQuestion(1);
-            nextBtn.className = isLast ? 'btn btn-primary' : 'btn btn-secondary';
+            nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary';
         }
 
         function submitQuiz() {
-            if (Object.keys(userAnswers).length < quizData.length) {
-                Swal.fire({ title: '還有題目未答', text: '確定要交卷嗎？', icon: 'warning', showCancelButton: true }).then(r => { if(r.isConfirmed) processSubmit(); });
-            } else processSubmit();
+            const unans = quizData.length - Object.keys(userAnswers).length;
+            if (unans > 0) {
+                Swal.fire({ title: `還有 ${unans} 題未答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true })
+                .then(res => { if(res.isConfirmed) processSubmit(); });
+            } else { processSubmit(); }
         }
 
         function processSubmit() {
@@ -369,31 +509,36 @@
                 submitData.push({ questionId: q.id, questionText: q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, isCorrect: isCorr });
 
                 detailDiv.innerHTML += `
-                    <div style="padding: 15px 0; border-bottom: 1px solid var(--border-color);">
-                        <div style="font-weight:600; margin-bottom:5px;">${i+1}. ${q.questionText} ${isCorr?'<span style="color:#2563eb;">✔</span>':'<span style="color:#ef4444;">✘</span>'}</div>
-                        <div style="font-size:0.9em; color:var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? `(你選: ${uAns})` : ''}</div>
+                    <div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px;">${i+1}. ${q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4>
+                        <p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> 
+                        ${!isCorr && uAns ? ` | 你的答案: <span style="color:#ef4444;">${uAns}</span>` : ''}</p>
                     </div>`;
             });
 
-            // 滿分特效
+            // 成就判定特效
             if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') {
                 Swal.fire('太神啦！', '滿分通關！獲得 🥇 榮譽金牌 (可於個人設定查看)', 'success');
             } else if (isReviewQuizMode && correctCount > 0) {
                 Swal.fire('復仇成功', `你成功消滅了 ${correctCount} 題錯題！`, 'success');
             }
 
-            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`;
+            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題 (${Math.round(correctCount/totalQuestions*100)}%)`;
             showView('resultView'); drawChart(correctCount, totalQuestions - correctCount);
             
             if (currentUser !== '訪客') apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode });
         }
 
         function drawChart(correct, wrong) {
-            const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#2563eb', '#f1f5f9'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } });
+            const ctx = document.getElementById('scoreChart');
+            if (window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] },
+                options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } }
+            });
         }
 
-        // --- 成就顯示與個人檔案 ---
+        // --- 成就顯示與周邊資料 ---
         function updateNavbarBadges() {
             apiCall('getProfileData', { username: currentUser }).then(res => {
                 if(res.success) {
@@ -408,14 +553,16 @@
             document.getElementById('profileUsernameDisplay').textContent = currentUser;
             apiCall('getProfileData', { username: currentUser }).then(res => {
                 if (res.success) {
-                    const av = res.avatar || '👤'; const avDiv = document.getElementById('profileAvatarDisplay');
-                    if(av.startsWith('http')) avDiv.innerHTML = `<img src="${av}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;">`; else avDiv.textContent = av;
+                    const av = res.avatar || '👤';
+                    const avDiv = document.getElementById('profileAvatarDisplay');
+                    if(av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:90px; height:90px; border-radius:50%; object-fit:cover;">`; }
+                    else { avDiv.textContent = av; }
                     document.getElementById('profileCorrectRate').textContent = res.correctRate;
                     document.getElementById('profileTotalAnswered').textContent = res.totalAnswered;
                     
                     let badgesHtml = '';
-                    if (res.hasGoldMedal) badgesHtml += '<span class="medal" title="滿分金牌">🥇</span> ';
-                    if (res.streak > 0) badgesHtml += `<span class="badge" style="font-size:1em;">🔥 ${res.streak} 天連勝</span>`;
+                    if (res.hasGoldMedal) badgesHtml += '<span title="滿分金牌">🥇 金牌得主</span> ';
+                    if (res.streak > 0) badgesHtml += `<span class="badge" style="font-size:0.9em;">🔥 ${res.streak} 天連勝</span>`;
                     document.getElementById('profileBadgesDisplay').innerHTML = badgesHtml;
                 }
             });
@@ -423,47 +570,55 @@
 
         function handleAvatarUpdate() {
             const newAvatar = document.getElementById('newAvatarInput').value.trim();
-            if(!newAvatar) return Swal.fire('請輸入內容', '', 'info');
-            showLoading('更新中');
+            if(!newAvatar) return Swal.fire('請輸入資料', '', 'info');
+            showLoading('更新中...');
             apiCall('updateAvatar', { username: currentUser, newAvatar }).then(res => {
-                Swal.fire('更新完成', '', 'success'); if (res.success) showProfileView(); document.getElementById('newAvatarInput').value = '';
+                Swal.fire(res.success ? '成功' : '失敗', res.message, res.success ? 'success' : 'error');
+                if (res.success) showProfileView(); document.getElementById('newAvatarInput').value = '';
             });
         }
 
         function loadIncorrectQuestions() {
-            const list = document.getElementById('incorrectQuestionsList'); list.innerHTML = '載入中...';
+            const list = document.getElementById('incorrectQuestionsList');
+            list.innerHTML = '<p>載入中...</p>';
             apiCall('getIncorrectQuestions', { username: currentUser }).then(res => {
                 if (res.questions && res.questions.length > 0) {
-                    list.innerHTML = res.questions.map((q, i) => `<div class="list-item"><div><strong>${q.question}</strong><div style="font-size:0.9em;color:var(--text-muted);">正確答案：${q.correctAnswer}</div></div></div>`).join('');
-                } else list.innerHTML = '<p style="color:var(--text-muted); padding:20px 0;">目前無錯題紀錄，繼續保持！</p>';
+                    list.innerHTML = res.questions.map((q, i) => `
+                        <div class="review-card">
+                            <strong style="font-size: 1.1em;">${i+1}. ${q.question}</strong><br>
+                            <span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 8px;">✅ ${q.correctAnswer}</span>
+                        </div>
+                    `).join('');
+                } else { list.innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">太強了！目前沒有任何錯題紀錄 🎉</p>'; }
             });
         }
 
         function loadLeaderboardData() {
-            const container = document.getElementById('leaderboardTableContainer'); container.innerHTML = '載入中...';
+            const container = document.getElementById('leaderboardTableContainer');
+            container.innerHTML = '<p>載入中...</p>';
             apiCall('getLeaderboardData').then(res => {
                 if(res.data && res.data.length > 0) {
-                    let html = '';
+                    let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>答對率</th><th>題數</th></tr>';
                     res.data.forEach((d, i) => {
-                        const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+                        const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1;
                         const medal = d.medal ? '🥇' : '';
-                        const streak = d.streak > 0 ? `<span style="color:#d97706; font-size:0.8em; margin-left:5px;">🔥${d.streak}</span>` : '';
-                        html += `
-                        <div class="list-item" style="align-items:center;">
-                            <div style="width:40px; font-weight:700; color:var(--text-muted);">${rank}</div>
-                            <div style="flex:1; display:flex; align-items:center; font-weight:600;">${d.avatar} <span style="margin-left:10px;">${d.username}</span> ${medal} ${streak}</div>
-                            <div style="text-align:right;">
-                                <div style="color:var(--primary-color); font-weight:800;">${d.rateDisplay}</div>
-                                <div style="font-size:0.8em; color:var(--text-muted);">${d.totalAns} 題</div>
-                            </div>
-                        </div>`;
+                        const streak = d.streak > 0 ? `<span style="color:#d97706; font-size:0.8em; font-weight:bold; margin-left:5px;">🔥${d.streak}</span>` : '';
+                        html += `<tr>
+                            <td style="font-weight:700;">${rank}</td>
+                            <td style="text-align:left; font-weight:600;">${d.avatar} ${d.username} ${medal} ${streak}</td>
+                            <td style="color:var(--primary-color); font-weight:800;">${d.rateDisplay}</td>
+                            <td>${d.totalAns}</td>
+                        </tr>`;
                     });
-                    container.innerHTML = html;
-                } else container.innerHTML = '尚無資料';
+                    container.innerHTML = html + '</table>';
+                } else { container.innerHTML = '<p>尚無資料</p>'; }
             });
         }
 
-        window.onload = () => { if (currentUser) showView('setupView'); else showView('loginView'); };
+        // --- 系統啟動 ---
+        window.onload = () => {
+            if (currentUser) showView('setupView'); else showView('loginView');
+        };
     </script>
 </body>
 </html>
