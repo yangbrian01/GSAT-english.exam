@@ -18,7 +18,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
+        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation;}
 
         /* --- 導覽列 --- */
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: rgba(255, 255, 255, 0.98); border-bottom: 1px solid var(--border-color); z-index: 100; }
@@ -65,7 +65,7 @@
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
 
         /* --- 🃏 Quizlet 級 3D 翻轉閃卡 --- */
-        .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0;}
+        .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none;}
         .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
         .flashcard-container.flipped .flashcard-inner { transform: rotateY(180deg); }
         
@@ -148,12 +148,12 @@
 
         <div id="setupView" class="view-section view-container">
             <h2>準備開始挑戰</h2>
-            <p class="subtitle">模式越高階，題型越豐富！</p>
+            <p class="subtitle">模式越高階，混合的題型越豐富！</p>
             
             <div class="input-group">
                 <label>測驗模式 🎮</label>
                 <select id="quizModeSelect" style="border-color: var(--primary-color); font-weight: 600; color: var(--primary-color);">
-                    <option value="1">1. 經典選擇 (英中互譯混出)</option>
+                    <option value="1">1. 經典選擇 (英中隨機混出)</option>
                     <option value="2">2. 進階聽力 (+ 純聽力題混出)</option>
                     <option value="3">3. 魔王挑戰 (+ 拼寫輸入混出)</option>
                 </select>
@@ -239,7 +239,6 @@
             </div>
 
             <div id="listModeContainer" style="display: none; max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
-            
         </div>
 
         <div id="profileView" class="view-section view-container">
@@ -286,7 +285,6 @@
             const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'en-US'; utterance.rate = 0.85; window.speechSynthesis.speak(utterance);
         }
         function playCurrentWordAudio() { 
-            // 確保永遠只唸真正的英文單字
             speakWord(quizData[currentQuestionIndex].correctWord); 
         }
 
@@ -313,16 +311,17 @@
             window.scrollTo(0, 0);
         }
 
+        // 登入相關...
         function handleGuestLogin() { Swal.fire({title:'訪客模式', text:'無法解鎖成就與記憶系統', icon:'info', showCancelButton:true}).then(r=>{if(r.isConfirmed){currentUser='訪客';sessionToken=null;localStorage.clear();showView('setupView');}}); }
         function handleRegister() { const u=document.getElementById('regUsername').value; const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號>3, 密碼>4','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogin() { const u=document.getElementById('loginUsername').value; const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
-        // --- 魔王模式遮罩小幫手 (根據使用者的截圖：b _ _ _ _ g n.) ---
+        // --- 魔王模式遮罩小幫手 (根據截圖：給頭給尾，避開 n. 等詞性) ---
         function maskWord(word) {
             let parts = word.split(' ');
             let res = parts.map(p => {
-                if (p.includes('.')) return p; // 避開 n., v. 等詞性標籤
+                if (p.includes('.') || p.includes('/')) return p; // 避開 n., adj./v. 等詞性標籤
                 if (p.length <= 2) return p;
                 return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1];
             });
@@ -341,7 +340,6 @@
                 const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value;
                 if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning');
                 showLoading('抽取題目中...');
-                // 傳遞 activeMode 給後端進行題型混合
                 apiCall('getAllQuestions', { numQuestions: num, sessionToken: currentUser==='訪客'?null:sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res));
             }
         }
@@ -349,7 +347,6 @@
         function processQuizData(res) {
             Swal.close();
             if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; }
-            
             quizData = res.questions;
             totalQuestions = res.totalQuestions;
             if (quizData.length > 0) {
@@ -365,8 +362,8 @@
             document.getElementById('currentQNum').textContent = index + 1;
             document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction;
             
-            const speakBtn = document.getElementById('qSpeakBtn');
             const meaningDisplay = document.getElementById('meaningDisplay');
+            const speakBtn = document.getElementById('qSpeakBtn');
             const hintDiv = document.getElementById('hintDisplay');
             const optContainer = document.getElementById('optionsContainer');
             const typeContainer = document.getElementById('typingContainer');
@@ -379,33 +376,34 @@
             typeContainer.style.display = 'none';
             meaningDisplay.style.display = 'block';
 
-            // 依照後端傳來的題型 (q.qType) 來渲染畫面
+            // 依照後端分配的精準題型來渲染
             if (q.qType === 'listen') {
-                // 純聽力題：隱藏文字，顯示超大耳機按鈕
-                meaningDisplay.innerHTML = '<div style="font-size:3em; cursor:pointer;" onclick="playCurrentWordAudio()">🎧</div><div style="font-size:0.4em; color:var(--text-muted); margin-top:10px;">點擊重播</div>';
+                // 純聽力題：只顯示耳機圖示，不顯示英文
+                meaningDisplay.innerHTML = '<div style="font-size:3em; cursor:pointer;" onclick="playCurrentWordAudio()">🎧</div><div style="font-size:0.4em; color:var(--text-muted); margin-top:10px;">點擊重新聆聽</div>';
                 setTimeout(() => playCurrentWordAudio(), 400); 
                 optContainer.style.display = 'block';
                 renderOptionsUI(q, optContainer);
             } 
             else if (q.qType === 'spell') {
-                // 拼寫題：顯示中文，給英文字首字尾提示
-                meaningDisplay.textContent = q.questionText; // 這裡後端保證是傳中文
-                speakBtn.style.display = 'flex'; // 可以聽發音輔助
-                setTimeout(() => playCurrentWordAudio(), 400);
-
+                // 拼寫輸入題：顯示中文意思，給頭尾提示，手打英文
+                meaningDisplay.textContent = q.questionText; // 中文
                 hintDiv.style.display = 'block';
-                hintDiv.textContent = maskWord(q.correctWord); 
+                hintDiv.textContent = maskWord(q.correctWord); // 頭尾提示
 
                 typeContainer.style.display = 'block';
                 typeInput.value = userAnswers[q.id] || '';
                 setTimeout(() => typeInput.focus(), 100);
             } 
-            else {
-                // 一般的英選中 / 中選英
+            else if (q.qType === 'en2ch') {
+                // 英選中：顯示英文，可聽發音
+                meaningDisplay.textContent = q.questionText; 
+                speakBtn.style.display = 'flex'; 
+                optContainer.style.display = 'block';
+                renderOptionsUI(q, optContainer);
+            } 
+            else if (q.qType === 'ch2en') {
+                // 中選英：顯示中文，選英文
                 meaningDisplay.textContent = q.questionText;
-                // 如果是英選中，可以給個發音小按鈕
-                if (q.qType === 'en2ch') speakBtn.style.display = 'flex';
-                
                 optContainer.style.display = 'block';
                 renderOptionsUI(q, optContainer);
             }
@@ -424,10 +422,7 @@
 
         function handleNextQuestion() {
             const q = quizData[currentQuestionIndex];
-            if (q.qType === 'spell') {
-                const inputVal = document.getElementById('typingInput').value.trim();
-                if (inputVal) userAnswers[q.id] = inputVal;
-            }
+            if (q.qType === 'spell') { const inputVal = document.getElementById('typingInput').value.trim(); if (inputVal) userAnswers[q.id] = inputVal; }
             changeQuestion(1);
         }
         function changeQuestion(delta) { 
@@ -453,11 +448,10 @@
             let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id] || ''; 
-                // 打字題容許大小寫不同
+                // 打字題容許大小寫不拘，其他完美比對
                 let isCorr = q.qType === 'spell' ? (uAns.toLowerCase() === q.correctAnswer.toLowerCase()) : (uAns === q.correctAnswer);
-                
                 if (isCorr) correctCount++;
-                submitData.push({ questionId: q.id, questionText: q.questionText === 'AUDIO_ONLY' ? '(純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
+                submitData.push({ questionId: q.id, questionText: q.questionText === 'AUDIO_ONLY' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
 
                 detailDiv.innerHTML += `
                     <div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;">
@@ -478,10 +472,11 @@
             window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } });
         }
 
-        // --- 🃏 記憶系統 (Quizlet 閃卡與列表切換) ---
+        // --- 🃏 記憶系統 (Quizlet 閃卡支援滑動) ---
         let reviewCardsData = [];
         let currentFlashcardIndex = 0;
         let showFlashcardMode = true;
+        let touchStartX = 0; let touchEndX = 0;
 
         function loadIncorrectQuestions() {
             document.getElementById('flashcardModeContainer').style.display = 'none';
@@ -533,31 +528,38 @@
             document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0;
             document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1;
 
-            // 🔥 100% 精準判斷：只要有中文字元就是意思，沒有就是英文
+            // 嚴謹判斷中英文
             const hasChinese = /[\u4e00-\u9fa5]/.test(q.question);
-            const enWord = hasChinese ? q.correctAnswer : q.question;
             const chWord = hasChinese ? q.question : q.correctAnswer;
-            
+            const enWord = hasChinese ? q.correctAnswer : q.question;
             const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後';
-            // 安全處理單字內的單引號 (避免 onclick 報錯)
             const safeEnWord = enWord.replace(/'/g, "\\'");
 
-            // 正面永遠是英文加發音，背面永遠是中文
+            // 正面是中文，背面是英文 + 喇叭
             area.innerHTML = `
-                <div class="flashcard-container" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};">
+                <div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};">
                     <div class="flashcard-inner">
                         <div class="flashcard-front">
-                            <button class="speak-btn" style="position:absolute; top:15px; right:15px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button>
-                            <div class="fc-word">${enWord}</div>
+                            <div class="fc-word" style="font-size: 1.8em;">${chWord}</div>
                             <div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div>
-                            <div class="fc-hint">點擊翻面</div>
+                            <div class="fc-hint">點擊翻面看英文與發音</div>
                         </div>
                         <div class="flashcard-back">
-                            <div class="fc-word" style="font-size: 1.8em;">${chWord}</div>
+                            <button class="speak-btn" style="position:absolute; top:15px; right:15px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button>
+                            <div class="fc-word">${enWord}</div>
                             ${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}
                         </div>
                     </div>
                 </div>`;
+            
+            // 綁定滑動切換事件
+            const cardElement = document.getElementById('fcContainer');
+            cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+            cardElement.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                if (touchEndX < touchStartX - 50) document.getElementById('fcNext').click(); // 向左滑 -> 下一張
+                if (touchEndX > touchStartX + 50) document.getElementById('fcPrev').click(); // 向右滑 -> 上一張
+            }, {passive: true});
         }
 
         function changeFlashcard(delta) {
@@ -570,17 +572,17 @@
             reviewCardsData.forEach((q, i) => {
                 const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後';
                 const hasChinese = /[\u4e00-\u9fa5]/.test(q.question);
-                const enWord = hasChinese ? q.correctAnswer : q.question;
                 const chWord = hasChinese ? q.question : q.correctAnswer;
+                const enWord = hasChinese ? q.correctAnswer : q.question;
                 const safeEnWord = enWord.replace(/'/g, "\\'");
 
                 html += `
                     <div class="review-list-item" style="opacity: ${q.isDue ? '1' : '0.6'};">
                         <div style="flex: 1;">
-                            <strong style="font-size: 1.1em;">${enWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br>
-                            <span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${chWord}</span>
+                            <strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br>
+                            <span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${enWord}</span>
                         </div>
-                        <button class="speak-btn" style="position:relative; width:40px; height:40px;" onclick="speakWord('${safeEnWord}')">🔊</button>
+                        <button class="speak-btn" style="position:relative; width:40px; height:40px; border: 1px solid var(--border-color);" onclick="speakWord('${safeEnWord}')">🔊</button>
                     </div>`;
             });
             document.getElementById('listModeContainer').innerHTML = html;
@@ -591,7 +593,7 @@
         function showProfileView() { document.getElementById('profileUsernameDisplay').textContent = currentUser; apiCall('getProfileData', { username: currentUser }).then(res => { if (res.success) { const av = res.avatar || '👤'; const avDiv = document.getElementById('profileAvatarDisplay'); if(av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:90px; height:90px; border-radius:50%; object-fit:cover;">`; } else { avDiv.textContent = av; } document.getElementById('profileCorrectRate').textContent = res.correctRate; document.getElementById('profileTotalAnswered').textContent = res.totalAnswered; let badgesHtml = ''; if (res.hasGoldMedal) badgesHtml += '<span title="滿分金牌">🥇 金牌得主</span> '; if (res.streak > 0) badgesHtml += `<span class="badge" style="font-size:0.9em;">🔥 ${res.streak} 天連勝</span>`; document.getElementById('profileBadgesDisplay').innerHTML = badgesHtml; } }); }
         function handleAvatarUpdate() { const newAvatar = document.getElementById('newAvatarInput').value.trim(); if(!newAvatar) return Swal.fire('請輸入資料', '', 'info'); showLoading('更新中...'); apiCall('updateAvatar', { username: currentUser, newAvatar }).then(res => { Swal.fire(res.success?'成功':'失敗', res.message, res.success?'success':'error'); if (res.success) showProfileView(); document.getElementById('newAvatarInput').value = ''; }); }
         
-        // 🏆 排行榜修復顏色
+        // 🏆 排行榜修復顏色與自身高光
         function loadLeaderboardData() { 
             const container = document.getElementById('leaderboardTableContainer'); container.innerHTML = '<p>載入中...</p>'; 
             apiCall('getLeaderboardData').then(res => { 
@@ -599,12 +601,19 @@
                     let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>答對率</th><th>題數</th></tr>'; 
                     res.data.forEach((d, i) => { 
                         const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; 
-                        const bgColor = i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent';
+                        const isMe = d.username === currentUser;
+                        
+                        // 背景色：前三名金銀銅，自己是淺綠色，其他透明
+                        const bgColor = i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : (isMe ? '#f0fdf4' : 'transparent');
+                        const borderStyle = isMe ? 'border: 2px solid var(--secondary-color); box-shadow: inset 0 0 0 2px var(--secondary-color);' : '';
+                        
                         const medal = d.medal ? '🥇' : ''; 
                         const streak = d.streak > 0 ? `<span style="color:#d97706; font-size:0.8em; font-weight:bold; margin-left:5px;">🔥${d.streak}</span>` : ''; 
-                        html += `<tr style="background-color: ${bgColor};">
+                        const nameDisplay = isMe ? `${d.username} <span style="color:var(--secondary-color); font-size:0.85em; font-weight:bold;">(你)</span>` : d.username;
+
+                        html += `<tr style="background-color: ${bgColor}; ${borderStyle}">
                             <td style="font-weight:700;">${rank}</td>
-                            <td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${d.username} ${medal} ${streak}</td>
+                            <td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay} ${medal} ${streak}</td>
                             <td style="color:var(--primary-color); font-weight:800;">${d.rateDisplay}</td>
                             <td>${d.totalAns}</td>
                         </tr>`; 
