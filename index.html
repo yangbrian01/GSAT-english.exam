@@ -31,8 +31,8 @@
         .badge { background: #fffbeb; color: #d97706; padding: 4px 10px; border-radius: 12px; font-size: 0.9em; font-weight: 700; white-space: nowrap; }
 
         /* --- 基礎佈局 --- */
-        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; }
-        .view-container { width: 100%; max-width: 650px; text-align: left; animation: fadeIn 0.4s ease-out; }
+        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; overflow: hidden; }
+        .view-container { width: 100%; max-width: 650px; text-align: left; animation: fadeIn 0.3s ease-out; }
         .centered-view { text-align: center; max-width: 450px; margin: 0 auto; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -60,26 +60,35 @@
         
         .speak-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.3em; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: flex; justify-content: center; align-items: center; z-index: 10;}
         .speak-btn:hover { transform: scale(1.1); color: var(--primary-color); }
+        
+        .audio-only-btn { font-size: 3em; cursor: pointer; display: inline-block; padding: 20px; background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; transition: 0.2s; }
+        .audio-only-btn:active { transform: scale(0.9); }
 
         .option-btn { display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: 0.2s; line-height: 1.4; }
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
 
-        /* --- 🃏 Quizlet 級 3D 翻轉閃卡 --- */
+        /* --- 🃏 Quizlet 級 3D 翻轉閃卡 + 滑動動畫 --- */
         .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none;}
-        .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
+        .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
         .flashcard-container.flipped .flashcard-inner { transform: rotateY(180deg); }
         
         .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 2px solid var(--border-color); }
         .flashcard-front { background-color: white; color: var(--text-main); }
         .flashcard-back { background-color: #e0e7ff; color: var(--primary-color); transform: rotateY(180deg); border-color: #c7d2fe; }
         
-        .fc-word { font-size: 2.5em; font-weight: 800; margin-bottom: 10px; word-break: break-word;}
+        .fc-word { font-size: 2.2em; font-weight: 800; margin-bottom: 10px; word-break: break-word; line-height: 1.3;}
         .fc-hint { font-size: 0.9em; opacity: 0.6; position: absolute; bottom: 20px; }
 
         .fc-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .fc-nav-btn { background: white; border: 2px solid var(--border-color); border-radius: 50%; width: 50px; height: 50px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: 0.2s;}
         .fc-nav-btn:hover { background: #f8fafc; border-color: var(--primary-color); color: var(--primary-color); }
         .fc-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* 滑動過場動畫 (Slide Animation) */
+        .slide-left { animation: slideLeftAnim 0.3s forwards; }
+        .slide-right { animation: slideRightAnim 0.3s forwards; }
+        @keyframes slideLeftAnim { 0% { transform: translateX(30px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes slideRightAnim { 0% { transform: translateX(-30px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
 
         .review-list-item { background: white; border: 2px solid var(--border-color); padding: 15px; border-radius: var(--radius-md); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
 
@@ -90,6 +99,9 @@
         .view-section.active { display: block; }
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .data-table th, .data-table td { padding: 15px 10px; border-bottom: 1px solid var(--border-color); }
+
+        /* 自身排行榜高光 */
+        .me-row { background-color: #d1fae5 !important; border: 2px solid #10b981 !important; font-weight: bold; box-shadow: inset 0 0 0 1px #10b981;}
 
         @media (max-width: 768px) {
             .navbar { padding: 12px 20px; }
@@ -104,7 +116,7 @@
             .flex-row, .flex-around { flex-direction: column; gap: 10px; }
             .question-card { font-size: 1.8em; padding: 30px 15px; }
             .typing-input { font-size: 1.2em !important; padding: 15px !important; }
-            .fc-word { font-size: 2em; }
+            .fc-word { font-size: 1.8em; }
         }
     </style>
 </head>
@@ -153,7 +165,7 @@
             <div class="input-group">
                 <label>測驗模式 🎮</label>
                 <select id="quizModeSelect" style="border-color: var(--primary-color); font-weight: 600; color: var(--primary-color);">
-                    <option value="1">1. 經典選擇 (英中隨機混出)</option>
+                    <option value="1">1. 經典選擇 (英中互譯混出)</option>
                     <option value="2">2. 進階聽力 (+ 純聽力題混出)</option>
                     <option value="3">3. 魔王挑戰 (+ 拼寫輸入混出)</option>
                 </select>
@@ -263,8 +275,6 @@
         </div>
     </main>
 
-    <footer class="footer"> &copy; 2026 Yang Technology | Crafted for Excellence </footer>
-
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbyXAx1jgdExUKrNHWpd4v8crV0KI4QXVMGr4Kzht8OG314UfxZKlPbLKlDYc_YqTVM2/exec';
         
@@ -313,15 +323,15 @@
 
         // 登入相關...
         function handleGuestLogin() { Swal.fire({title:'訪客模式', text:'無法解鎖成就與記憶系統', icon:'info', showCancelButton:true}).then(r=>{if(r.isConfirmed){currentUser='訪客';sessionToken=null;localStorage.clear();showView('setupView');}}); }
-        function handleRegister() { const u=document.getElementById('regUsername').value; const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號>3, 密碼>4','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
-        function handleLogin() { const u=document.getElementById('loginUsername').value; const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');}else Swal.fire('失敗',res.message,'error');}); }
+        function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號>3, 密碼>4','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
+        function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
-        // --- 魔王模式遮罩小幫手 (根據截圖：給頭給尾，避開 n. 等詞性) ---
+        // --- 魔王模式遮罩小幫手 ---
         function maskWord(word) {
             let parts = word.split(' ');
             let res = parts.map(p => {
-                if (p.includes('.') || p.includes('/')) return p; // 避開 n., adj./v. 等詞性標籤
+                if (p.includes('.') || p.includes('/') || p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; 
                 if (p.length <= 2) return p;
                 return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1];
             });
@@ -376,17 +386,20 @@
             typeContainer.style.display = 'none';
             meaningDisplay.style.display = 'block';
 
-            // 依照後端分配的精準題型來渲染
+            // 🎯 核心修復：嚴格依照後端分配的精準題型來渲染畫面
             if (q.qType === 'listen') {
-                // 純聽力題：只顯示耳機圖示，不顯示英文
-                meaningDisplay.innerHTML = '<div style="font-size:3em; cursor:pointer;" onclick="playCurrentWordAudio()">🎧</div><div style="font-size:0.4em; color:var(--text-muted); margin-top:10px;">點擊重新聆聽</div>';
+                // 純聽力題：只顯示耳機圖示，不顯示任何英文文字！
+                meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>';
                 setTimeout(() => playCurrentWordAudio(), 400); 
                 optContainer.style.display = 'block';
                 renderOptionsUI(q, optContainer);
             } 
             else if (q.qType === 'spell') {
-                // 拼寫輸入題：顯示中文意思，給頭尾提示，手打英文
+                // 拼寫輸入題：顯示中文意思，給頭尾提示，可聽發音
                 meaningDisplay.textContent = q.questionText; // 中文
+                speakBtn.style.display = 'flex'; 
+                setTimeout(() => playCurrentWordAudio(), 400);
+
                 hintDiv.style.display = 'block';
                 hintDiv.textContent = maskWord(q.correctWord); // 頭尾提示
 
@@ -394,16 +407,9 @@
                 typeInput.value = userAnswers[q.id] || '';
                 setTimeout(() => typeInput.focus(), 100);
             } 
-            else if (q.qType === 'en2ch') {
-                // 英選中：顯示英文，可聽發音
+            else {
+                // 經典選擇題 (en2ch 或 ch2en)：嚴格不給發音按鈕，回歸純閱讀
                 meaningDisplay.textContent = q.questionText; 
-                speakBtn.style.display = 'flex'; 
-                optContainer.style.display = 'block';
-                renderOptionsUI(q, optContainer);
-            } 
-            else if (q.qType === 'ch2en') {
-                // 中選英：顯示中文，選英文
-                meaningDisplay.textContent = q.questionText;
                 optContainer.style.display = 'block';
                 renderOptionsUI(q, optContainer);
             }
@@ -448,10 +454,9 @@
             let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id] || ''; 
-                // 打字題容許大小寫不拘，其他完美比對
                 let isCorr = q.qType === 'spell' ? (uAns.toLowerCase() === q.correctAnswer.toLowerCase()) : (uAns === q.correctAnswer);
                 if (isCorr) correctCount++;
-                submitData.push({ questionId: q.id, questionText: q.questionText === 'AUDIO_ONLY' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
+                submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
 
                 detailDiv.innerHTML += `
                     <div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;">
@@ -472,7 +477,7 @@
             window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } });
         }
 
-        // --- 🃏 記憶系統 (Quizlet 閃卡支援滑動) ---
+        // --- 🃏 記憶系統 (Quizlet 閃卡支援滑動與動畫) ---
         let reviewCardsData = [];
         let currentFlashcardIndex = 0;
         let showFlashcardMode = true;
@@ -528,50 +533,57 @@
             document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0;
             document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1;
 
-            // 嚴謹判斷中英文
-            const hasChinese = /[\u4e00-\u9fa5]/.test(q.question);
+            // 🎯 核心修復：嚴格判斷中英文，確保中文在正面，英文在背面
+            const hasChinese = /[\u4E00-\u9FFF]/.test(q.question);
             const chWord = hasChinese ? q.question : q.correctAnswer;
             const enWord = hasChinese ? q.correctAnswer : q.question;
             const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後';
             const safeEnWord = enWord.replace(/'/g, "\\'");
 
-            // 正面是中文，背面是英文 + 喇叭
+            // 🎯 正面：中文，背面：英文＋喇叭
             area.innerHTML = `
                 <div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};">
                     <div class="flashcard-inner">
                         <div class="flashcard-front">
                             <div class="fc-word" style="font-size: 1.8em;">${chWord}</div>
                             <div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div>
-                            <div class="fc-hint">點擊翻面看英文與發音</div>
+                            <div class="fc-hint">點擊卡片翻面看英文</div>
                         </div>
                         <div class="flashcard-back">
-                            <button class="speak-btn" style="position:absolute; top:15px; right:15px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button>
+                            <button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button>
                             <div class="fc-word">${enWord}</div>
                             ${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}
                         </div>
                     </div>
                 </div>`;
             
-            // 綁定滑動切換事件
+            // 綁定手機滑動切換事件
             const cardElement = document.getElementById('fcContainer');
             cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
             cardElement.addEventListener('touchend', e => {
                 touchEndX = e.changedTouches[0].screenX;
-                if (touchEndX < touchStartX - 50) document.getElementById('fcNext').click(); // 向左滑 -> 下一張
-                if (touchEndX > touchStartX + 50) document.getElementById('fcPrev').click(); // 向右滑 -> 上一張
+                if (touchEndX < touchStartX - 40) document.getElementById('fcNext').click(); // 向左滑
+                if (touchEndX > touchStartX + 40) document.getElementById('fcPrev').click(); // 向右滑
             }, {passive: true});
         }
 
         function changeFlashcard(delta) {
             const newIdx = currentFlashcardIndex + delta;
-            if (newIdx >= 0 && newIdx < reviewCardsData.length) { currentFlashcardIndex = newIdx; renderSingleFlashcard(); }
+            if (newIdx >= 0 && newIdx < reviewCardsData.length) { 
+                currentFlashcardIndex = newIdx; 
+                const area = document.getElementById('singleFlashcardArea');
+                // 觸發過場動畫
+                area.className = delta > 0 ? 'slide-left' : 'slide-right';
+                renderSingleFlashcard(); 
+                setTimeout(() => { area.className = ''; }, 300); // 清除動畫 class 以便下次觸發
+            }
         }
 
         function renderListMode() {
             let html = '';
             reviewCardsData.forEach((q, i) => {
                 const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後';
-                const hasChinese = /[\u4e00-\u9fa5]/.test(q.question);
+                const hasChinese = /[\u4E00-\u9FFF]/.test(q.question);
                 const chWord = hasChinese ? q.question : q.correctAnswer;
                 const enWord = hasChinese ? q.correctAnswer : q.question;
                 const safeEnWord = enWord.replace(/'/g, "\\'");
@@ -582,7 +594,7 @@
                             <strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br>
                             <span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${enWord}</span>
                         </div>
-                        <button class="speak-btn" style="position:relative; width:40px; height:40px; border: 1px solid var(--border-color);" onclick="speakWord('${safeEnWord}')">🔊</button>
+                        <button class="speak-btn" style="position:relative; width:45px; height:45px; border: 1px solid var(--border-color); box-shadow:none;" onclick="speakWord('${safeEnWord}')">🔊</button>
                     </div>`;
             });
             document.getElementById('listModeContainer').innerHTML = html;
@@ -593,7 +605,7 @@
         function showProfileView() { document.getElementById('profileUsernameDisplay').textContent = currentUser; apiCall('getProfileData', { username: currentUser }).then(res => { if (res.success) { const av = res.avatar || '👤'; const avDiv = document.getElementById('profileAvatarDisplay'); if(av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:90px; height:90px; border-radius:50%; object-fit:cover;">`; } else { avDiv.textContent = av; } document.getElementById('profileCorrectRate').textContent = res.correctRate; document.getElementById('profileTotalAnswered').textContent = res.totalAnswered; let badgesHtml = ''; if (res.hasGoldMedal) badgesHtml += '<span title="滿分金牌">🥇 金牌得主</span> '; if (res.streak > 0) badgesHtml += `<span class="badge" style="font-size:0.9em;">🔥 ${res.streak} 天連勝</span>`; document.getElementById('profileBadgesDisplay').innerHTML = badgesHtml; } }); }
         function handleAvatarUpdate() { const newAvatar = document.getElementById('newAvatarInput').value.trim(); if(!newAvatar) return Swal.fire('請輸入資料', '', 'info'); showLoading('更新中...'); apiCall('updateAvatar', { username: currentUser, newAvatar }).then(res => { Swal.fire(res.success?'成功':'失敗', res.message, res.success?'success':'error'); if (res.success) showProfileView(); document.getElementById('newAvatarInput').value = ''; }); }
         
-        // 🏆 排行榜修復顏色與自身高光
+        // 🏆 排行榜：修復字串誤差導致的高光失效
         function loadLeaderboardData() { 
             const container = document.getElementById('leaderboardTableContainer'); container.innerHTML = '<p>載入中...</p>'; 
             apiCall('getLeaderboardData').then(res => { 
@@ -601,21 +613,23 @@
                     let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>答對率</th><th>題數</th></tr>'; 
                     res.data.forEach((d, i) => { 
                         const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; 
-                        const isMe = d.username === currentUser;
                         
-                        // 背景色：前三名金銀銅，自己是淺綠色，其他透明
-                        const bgColor = i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : (isMe ? '#f0fdf4' : 'transparent');
-                        const borderStyle = isMe ? 'border: 2px solid var(--secondary-color); box-shadow: inset 0 0 0 2px var(--secondary-color);' : '';
+                        // 🎯 核心修復：強制轉成字串並去除空白，確保自己一定能被亮起來
+                        const isMe = String(d.username).trim() === String(currentUser).trim();
+                        
+                        // 背景色：自己是明顯的薄荷綠，前三名金銀銅，其他透明
+                        let rowClass = isMe ? 'me-row' : '';
+                        let inlineStyle = !isMe ? (i === 0 ? 'background-color:#ffedd5;' : i === 1 ? 'background-color:#fef9c3;' : i === 2 ? 'background-color:#e0f2fe;' : '') : '';
                         
                         const medal = d.medal ? '🥇' : ''; 
                         const streak = d.streak > 0 ? `<span style="color:#d97706; font-size:0.8em; font-weight:bold; margin-left:5px;">🔥${d.streak}</span>` : ''; 
                         const nameDisplay = isMe ? `${d.username} <span style="color:var(--secondary-color); font-size:0.85em; font-weight:bold;">(你)</span>` : d.username;
 
-                        html += `<tr style="background-color: ${bgColor}; ${borderStyle}">
-                            <td style="font-weight:700;">${rank}</td>
+                        html += `<tr class="${rowClass}" style="${inlineStyle}">
+                            <td style="font-weight:700; text-align:center;">${rank}</td>
                             <td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay} ${medal} ${streak}</td>
-                            <td style="color:var(--primary-color); font-weight:800;">${d.rateDisplay}</td>
-                            <td>${d.totalAns}</td>
+                            <td style="color:var(--primary-color); font-weight:800; text-align:center;">${d.rateDisplay}</td>
+                            <td style="text-align:center;">${d.totalAns}</td>
                         </tr>`; 
                     }); 
                     container.innerHTML = html + '</table>'; 
