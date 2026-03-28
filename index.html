@@ -54,6 +54,11 @@
         .btn-success { background-color: var(--secondary-color); color: white; }
         .btn-outline { background: transparent; color: var(--text-muted); padding: 10px; }
 
+        /* --- 載入動畫 (取代醜醜的載入中字眼) --- */
+        .spinner { width: 35px; height: 35px; border: 3px solid rgba(99, 102, 241, 0.2); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-box { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 600; }
+
         /* --- 測驗 UI --- */
         .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--border-color); }
         .question-card { position: relative; background: #e0e7ff; border: 2px solid #c7d2fe; border-radius: 16px; padding: 40px 20px; margin-bottom: 30px; font-size: 2.2em; font-weight: 800; color: var(--primary-color); word-break: break-word; text-align: center;}
@@ -68,7 +73,7 @@
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
 
         /* --- 🃏 Quizlet 級 3D 翻轉閃卡 + 滑動動畫 --- */
-        .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none;}
+        .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none; }
         .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
         .flashcard-container.flipped .flashcard-inner { transform: rotateY(180deg); }
         
@@ -85,10 +90,10 @@
         .fc-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         /* 滑動過場動畫 (Slide Animation) */
-        .slide-left { animation: slideLeftAnim 0.3s forwards; }
-        .slide-right { animation: slideRightAnim 0.3s forwards; }
-        @keyframes slideLeftAnim { 0% { transform: translateX(30px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
-        @keyframes slideRightAnim { 0% { transform: translateX(-30px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        .slide-left { animation: slideLeftAnim 0.3s forwards ease-out; }
+        .slide-right { animation: slideRightAnim 0.3s forwards ease-out; }
+        @keyframes slideLeftAnim { 0% { transform: translateX(40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes slideRightAnim { 0% { transform: translateX(-40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
 
         .review-list-item { background: white; border: 2px solid var(--border-color); padding: 15px; border-radius: var(--radius-md); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
 
@@ -99,9 +104,6 @@
         .view-section.active { display: block; }
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .data-table th, .data-table td { padding: 15px 10px; border-bottom: 1px solid var(--border-color); }
-
-        /* 自身排行榜高光 */
-        .me-row { background-color: #d1fae5 !important; border: 2px solid #10b981 !important; font-weight: bold; box-shadow: inset 0 0 0 1px #10b981;}
 
         @media (max-width: 768px) {
             .navbar { padding: 12px 20px; }
@@ -197,7 +199,6 @@
             </div>
             
             <div class="question-card">
-                <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
                 <div id="hintDisplay" style="display:none; font-size: 0.65em; letter-spacing: 6px; margin-top: 15px; color: var(--text-muted); font-weight: 600;"></div>
             </div>
@@ -205,13 +206,14 @@
             <div id="optionsContainer"></div>
             
             <div id="typingContainer" style="display:none;">
-                <input type="text" id="typingInput" class="typing-input" placeholder="請拼出完整英文..." autocomplete="off">
+                <input type="text" id="typingInput" class="typing-input" placeholder="請拼出完整英文... (按 Enter 提交)" autocomplete="off">
             </div>
             
-            <div class="flex-row" style="margin-top: 30px;">
+            <div class="flex-row" style="margin-top: 30px; display:none;">
                 <button id="prevButton" class="btn btn-secondary" style="flex: 1;" onclick="changeQuestion(-1)" disabled>上一題</button>
                 <button id="nextButton" class="btn btn-primary" style="flex: 1;" onclick="handleNextQuestion()">下一題</button>
             </div>
+            <button id="manualNextBtn" class="btn btn-primary" style="margin-top: 20px; display:none;" onclick="handleNextQuestion()">下一題</button>
         </div>
 
         <div id="resultView" class="view-section view-container" style="max-width: 800px;">
@@ -247,7 +249,9 @@
                     <span id="fcCounter" style="font-weight: 600; color: var(--text-muted);">0 / 0</span>
                     <button class="fc-nav-btn" id="fcNext" onclick="changeFlashcard(1)">&gt;</button>
                 </div>
-                <div id="singleFlashcardArea"></div>
+                <div id="slideWrapper">
+                    <div id="singleFlashcardArea"></div>
+                </div>
             </div>
 
             <div id="listModeContainer" style="display: none; max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
@@ -275,6 +279,8 @@
         </div>
     </main>
 
+    <footer class="footer"> &copy; 2026 Yang Technology | Crafted for Excellence </footer>
+
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbyXAx1jgdExUKrNHWpd4v8crV0KI4QXVMGr4Kzht8OG314UfxZKlPbLKlDYc_YqTVM2/exec';
         
@@ -287,6 +293,7 @@
         let quizData = [], currentQuestionIndex = 0, userAnswers = {}, totalQuestions = 0;
         let currentUser = localStorage.getItem('user'), sessionToken = localStorage.getItem('token');
         let isReviewQuizMode = false; 
+        let autoAdvanceTimer = null; // 控制自動跳下一題的計時器
 
         // --- 🗣️ TTS 原生語音引擎 ---
         function speakWord(text) {
@@ -368,23 +375,24 @@
         }
 
         function renderQuestion(index) {
+            clearTimeout(autoAdvanceTimer); // 清除自動跳轉計時
             currentQuestionIndex = index; const q = quizData[index];
             document.getElementById('currentQNum').textContent = index + 1;
             document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction;
             
             const meaningDisplay = document.getElementById('meaningDisplay');
-            const speakBtn = document.getElementById('qSpeakBtn');
             const hintDiv = document.getElementById('hintDisplay');
             const optContainer = document.getElementById('optionsContainer');
             const typeContainer = document.getElementById('typingContainer');
             const typeInput = document.getElementById('typingInput');
+            const manualNextBtn = document.getElementById('manualNextBtn');
 
             // 預設重置
-            speakBtn.style.display = 'none';
             hintDiv.style.display = 'none';
             optContainer.style.display = 'none';
             typeContainer.style.display = 'none';
             meaningDisplay.style.display = 'block';
+            manualNextBtn.style.display = 'none';
 
             // 🎯 核心修復：嚴格依照後端分配的精準題型來渲染畫面
             if (q.qType === 'listen') {
@@ -395,17 +403,27 @@
                 renderOptionsUI(q, optContainer);
             } 
             else if (q.qType === 'spell') {
-                // 拼寫輸入題：顯示中文意思，給頭尾提示，可聽發音
+                // 拼寫輸入題：顯示中文意思，給頭尾提示，"沒有" 發音按鈕
                 meaningDisplay.textContent = q.questionText; // 中文
-                speakBtn.style.display = 'flex'; 
-                setTimeout(() => playCurrentWordAudio(), 400);
-
                 hintDiv.style.display = 'block';
                 hintDiv.textContent = maskWord(q.correctWord); // 頭尾提示
 
                 typeContainer.style.display = 'block';
                 typeInput.value = userAnswers[q.id] || '';
                 setTimeout(() => typeInput.focus(), 100);
+                
+                // 綁定 Enter 鍵自動提交
+                typeInput.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        userAnswers[q.id] = typeInput.value.trim();
+                        handleNextQuestion();
+                    }
+                };
+                
+                // 手機版也給一個手動按鈕防呆
+                manualNextBtn.style.display = 'block';
+                manualNextBtn.textContent = (index === totalQuestions - 1) ? '交卷送出' : '下一題';
             } 
             else {
                 // 經典選擇題 (en2ch 或 ch2en)：嚴格不給發音按鈕，回歸純閱讀
@@ -413,47 +431,60 @@
                 optContainer.style.display = 'block';
                 renderOptionsUI(q, optContainer);
             }
-            
-            updateNavButtons();
         }
 
         function renderOptionsUI(q, container) {
             container.innerHTML = '';
             q.options.forEach(word => {
-                const btn = document.createElement('button'); btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`; btn.textContent = word;
-                btn.onclick = () => { userAnswers[q.id] = word; Array.from(container.children).forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); };
+                const btn = document.createElement('button'); 
+                btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`; 
+                btn.textContent = word;
+                btn.onclick = () => { 
+                    // 紀錄答案並更換顏色
+                    userAnswers[q.id] = word; 
+                    Array.from(container.children).forEach(b => b.classList.remove('selected')); 
+                    btn.classList.add('selected'); 
+                    
+                    // ⚡ 自動跳轉下一題邏輯
+                    clearTimeout(autoAdvanceTimer);
+                    autoAdvanceTimer = setTimeout(() => {
+                        handleNextQuestion();
+                    }, 400); // 延遲 0.4 秒讓使用者看到選中效果
+                };
                 container.appendChild(btn);
             });
         }
 
         function handleNextQuestion() {
+            clearTimeout(autoAdvanceTimer);
             const q = quizData[currentQuestionIndex];
-            if (q.qType === 'spell') { const inputVal = document.getElementById('typingInput').value.trim(); if (inputVal) userAnswers[q.id] = inputVal; }
-            changeQuestion(1);
+            if (q.qType === 'spell') { 
+                const inputVal = document.getElementById('typingInput').value.trim(); 
+                userAnswers[q.id] = inputVal; // 不管有沒有打都存起來
+            }
+            
+            if (currentQuestionIndex < quizData.length - 1) {
+                changeQuestion(1);
+            } else {
+                submitQuiz();
+            }
         }
+        
         function changeQuestion(delta) { 
-            const q = quizData[currentQuestionIndex];
-            if (q.qType === 'spell' && delta < 0) userAnswers[q.id] = document.getElementById('typingInput').value.trim();
-            const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); 
-        }
-        function updateNavButtons() {
-            const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0;
-            const nextBtn = document.getElementById('nextButton');
-            nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.onclick = isLast ? submitQuiz : handleNextQuestion; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary';
+            const newIdx = currentQuestionIndex + delta; 
+            if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); 
         }
 
         function submitQuiz() {
-            const q = quizData[currentQuestionIndex];
-            if (q.qType === 'spell') userAnswers[q.id] = document.getElementById('typingInput').value.trim();
-            const unans = quizData.length - Object.keys(userAnswers).length;
-            if (unans > 0) Swal.fire({ title: `還有 ${unans} 題未答`, text: '確定交卷？', icon: 'warning', showCancelButton: true }).then(r => { if(r.isConfirmed) processSubmit(); });
-            else processSubmit();
+            // 直接處理提交，不再詢問（因為有自動跳題機制，到最後一題直接交卷）
+            processSubmit();
         }
 
         function processSubmit() {
             let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id] || ''; 
+                // 打字題容許大小寫不拘，其他完美比對
                 let isCorr = q.qType === 'spell' ? (uAns.toLowerCase() === q.correctAnswer.toLowerCase()) : (uAns === q.correctAnswer);
                 if (isCorr) correctCount++;
                 submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
@@ -488,6 +519,10 @@
             document.getElementById('listModeContainer').style.display = 'none';
             document.getElementById('startReviewBtn').style.display = 'none';
 
+            // 替換掉醜醜的文字
+            document.getElementById('flashcardModeContainer').style.display = 'block';
+            document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p>載入記憶庫中...</p></div>';
+
             apiCall('getIncorrectQuestions', { username: currentUser }).then(res => {
                 reviewCardsData = res.questions || [];
                 if (reviewCardsData.length > 0) {
@@ -501,6 +536,7 @@
                     renderReviewUI();
                 } else {
                     document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0';
+                    document.getElementById('singleFlashcardArea').innerHTML = '';
                     document.getElementById('listModeContainer').style.display = 'block';
                     document.getElementById('listModeContainer').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>';
                 }
@@ -562,8 +598,12 @@
             cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
             cardElement.addEventListener('touchend', e => {
                 touchEndX = e.changedTouches[0].screenX;
-                if (touchEndX < touchStartX - 40) document.getElementById('fcNext').click(); // 向左滑
-                if (touchEndX > touchStartX + 40) document.getElementById('fcPrev').click(); // 向右滑
+                if (touchEndX < touchStartX - 40) {
+                    if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); 
+                }
+                if (touchEndX > touchStartX + 40) {
+                    if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); 
+                }
             }, {passive: true});
         }
 
@@ -571,11 +611,14 @@
             const newIdx = currentFlashcardIndex + delta;
             if (newIdx >= 0 && newIdx < reviewCardsData.length) { 
                 currentFlashcardIndex = newIdx; 
-                const area = document.getElementById('singleFlashcardArea');
-                // 觸發過場動畫
-                area.className = delta > 0 ? 'slide-left' : 'slide-right';
+                const wrapper = document.getElementById('slideWrapper');
+                
+                // 觸發過場動畫小魔術 (強制 DOM Reflow 重繪)
+                wrapper.classList.remove('slide-left', 'slide-right');
+                void wrapper.offsetWidth; // 魔法指令：觸發重繪
+                wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right');
+                
                 renderSingleFlashcard(); 
-                setTimeout(() => { area.className = ''; }, 300); // 清除動畫 class 以便下次觸發
             }
         }
 
@@ -605,27 +648,29 @@
         function showProfileView() { document.getElementById('profileUsernameDisplay').textContent = currentUser; apiCall('getProfileData', { username: currentUser }).then(res => { if (res.success) { const av = res.avatar || '👤'; const avDiv = document.getElementById('profileAvatarDisplay'); if(av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:90px; height:90px; border-radius:50%; object-fit:cover;">`; } else { avDiv.textContent = av; } document.getElementById('profileCorrectRate').textContent = res.correctRate; document.getElementById('profileTotalAnswered').textContent = res.totalAnswered; let badgesHtml = ''; if (res.hasGoldMedal) badgesHtml += '<span title="滿分金牌">🥇 金牌得主</span> '; if (res.streak > 0) badgesHtml += `<span class="badge" style="font-size:0.9em;">🔥 ${res.streak} 天連勝</span>`; document.getElementById('profileBadgesDisplay').innerHTML = badgesHtml; } }); }
         function handleAvatarUpdate() { const newAvatar = document.getElementById('newAvatarInput').value.trim(); if(!newAvatar) return Swal.fire('請輸入資料', '', 'info'); showLoading('更新中...'); apiCall('updateAvatar', { username: currentUser, newAvatar }).then(res => { Swal.fire(res.success?'成功':'失敗', res.message, res.success?'success':'error'); if (res.success) showProfileView(); document.getElementById('newAvatarInput').value = ''; }); }
         
-        // 🏆 排行榜：修復字串誤差導致的高光失效
+        // 🏆 排行榜：修復字串誤差導致的高光失效，加入 Spinner
         function loadLeaderboardData() { 
-            const container = document.getElementById('leaderboardTableContainer'); container.innerHTML = '<p>載入中...</p>'; 
+            const container = document.getElementById('leaderboardTableContainer'); 
+            container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:10px;">讀取排行榜中...</p></div>'; 
+            
             apiCall('getLeaderboardData').then(res => { 
                 if(res.data && res.data.length > 0) { 
                     let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>答對率</th><th>題數</th></tr>'; 
                     res.data.forEach((d, i) => { 
                         const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; 
                         
-                        // 🎯 核心修復：強制轉成字串並去除空白，確保自己一定能被亮起來
-                        const isMe = String(d.username).trim() === String(currentUser).trim();
+                        // 🎯 核心修復：強制轉成小寫字串並去除空白，確保自己一定能被亮起來
+                        const isMe = String(d.username).trim().toLowerCase() === String(currentUser).trim().toLowerCase();
                         
-                        // 背景色：自己是明顯的薄荷綠，前三名金銀銅，其他透明
-                        let rowClass = isMe ? 'me-row' : '';
-                        let inlineStyle = !isMe ? (i === 0 ? 'background-color:#ffedd5;' : i === 1 ? 'background-color:#fef9c3;' : i === 2 ? 'background-color:#e0f2fe;' : '') : '';
+                        // 背景色：自己是明顯的薄荷綠，前三名金銀銅，其他透明。為求保證生效，直接寫 inline style
+                        const bgColor = isMe ? '#d1fae5' : (i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent');
+                        const borderStyle = isMe ? 'border: 2px solid #10b981; box-shadow: inset 0 0 0 2px #10b981;' : '';
                         
                         const medal = d.medal ? '🥇' : ''; 
                         const streak = d.streak > 0 ? `<span style="color:#d97706; font-size:0.8em; font-weight:bold; margin-left:5px;">🔥${d.streak}</span>` : ''; 
-                        const nameDisplay = isMe ? `${d.username} <span style="color:var(--secondary-color); font-size:0.85em; font-weight:bold;">(你)</span>` : d.username;
+                        const nameDisplay = isMe ? `<span style="color:#047857;">${d.username} (你)</span>` : d.username;
 
-                        html += `<tr class="${rowClass}" style="${inlineStyle}">
+                        html += `<tr style="background-color: ${bgColor}; ${borderStyle}">
                             <td style="font-weight:700; text-align:center;">${rank}</td>
                             <td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay} ${medal} ${streak}</td>
                             <td style="color:var(--primary-color); font-weight:800; text-align:center;">${d.rateDisplay}</td>
@@ -633,7 +678,7 @@
                         </tr>`; 
                     }); 
                     container.innerHTML = html + '</table>'; 
-                } else { container.innerHTML = '<p>尚無資料</p>'; } 
+                } else { container.innerHTML = '<p style="text-align:center; padding:20px;">尚無資料</p>'; } 
             }); 
         }
 
