@@ -114,9 +114,9 @@
                 <span id="navStreak" class="badge" style="display:none;">🔥 0</span>
                 <span id="navMedal" style="font-size:1.2em; display:none;">🥇</span>
             </div>
-            <button class="nav-btn" onclick="showView('reviewPage')">📚 記憶系統</button>
+            <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')">📚 記憶系統</button>
             <button class="nav-btn" onclick="showView('leaderboardView')">🏆 排行榜</button>
-            <button class="nav-btn" onclick="showView('profileView')">⚙️ 設定</button>
+            <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">⚙️ 設定</button>
             <button class="nav-btn" style="color: var(--danger-color);" onclick="handleLogout()">登出</button>
         </div>
     </nav>
@@ -264,23 +264,21 @@
         let quizData = [], currentQuestionIndex = 0, userAnswers = {}, totalQuestions = 0;
         let currentUser = localStorage.getItem('user'), sessionToken = localStorage.getItem('token');
         let isReviewQuizMode = false; 
-        let activeQuizType = '1'; // 1: 純選擇, 2: 聽力選擇, 3: 聽力拼寫
+        let activeQuizType = '1'; 
 
         // --- 🗣️ TTS 原生語音引擎 ---
         function speakWord(text) {
             if (!('speechSynthesis' in window)) return;
-            // 每次發音前先清除佇列，避免卡住
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-            utterance.rate = 0.85; // 語速稍微放慢適合學習
+            utterance.rate = 0.85; 
             utterance.pitch = 1;
             window.speechSynthesis.speak(utterance);
         }
 
         function playCurrentWordAudio() {
             const q = quizData[currentQuestionIndex];
-            // 不管題目顯示什麼，只要發音按鈕存在，唸的一定是英文單字
             speakWord(q.correctWord);
         }
 
@@ -333,11 +331,10 @@
             Swal.close();
             if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; }
             
-            // 處理題目邏輯：如果是魔王模式 (3)，強迫題目變成中文，答案必須手打英文
             quizData = res.questions.map(q => {
                 if (activeQuizType === '3') {
-                    q.questionText = q.correctMeaning; // 顯示中文
-                    q.correctAnswer = q.correctWord;   // 答案是英文
+                    q.questionText = q.correctMeaning; 
+                    q.correctAnswer = q.correctWord;   
                     q.instruction = "請聽發音並拼寫出正確的英文單字";
                 }
                 return q;
@@ -348,7 +345,6 @@
                 currentQuestionIndex = 0; userAnswers = {};
                 document.getElementById('totalQNum').textContent = totalQuestions;
                 
-                // 進入測驗時先清除輸入框
                 document.getElementById('typingInput').value = '';
                 showView('quizView'); renderQuestion(0);
             }
@@ -360,11 +356,9 @@
             document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction;
             document.getElementById('meaningDisplay').textContent = q.questionText;
             
-            // 判斷是否顯示發音按鈕 (模式 2 聽力 或 模式 3 拼寫)
             const speakBtn = document.getElementById('qSpeakBtn');
             if (activeQuizType === '2' || activeQuizType === '3') {
                 speakBtn.style.display = 'flex';
-                // 自動發音
                 setTimeout(() => speakWord(q.correctWord), 500); 
             } else {
                 speakBtn.style.display = 'none';
@@ -375,13 +369,11 @@
             const typeInput = document.getElementById('typingInput');
 
             if (activeQuizType === '3') {
-                // 魔王輸入模式
                 optContainer.style.display = 'none';
                 typeContainer.style.display = 'block';
                 typeInput.value = userAnswers[q.id] || '';
                 setTimeout(() => typeInput.focus(), 100);
             } else {
-                // 選擇題模式
                 typeContainer.style.display = 'none';
                 optContainer.style.display = 'block';
                 optContainer.innerHTML = '';
@@ -395,19 +387,15 @@
         }
 
         function handleNextQuestion() {
-            // 如果是輸入模式，先抓取輸入框的值存起來
             if (activeQuizType === '3') {
                 const inputVal = document.getElementById('typingInput').value.trim();
-                if (inputVal) {
-                    userAnswers[quizData[currentQuestionIndex].id] = inputVal;
-                }
+                if (inputVal) { userAnswers[quizData[currentQuestionIndex].id] = inputVal; }
             }
             changeQuestion(1);
         }
 
         function changeQuestion(delta) { 
             if (activeQuizType === '3' && delta < 0) {
-                // 回上一題也要存目前的輸入
                 userAnswers[quizData[currentQuestionIndex].id] = document.getElementById('typingInput').value.trim();
             }
             const newIdx = currentQuestionIndex + delta; 
@@ -424,9 +412,7 @@
         }
 
         function submitQuiz() {
-            if (activeQuizType === '3') {
-                userAnswers[quizData[currentQuestionIndex].id] = document.getElementById('typingInput').value.trim();
-            }
+            if (activeQuizType === '3') { userAnswers[quizData[currentQuestionIndex].id] = document.getElementById('typingInput').value.trim(); }
             const unans = quizData.length - Object.keys(userAnswers).length;
             if (unans > 0) Swal.fire({ title: `還有 ${unans} 題未答`, text: '確定交卷？', icon: 'warning', showCancelButton: true }).then(r => { if(r.isConfirmed) processSubmit(); });
             else processSubmit();
@@ -438,13 +424,9 @@
 
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id]; 
-                // 判斷對錯 (輸入模式可忽略大小寫)
                 let isCorr = false;
-                if (activeQuizType === '3') {
-                    isCorr = uAns && uAns.toLowerCase() === q.correctAnswer.toLowerCase();
-                } else {
-                    isCorr = uAns === q.correctAnswer;
-                }
+                if (activeQuizType === '3') { isCorr = uAns && uAns.toLowerCase() === q.correctAnswer.toLowerCase(); } 
+                else { isCorr = uAns === q.correctAnswer; }
 
                 if (isCorr) correctCount++;
                 submitData.push({ questionId: q.id, questionText: q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, isCorrect: isCorr });
@@ -484,7 +466,6 @@
                         let badgeBg = q.stage === 0 ? '#fee2e2' : q.stage === 1 ? '#ffedd5' : q.stage === 2 ? '#fef08a' : '#dcfce7';
                         let stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後';
 
-                        // 判斷誰是英文，誰是中文 (假設長度短或純英文字母的為英文)
                         const isQEnglish = /^[a-zA-Z\s\-]+$/.test(q.question);
                         const enWord = isQEnglish ? q.question : q.correctAnswer;
                         const chWord = isQEnglish ? q.correctAnswer : q.question;
