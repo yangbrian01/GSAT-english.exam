@@ -91,7 +91,6 @@
         .fc-nav-btn:hover { background: #f8fafc; border-color: var(--primary-color); color: var(--primary-color); }
         .fc-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* 滑動過場動畫 */
         .slide-left { animation: slideLeftAnim 0.3s forwards ease-out; }
         .slide-right { animation: slideRightAnim 0.3s forwards ease-out; }
         @keyframes slideLeftAnim { 0% { transform: translateX(40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
@@ -204,6 +203,7 @@
             </div>
             
             <div class="question-card">
+                <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
                 <div id="hintDisplay" style="display:none; font-size: 0.65em; letter-spacing: 6px; margin-top: 15px; color: var(--text-muted); font-weight: 600;"></div>
             </div>
@@ -218,6 +218,7 @@
                 <button id="prevButton" class="btn btn-secondary" style="flex: 1;" onclick="changeQuestion(-1)" disabled>上一題</button>
                 <button id="nextButton" class="btn btn-primary" style="flex: 1;" onclick="handleNextQuestion()">下一題</button>
             </div>
+            <button id="manualNextBtn" class="btn btn-primary" style="margin-top: 20px; display:none;" onclick="handleNextQuestion()">下一題</button>
         </div>
 
         <div id="resultView" class="view-section view-container" style="max-width: 800px;">
@@ -283,8 +284,6 @@
         </div>
     </main>
 
-    <footer class="footer"> &copy; 2026 Yang Technology | Crafted for Excellence </footer>
-
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbyXAx1jgdExUKrNHWpd4v8crV0KI4QXVMGr4Kzht8OG314UfxZKlPbLKlDYc_YqTVM2/exec';
         
@@ -299,6 +298,13 @@
         let isReviewQuizMode = false; 
         let autoAdvanceTimer = null; 
 
+        // 🎯 超強大文字淨化器：專門切掉字典詞性 (n. adj. v. 等)
+        function getPureWord(rawWord) {
+            if (!rawWord) return '';
+            // 把結尾的空白 + 小寫字母 + 小數點以後的東西全切掉
+            return rawWord.replace(/\s+[a-zA-Z]+\..*$/i, '').trim();
+        }
+
         // --- 🗣️ TTS 原生語音引擎 ---
         function speakWord(text) {
             if (!('speechSynthesis' in window)) return;
@@ -306,7 +312,8 @@
             const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'en-US'; utterance.rate = 0.85; window.speechSynthesis.speak(utterance);
         }
         function playCurrentWordAudio() { 
-            speakWord(quizData[currentQuestionIndex].correctWord); 
+            // 發音時強制過濾詞性，只唸出純英文單字
+            speakWord(getPureWord(quizData[currentQuestionIndex].correctWord)); 
         }
 
         // --- 畫面切換 ---
@@ -332,17 +339,16 @@
             window.scrollTo(0, 0);
         }
 
-        // 登入相關...
         function handleGuestLogin() { Swal.fire({title:'訪客模式', text:'無法解鎖成就與記憶系統', icon:'info', showCancelButton:true}).then(r=>{if(r.isConfirmed){currentUser='訪客';sessionToken=null;localStorage.clear();showView('setupView');}}); }
         function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號>3, 密碼>4','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
-        // --- 魔王模式遮罩小幫手 ---
+        // --- 魔王模式遮罩小幫手：傳入的已經是淨化過的單字 ---
         function maskWord(word) {
             let parts = word.split(' ');
             let res = parts.map(p => {
-                if (p.includes('.') || p.includes('/') || p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; 
+                if (p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; 
                 if (p.length <= 2) return p;
                 return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1];
             });
@@ -389,12 +395,20 @@
             const optContainer = document.getElementById('optionsContainer');
             const typeContainer = document.getElementById('typingContainer');
             const typeInput = document.getElementById('typingInput');
+            const manualNextBtn = document.getElementById('manualNextBtn');
+            const prevButton = document.getElementById('prevButton');
+            const nextButton = document.getElementById('nextButton');
 
             // 預設重置
             hintDiv.style.display = 'none';
             optContainer.style.display = 'none';
             typeContainer.style.display = 'none';
             meaningDisplay.style.display = 'block';
+            manualNextBtn.style.display = 'none';
+
+            // 顯示底部導覽按鈕
+            prevButton.style.display = 'block';
+            nextButton.style.display = 'block';
 
             if (q.qType === 'listen') {
                 meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>';
@@ -403,9 +417,10 @@
                 renderOptionsUI(q, optContainer);
             } 
             else if (q.qType === 'spell') {
-                meaningDisplay.textContent = q.questionText; // 中文
+                // 拼寫題：顯示中文，給頭尾提示 (傳入已淨化的單字)，沒有發音按鈕
+                meaningDisplay.textContent = q.questionText; 
                 hintDiv.style.display = 'block';
-                hintDiv.textContent = maskWord(q.correctWord); // 頭尾提示
+                hintDiv.textContent = maskWord(getPureWord(q.correctWord)); 
 
                 typeContainer.style.display = 'block';
                 typeInput.value = userAnswers[q.id] || '';
@@ -418,13 +433,19 @@
                         handleNextQuestion();
                     }
                 };
+                
+                // 拼寫題隱藏常規底部按鈕，改用專屬大按鈕防呆
+                prevButton.style.display = 'none';
+                nextButton.style.display = 'none';
+                manualNextBtn.style.display = 'block';
+                manualNextBtn.textContent = (index === totalQuestions - 1) ? '交卷送出' : '下一題';
             } 
             else {
                 meaningDisplay.textContent = q.questionText; 
                 optContainer.style.display = 'block';
                 renderOptionsUI(q, optContainer);
             }
-            updateNavButtons(); // 這裡更新 上一題 / 下一題 按鈕狀態
+            updateNavButtons();
         }
 
         function renderOptionsUI(q, container) {
@@ -452,13 +473,13 @@
             const q = quizData[currentQuestionIndex];
             if (q.qType === 'spell') { 
                 const inputVal = document.getElementById('typingInput').value.trim(); 
-                if(inputVal) userAnswers[q.id] = inputVal; // 沒填就不強迫存
+                if(inputVal) userAnswers[q.id] = inputVal; 
             }
             
             if (currentQuestionIndex < quizData.length - 1) {
                 changeQuestion(1);
             } else {
-                submitQuiz(); // 最後一題觸發交卷
+                submitQuiz(); 
             }
         }
         
@@ -480,13 +501,7 @@
         }
 
         function submitQuiz() {
-            const q = quizData[currentQuestionIndex];
-            if (q.qType === 'spell') {
-                const inputVal = document.getElementById('typingInput').value.trim();
-                if(inputVal) userAnswers[q.id] = inputVal;
-            }
-
-            // 🛡️ 抓漏：如果有題目沒寫，一定要跳警告
+            // 🛡️ 抓漏防呆：未作答警告
             const unans = quizData.length - Object.keys(userAnswers).length;
             if (unans > 0) {
                 Swal.fire({
@@ -509,7 +524,14 @@
             let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id] || ''; 
-                let isCorr = q.qType === 'spell' ? (uAns.toLowerCase() === q.correctAnswer.toLowerCase()) : (uAns === q.correctAnswer);
+                let isCorr = false;
+                // 🎯 核心比對修復：過濾掉字典詞性再比對
+                if (q.qType === 'spell') {
+                    isCorr = (uAns.toLowerCase() === getPureWord(q.correctAnswer).toLowerCase());
+                } else {
+                    isCorr = (uAns === q.correctAnswer);
+                }
+                
                 if (isCorr) correctCount++;
                 submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
 
@@ -532,7 +554,7 @@
             window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } });
         }
 
-        // --- 🃏 記憶系統 (Quizlet 閃卡支援滑動與動畫) ---
+        // --- 🃏 記憶系統 ---
         let reviewCardsData = [];
         let currentFlashcardIndex = 0;
         let showFlashcardMode = true;
@@ -596,7 +618,8 @@
             const chWord = hasChinese ? q.question : q.correctAnswer;
             const enWord = hasChinese ? q.correctAnswer : q.question;
             const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後';
-            const safeEnWord = enWord.replace(/'/g, "\\'");
+            // 🎯 傳給發音函式的要是乾淨的純單字
+            const safeEnWord = getPureWord(enWord).replace(/'/g, "\\'");
 
             area.innerHTML = `
                 <div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};">
@@ -648,7 +671,7 @@
                 const hasChinese = /[\u4E00-\u9FFF]/.test(q.question);
                 const chWord = hasChinese ? q.question : q.correctAnswer;
                 const enWord = hasChinese ? q.correctAnswer : q.question;
-                const safeEnWord = enWord.replace(/'/g, "\\'");
+                const safeEnWord = getPureWord(enWord).replace(/'/g, "\\'");
 
                 html += `
                     <div class="review-list-item" style="opacity: ${q.isDue ? '1' : '0.6'};">
