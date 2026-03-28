@@ -143,7 +143,6 @@
             <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
             <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')">📚 記憶系統</button>
             
-            <button class="nav-btn" id="navAiDictBtn" onclick="showView('aiDictView')">📖 AI 字典</button>
             <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
             <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
 
@@ -209,6 +208,7 @@
             </div>
             
             <div class="question-card">
+                <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
                 <div id="hintDisplay" style="display:none; font-size: 0.65em; letter-spacing: 6px; margin-top: 15px; color: var(--text-muted); font-weight: 600;"></div>
             </div>
@@ -259,30 +259,6 @@
                 <div id="slideWrapper"><div id="singleFlashcardArea"></div></div>
             </div>
             <div id="listModeContainer" style="display: none; max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
-        </div>
-
-        <div id="aiDictView" class="view-section view-container">
-            <h2>📖 AI 智慧字典</h2>
-            <p class="subtitle">即時生成單字解析、衍生意思與易混淆字比較。</p>
-            <div class="input-group">
-                <input type="text" id="dictSearchInput" placeholder="輸入要查詢的英文單字..." style="font-size: 1.2em; font-weight:bold;">
-            </div>
-            <button class="btn btn-primary" onclick="searchAiDictionary()">🔍 呼叫 AI 查詢</button>
-            
-            <div id="dictLoading" class="loading-box" style="display:none;">
-                <div class="spinner"></div><p style="margin-top:15px;">AI 大腦檢索中，請稍候...</p>
-            </div>
-            
-            <div id="dictResult" class="ai-result-box">
-                <div class="ai-title" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span id="resWord" style="font-size: 1.5em;"></span>
-                    <button class="speak-btn" style="position:relative; top:0; right:0;" onclick="speakWord(document.getElementById('resWord').textContent)">🔊</button>
-                </div>
-                <div class="ai-field"><strong>📌 基本意思：</strong><p id="resPrimary"></p></div>
-                <div class="ai-field"><strong>🌱 衍生/其他用法：</strong><p id="resDerived"></p></div>
-                <div class="ai-field"><strong>💬 實用例句：</strong><p id="resExample" style="color: var(--primary-color); font-weight:600;"></p></div>
-                <div class="ai-field"><strong>⚠️ 易混淆字：</strong><p id="resConfused" style="background:#fef9c3; padding:10px; border-radius:8px;"></p></div>
-            </div>
         </div>
 
         <div id="aiEssayView" class="view-section view-container" style="max-width: 800px;">
@@ -371,7 +347,7 @@
         function speakWord(text) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.speak(u); }
         function playCurrentWordAudio() { speakWord(getPureWord(quizData[currentQuestionIndex].correctWord)); }
 
-        const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'aiDictView', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
+        const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
         function showView(viewId) {
             document.getElementById('navMenu').classList.remove('show');
             VIEW_IDS.forEach(id => document.getElementById(id).classList.remove('active'));
@@ -400,29 +376,6 @@
         // 🤖 AI 模組前端呼叫邏輯
         // ==========================================
         
-        // 1. AI 字典
-        function searchAiDictionary() {
-            const word = document.getElementById('dictSearchInput').value.trim();
-            if (!word) return Swal.fire('請輸入單字', '', 'warning');
-            
-            document.getElementById('dictResult').style.display = 'none';
-            document.getElementById('dictLoading').style.display = 'block';
-
-            apiCall('aiDictionary', { word }).then(res => {
-                document.getElementById('dictLoading').style.display = 'none';
-                if (res.success && res.data) {
-                    document.getElementById('resWord').textContent = res.data.word;
-                    document.getElementById('resPrimary').textContent = res.data.primary;
-                    document.getElementById('resDerived').textContent = res.data.derived;
-                    document.getElementById('resExample').textContent = res.data.exampleSentence;
-                    document.getElementById('resConfused').textContent = res.data.confusedWords;
-                    document.getElementById('dictResult').style.display = 'block';
-                } else {
-                    Swal.fire('查詢失敗', res.message || '無法解析 AI 回應', 'error');
-                }
-            });
-        }
-
         // 2. AI 作文批改
         function gradeAiEssay() {
             const text = document.getElementById('essayInput').value.trim();
@@ -459,7 +412,6 @@
             apiCall('aiTutor', { question: context, doubt: doubt }).then(res => {
                 document.getElementById('tutorLoading').style.display = 'none';
                 if (res.success && res.data) {
-                    // 把換行符號轉成 HTML 的 <br>
                     document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>');
                     document.getElementById('tutorResult').style.display = 'block';
                 } else {
