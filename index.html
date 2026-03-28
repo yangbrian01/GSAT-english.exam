@@ -25,12 +25,17 @@
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
 
         /* --- 頂部導覽列 --- */
-        .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: rgba(255, 255, 255, 0.95); border-bottom: 1px solid var(--border-color); z-index: 100; }
+        .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: rgba(255, 255, 255, 0.98); border-bottom: 1px solid var(--border-color); z-index: 100; }
         .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
-        .nav-menu { display: flex; gap: 12px; align-items: center; }
+        
+        /* 漢堡選單按鈕 (預設隱藏) */
+        .hamburger-btn { display: none; background: none; border: none; font-size: 1.8em; color: var(--text-main); cursor: pointer; padding: 0 5px; }
+        
+        .nav-menu { display: flex; gap: 10px; align-items: center; }
+        .nav-info { display: flex; align-items: center; gap: 8px; }
         .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
         .nav-btn:hover { background-color: #f8fafc; color: var(--primary-color); }
-        .badge { background: #fffbeb; color: #d97706; padding: 4px 10px; border-radius: 12px; font-size: 0.9em; font-weight: 700; margin-left: 5px; white-space: nowrap; }
+        .badge { background: #fffbeb; color: #d97706; padding: 4px 10px; border-radius: 12px; font-size: 0.9em; font-weight: 700; white-space: nowrap; }
 
         /* --- 主視圖區塊 --- */
         .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; }
@@ -68,7 +73,6 @@
         .review-card { background: white; border: 2px solid var(--border-color); padding: 18px; border-radius: var(--radius-md); margin-bottom: 15px; text-align: left; transition: 0.3s; }
         .stage-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 700; margin-left: 10px; white-space: nowrap; display: inline-block; margin-top: 5px; }
 
-        /* --- 彈性容器排版 (為了手機版好調整) --- */
         .flex-row { display: flex; gap: 15px; }
         .flex-around { display: flex; justify-content: space-around; }
 
@@ -79,38 +83,58 @@
         .data-table th { background: #f8fafc; font-weight: 600; color: var(--text-muted); }
 
         /* ========================================= */
-        /* 📱 手機版響應式設計 (Mobile RWD)           */
+        /* 📱 手機版響應式設計 & 漢堡選單 (Mobile RWD)  */
         /* ========================================= */
         @media (max-width: 768px) {
-            /* 導覽列優化：縮小邊距，隱藏次要資訊 */
-            .navbar { padding: 10px 15px; }
-            .nav-brand { font-size: 1.2em; }
-            .nav-menu { gap: 5px; }
-            .nav-btn { padding: 6px 8px; font-size: 0.9em; }
-            #navWelcome { display: none; } /* 隱藏歡迎詞 */
-            .nav-text { display: none; } /* 隱藏按鈕部分文字，只留 icon */
+            .navbar { padding: 12px 20px; }
+            .nav-brand { font-size: 1.3em; }
+            
+            /* 顯示漢堡按鈕 */
+            .hamburger-btn { display: block; }
+            
+            /* 將導覽列改為下拉式選單 */
+            .nav-menu {
+                display: none; /* 預設隱藏 */
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.98);
+                flex-direction: column;
+                align-items: stretch;
+                padding: 0 0 15px 0;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                border-bottom: 1px solid var(--border-color);
+            }
+            .nav-menu.show { display: flex; } /* JavaScript 切換 class 時顯示 */
+            
+            /* 手機版徽章區塊排版 */
+            .nav-info {
+                padding: 15px 20px;
+                border-bottom: 1px solid var(--border-color);
+                margin-bottom: 5px;
+                flex-wrap: wrap;
+                background: #f8fafc;
+            }
+            
+            /* 手機版按鈕變成滿版大按鈕 */
+            .nav-btn {
+                padding: 14px 20px;
+                text-align: left;
+                border-radius: 0;
+                font-size: 1.05em;
+            }
 
-            /* 內容區塊優化 */
             .main-content { padding: 30px 15px; }
             h2 { font-size: 1.6em; }
-            
-            /* 將左右並排的框框改成上下垂直排列 */
             .flex-row { flex-direction: column; gap: 10px; }
             .flex-around { flex-direction: column; gap: 15px; text-align: center; }
-            
-            /* SRS 面板的排版 */
             .srs-box { padding: 12px; }
             .srs-box div:last-child { font-size: 2em !important; }
-
-            /* 個人設定頁的頭像排版 */
             .profile-header { flex-direction: column; text-align: center; }
             #profileBadgesDisplay { justify-content: center; display: flex; flex-wrap: wrap; gap: 5px; }
-
-            /* 測驗文字縮小避免超出畫面 */
             .question-card { font-size: 1.6em; padding: 20px 15px; }
             .option-btn { padding: 14px; font-size: 1em; }
-
-            /* 表格字體縮小 */
             .data-table th, .data-table td { padding: 10px 5px; font-size: 0.85em; }
         }
     </style>
@@ -119,14 +143,18 @@
 
     <nav class="navbar" id="topNavbar" style="display: none;">
         <div class="nav-brand">VocabMaster</div>
-        <div class="nav-menu">
-            <span id="navWelcome" style="font-weight: 600; font-size: 0.9em; margin-right: 5px;"></span>
-            <span id="navStreak" class="badge" style="display:none;" title="連續測驗天數">🔥 0</span>
-            <span id="navMedal" style="font-size:1.2em; display:none;" title="滿分金牌成就">🥇</span>
-            
-            <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')" style="display:none;">📚 <span class="nav-text">記憶系統</span></button>
-            <button class="nav-btn" onclick="showView('leaderboardView')">🏆 <span class="nav-text">排行</span></button>
-            <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')" style="display:none;">⚙️ <span class="nav-text">設定</span></button>
+        
+        <button class="hamburger-btn" onclick="toggleMobileMenu()">☰</button>
+        
+        <div class="nav-menu" id="navMenu">
+            <div class="nav-info">
+                <span id="navWelcome" style="font-weight: 600; font-size: 0.9em; color: var(--primary-color);"></span>
+                <span id="navStreak" class="badge" style="display:none;" title="連續測驗天數">🔥 0</span>
+                <span id="navMedal" style="font-size:1.2em; display:none;" title="滿分金牌成就">🥇</span>
+            </div>
+            <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')" style="display:none;">📚 記憶系統</button>
+            <button class="nav-btn" onclick="showView('leaderboardView')">🏆 排行榜</button>
+            <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')" style="display:none;">⚙️ 設定</button>
             <button class="nav-btn" style="color: var(--danger-color);" onclick="handleLogout()">登出</button>
         </div>
     </nav>
@@ -269,7 +297,17 @@
 
         const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'profileView', 'leaderboardView'];
         
+        // 🍔 漢堡選單切換邏輯
+        function toggleMobileMenu() {
+            const menu = document.getElementById('navMenu');
+            menu.classList.toggle('show');
+        }
+
         function showView(viewId) {
+            // 切換頁面時，自動關閉手機版的漢堡選單
+            const menu = document.getElementById('navMenu');
+            if(menu.classList.contains('show')) menu.classList.remove('show');
+
             VIEW_IDS.forEach(id => document.getElementById(id).classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
 
@@ -287,7 +325,6 @@
             if (viewId === 'profileView') showProfileView();
             if (viewId === 'leaderboardView') loadLeaderboardData();
             
-            // 跳轉時自動回到最上面，手機版體驗更佳
             window.scrollTo(0, 0);
         }
 
