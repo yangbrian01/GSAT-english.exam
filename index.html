@@ -42,17 +42,16 @@
         /* --- 表單/按鈕 --- */
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9em; color: var(--text-muted); }
-        input[type="text"], input[type="password"], input[type="number"], select { width: 100%; padding: 14px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1em; background-color: #f8fafc; transition: 0.2s; font-family: inherit; }
-        input:focus, select:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
+        input[type="text"], input[type="password"], input[type="number"], select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1em; background-color: #f8fafc; transition: 0.2s; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
+        textarea { resize: vertical; min-height: 120px; }
         
         .typing-input { font-size: 1.5em !important; text-align: center; padding: 20px !important; letter-spacing: 2px; color: var(--primary-color); font-weight: 700;}
 
         .btn { padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active { transform: scale(0.98); }
         .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-secondary { background-color: white; color: var(--text-main); border: 2px solid var(--border-color); }
-        .btn-secondary:hover { background-color: #f8fafc; }
         .btn-success { background-color: var(--secondary-color); color: white; }
         .btn-outline { background: transparent; color: var(--text-muted); padding: 10px; }
 
@@ -67,14 +66,13 @@
         
         .speak-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.3em; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: flex; justify-content: center; align-items: center; z-index: 10;}
         .speak-btn:hover { transform: scale(1.1); color: var(--primary-color); }
-        
         .audio-only-btn { font-size: 3em; cursor: pointer; display: inline-block; padding: 20px; background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; transition: 0.2s; }
         .audio-only-btn:active { transform: scale(0.9); }
 
         .option-btn { display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: 0.2s; line-height: 1.4; }
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
 
-        /* --- 🃏 Quizlet 級 3D 翻轉閃卡 + 滑動動畫 --- */
+        /* --- 🃏 Quizlet 級閃卡 --- */
         .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none; }
         .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
         .flashcard-container.flipped .flashcard-inner { transform: rotateY(180deg); }
@@ -95,8 +93,15 @@
         .slide-right { animation: slideRightAnim 0.3s forwards ease-out; }
         @keyframes slideLeftAnim { 0% { transform: translateX(40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
         @keyframes slideRightAnim { 0% { transform: translateX(-40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
-
         .review-list-item { background: white; border: 2px solid var(--border-color); padding: 15px; border-radius: var(--radius-md); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+
+        /* --- 🤖 AI 區塊樣式 --- */
+        .ai-result-box { background: #f8fafc; border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 25px; margin-top: 20px; text-align: left; display: none;}
+        .ai-title { color: var(--primary-color); font-weight: 800; font-size: 1.3em; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .ai-field { margin-bottom: 15px; }
+        .ai-field strong { display: block; color: var(--text-main); margin-bottom: 5px; }
+        .ai-field p { color: var(--text-muted); line-height: 1.5; }
+        .ai-score { font-size: 3em; font-weight: 800; color: var(--secondary-color); text-align: center; margin: 10px 0; }
 
         /* 排版與表格 */
         .flex-row { display: flex; gap: 15px; }
@@ -105,8 +110,6 @@
         .view-section.active { display: block; }
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .data-table th, .data-table td { padding: 15px 10px; border-bottom: 1px solid var(--border-color); }
-
-        /* 自身排行榜高光 */
         .me-row { background-color: #d1fae5 !important; border: 2px solid #10b981 !important; font-weight: bold; box-shadow: inset 0 0 0 1px #10b981;}
 
         @media (max-width: 768px) {
@@ -139,6 +142,11 @@
             </div>
             <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
             <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')">📚 記憶系統</button>
+            
+            <button class="nav-btn" id="navAiDictBtn" onclick="showView('aiDictView')">📖 AI 字典</button>
+            <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
+            <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
+
             <button class="nav-btn" onclick="showView('leaderboardView')">🏆 排行榜</button>
             <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">⚙️ 設定</button>
             <button class="nav-btn" style="color: var(--danger-color);" onclick="handleLogout()">登出</button>
@@ -167,7 +175,6 @@
         <div id="setupView" class="view-section view-container">
             <h2>準備開始挑戰</h2>
             <p class="subtitle">模式越高階，混合的題型越豐富！</p>
-            
             <div class="input-group">
                 <label>測驗模式 🎮</label>
                 <select id="quizModeSelect" style="border-color: var(--primary-color); font-weight: 600; color: var(--primary-color);">
@@ -176,7 +183,6 @@
                     <option value="3">3. 魔王挑戰 (+ 拼寫輸入混出)</option>
                 </select>
             </div>
-
             <div class="flex-row">
                 <div class="input-group" style="flex: 1;">
                     <label>題數</label>
@@ -203,7 +209,6 @@
             </div>
             
             <div class="question-card">
-                <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
                 <div id="hintDisplay" style="display:none; font-size: 0.65em; letter-spacing: 6px; margin-top: 15px; color: var(--text-muted); font-weight: 600;"></div>
             </div>
@@ -231,7 +236,6 @@
 
         <div id="reviewPage" class="view-section view-container" style="max-width: 700px;">
             <h2>🧠 SRS 記憶閃卡</h2>
-            
             <div class="flex-row" style="margin-bottom: 20px;">
                 <div style="flex:1; background:#fee2e2; padding:15px; border-radius:12px; text-align:center;">
                     <div style="color:#ef4444; font-weight:700;">🔥 今日待複習</div>
@@ -242,24 +246,89 @@
                     <div id="pendingCountLabel" style="font-size:2em; font-weight:800; color:#334155;">0</div>
                 </div>
             </div>
-
             <div style="display:flex; gap:10px; margin-bottom: 20px;">
                 <button id="startReviewBtn" class="btn btn-primary" style="margin:0; flex:2;" onclick="startGame(true)">🗡️ 實戰複習測驗</button>
                 <button class="btn btn-secondary" style="margin:0; flex:1;" onclick="toggleFlashcardMode()">切換顯示模式</button>
             </div>
-
             <div id="flashcardModeContainer">
                 <div class="fc-nav">
                     <button class="fc-nav-btn" id="fcPrev" onclick="changeFlashcard(-1)">&lt;</button>
                     <span id="fcCounter" style="font-weight: 600; color: var(--text-muted);">0 / 0</span>
                     <button class="fc-nav-btn" id="fcNext" onclick="changeFlashcard(1)">&gt;</button>
                 </div>
-                <div id="slideWrapper">
-                    <div id="singleFlashcardArea"></div>
+                <div id="slideWrapper"><div id="singleFlashcardArea"></div></div>
+            </div>
+            <div id="listModeContainer" style="display: none; max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
+        </div>
+
+        <div id="aiDictView" class="view-section view-container">
+            <h2>📖 AI 智慧字典</h2>
+            <p class="subtitle">即時生成單字解析、衍生意思與易混淆字比較。</p>
+            <div class="input-group">
+                <input type="text" id="dictSearchInput" placeholder="輸入要查詢的英文單字..." style="font-size: 1.2em; font-weight:bold;">
+            </div>
+            <button class="btn btn-primary" onclick="searchAiDictionary()">🔍 呼叫 AI 查詢</button>
+            
+            <div id="dictLoading" class="loading-box" style="display:none;">
+                <div class="spinner"></div><p style="margin-top:15px;">AI 大腦檢索中，請稍候...</p>
+            </div>
+            
+            <div id="dictResult" class="ai-result-box">
+                <div class="ai-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="resWord" style="font-size: 1.5em;"></span>
+                    <button class="speak-btn" style="position:relative; top:0; right:0;" onclick="speakWord(document.getElementById('resWord').textContent)">🔊</button>
                 </div>
+                <div class="ai-field"><strong>📌 基本意思：</strong><p id="resPrimary"></p></div>
+                <div class="ai-field"><strong>🌱 衍生/其他用法：</strong><p id="resDerived"></p></div>
+                <div class="ai-field"><strong>💬 實用例句：</strong><p id="resExample" style="color: var(--primary-color); font-weight:600;"></p></div>
+                <div class="ai-field"><strong>⚠️ 易混淆字：</strong><p id="resConfused" style="background:#fef9c3; padding:10px; border-radius:8px;"></p></div>
+            </div>
+        </div>
+
+        <div id="aiEssayView" class="view-section view-container" style="max-width: 800px;">
+            <h2>✍️ AI 作文批改</h2>
+            <p class="subtitle">依據大考中心標準（詞彙、文法、組織、內容）給予專業評分與建議。</p>
+            <div class="input-group">
+                <textarea id="essayInput" placeholder="請將您的英文作文貼在這裡..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="gradeAiEssay()">📝 繳交作文給 AI 批改</button>
+            
+            <div id="essayLoading" class="loading-box" style="display:none;">
+                <div class="spinner"></div><p style="margin-top:15px;">AI 閱卷老師正在仔細批改，約需 10-15 秒...</p>
             </div>
 
-            <div id="listModeContainer" style="display: none; max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
+            <div id="essayResult" class="ai-result-box">
+                <div class="ai-score" id="resEssayScore">-- / 20</div>
+                <div class="ai-title">批改報告</div>
+                <div class="ai-field"><strong>🎯 內容 (Content)：</strong><p id="resEssayContent"></p></div>
+                <div class="ai-field"><strong>🏗️ 組織 (Organization)：</strong><p id="resEssayOrg"></p></div>
+                <div class="ai-field"><strong>📚 詞彙 (Vocabulary)：</strong><p id="resEssayVocab"></p></div>
+                <div class="ai-field"><strong>🛠️ 文法 (Grammar)：</strong><p id="resEssayGrammar"></p></div>
+                <div class="ai-field"><strong>💡 總體建議：</strong><p id="resEssayGeneral" style="color: var(--primary-color); font-weight:600;"></p></div>
+            </div>
+        </div>
+
+        <div id="aiTutorView" class="view-section view-container">
+            <h2>🤖 隨身解題家教</h2>
+            <p class="subtitle">遇到看不懂的文法或題目？貼上來，AI 用最白話的方式教你！</p>
+            <div class="input-group">
+                <label>題目或段落內容</label>
+                <textarea id="tutorContextInput" placeholder="例如: Having finished his homework, he went to bed." style="min-height: 80px;"></textarea>
+            </div>
+            <div class="input-group">
+                <label>你想問什麼？</label>
+                <input type="text" id="tutorDoubtInput" placeholder="例如: 為什麼前面是用 Having finished？">
+            </div>
+            <button class="btn btn-primary" onclick="askAiTutor()">🙋‍♂️ 舉手發問</button>
+            
+            <div id="tutorLoading" class="loading-box" style="display:none;">
+                <div class="spinner"></div><p style="margin-top:15px;">老師思考中...</p>
+            </div>
+
+            <div id="tutorResult" class="ai-result-box">
+                <div class="ai-title">👨‍🏫 老師講解</div>
+                <div id="resTutorExplanation" style="line-height: 1.8; color: var(--text-main);"></div>
+            </div>
         </div>
 
         <div id="profileView" class="view-section view-container">
@@ -295,29 +364,14 @@
 
         let quizData = [], currentQuestionIndex = 0, userAnswers = {}, totalQuestions = 0;
         let currentUser = localStorage.getItem('user'), sessionToken = localStorage.getItem('token');
-        let isReviewQuizMode = false; 
-        let autoAdvanceTimer = null; 
+        let isReviewQuizMode = false; let autoAdvanceTimer = null; 
 
-        // 🎯 超強大文字淨化器：專門切掉字典詞性 (n. adj. v. 等)
-        function getPureWord(rawWord) {
-            if (!rawWord) return '';
-            // 把結尾的空白 + 小寫字母 + 小數點以後的東西全切掉
-            return rawWord.replace(/\s+[a-zA-Z]+\..*$/i, '').trim();
-        }
+        // 🎯 淨化單字 (只唸英文)
+        function getPureWord(rawWord) { if (!rawWord) return ''; return rawWord.replace(/\s+[a-zA-Z]+\..*$/i, '').trim(); }
+        function speakWord(text) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.speak(u); }
+        function playCurrentWordAudio() { speakWord(getPureWord(quizData[currentQuestionIndex].correctWord)); }
 
-        // --- 🗣️ TTS 原生語音引擎 ---
-        function speakWord(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'en-US'; utterance.rate = 0.85; window.speechSynthesis.speak(utterance);
-        }
-        function playCurrentWordAudio() { 
-            // 發音時強制過濾詞性，只唸出純英文單字
-            speakWord(getPureWord(quizData[currentQuestionIndex].correctWord)); 
-        }
-
-        // --- 畫面切換 ---
-        const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'profileView', 'leaderboardView'];
+        const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'aiDictView', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
         function showView(viewId) {
             document.getElementById('navMenu').classList.remove('show');
             VIEW_IDS.forEach(id => document.getElementById(id).classList.remove('active'));
@@ -327,8 +381,11 @@
                 document.getElementById('topNavbar').style.display = 'flex';
                 document.getElementById('navWelcome').textContent = currentUser === '訪客' ? '👋 訪客' : `👋 ${currentUser}`;
                 const isGuest = currentUser === '訪客';
+                
+                // 隱藏需要會員的功能
                 document.getElementById('navReviewBtn').style.display = isGuest ? 'none' : 'block';
                 document.getElementById('navProfileBtn').style.display = isGuest ? 'none' : 'block';
+                
                 if(viewId === 'quizView') document.getElementById('topNavbar').style.display = 'none';
                 if (!isGuest && viewId !== 'quizView') updateNavbarBadges();
             } else { document.getElementById('topNavbar').style.display = 'none'; }
@@ -339,387 +396,166 @@
             window.scrollTo(0, 0);
         }
 
+        // ==========================================
+        // 🤖 AI 模組前端呼叫邏輯
+        // ==========================================
+        
+        // 1. AI 字典
+        function searchAiDictionary() {
+            const word = document.getElementById('dictSearchInput').value.trim();
+            if (!word) return Swal.fire('請輸入單字', '', 'warning');
+            
+            document.getElementById('dictResult').style.display = 'none';
+            document.getElementById('dictLoading').style.display = 'block';
+
+            apiCall('aiDictionary', { word }).then(res => {
+                document.getElementById('dictLoading').style.display = 'none';
+                if (res.success && res.data) {
+                    document.getElementById('resWord').textContent = res.data.word;
+                    document.getElementById('resPrimary').textContent = res.data.primary;
+                    document.getElementById('resDerived').textContent = res.data.derived;
+                    document.getElementById('resExample').textContent = res.data.exampleSentence;
+                    document.getElementById('resConfused').textContent = res.data.confusedWords;
+                    document.getElementById('dictResult').style.display = 'block';
+                } else {
+                    Swal.fire('查詢失敗', res.message || '無法解析 AI 回應', 'error');
+                }
+            });
+        }
+
+        // 2. AI 作文批改
+        function gradeAiEssay() {
+            const text = document.getElementById('essayInput').value.trim();
+            if (text.length < 20) return Swal.fire('字數太少', '請至少輸入一句完整的句子', 'warning');
+            
+            document.getElementById('essayResult').style.display = 'none';
+            document.getElementById('essayLoading').style.display = 'block';
+
+            apiCall('aiEssayGrading', { essayText: text }).then(res => {
+                document.getElementById('essayLoading').style.display = 'none';
+                if (res.success && res.data) {
+                    document.getElementById('resEssayScore').textContent = `${res.data.totalScore} / 20`;
+                    document.getElementById('resEssayContent').textContent = res.data.content;
+                    document.getElementById('resEssayOrg').textContent = res.data.organization;
+                    document.getElementById('resEssayVocab').textContent = res.data.vocabulary;
+                    document.getElementById('resEssayGrammar').textContent = res.data.grammar;
+                    document.getElementById('resEssayGeneral').textContent = res.data.generalFeedback;
+                    document.getElementById('essayResult').style.display = 'block';
+                } else {
+                    Swal.fire('批改失敗', res.message || '請稍後再試', 'error');
+                }
+            });
+        }
+
+        // 3. AI 家教
+        function askAiTutor() {
+            const context = document.getElementById('tutorContextInput').value.trim();
+            const doubt = document.getElementById('tutorDoubtInput').value.trim();
+            if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning');
+            
+            document.getElementById('tutorResult').style.display = 'none';
+            document.getElementById('tutorLoading').style.display = 'block';
+
+            apiCall('aiTutor', { question: context, doubt: doubt }).then(res => {
+                document.getElementById('tutorLoading').style.display = 'none';
+                if (res.success && res.data) {
+                    // 把換行符號轉成 HTML 的 <br>
+                    document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>');
+                    document.getElementById('tutorResult').style.display = 'block';
+                } else {
+                    Swal.fire('呼叫老師失敗', res.message, 'error');
+                }
+            });
+        }
+
+        // ==========================================
+        // 基礎系統 (登入, 測驗, SRS, 排行) 邏輯保持原樣
+        // ==========================================
+
         function handleGuestLogin() { Swal.fire({title:'訪客模式', text:'無法解鎖成就與記憶系統', icon:'info', showCancelButton:true}).then(r=>{if(r.isConfirmed){currentUser='訪客';sessionToken=null;localStorage.clear();showView('setupView');}}); }
         function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號>3, 密碼>4','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
-        // --- 魔王模式遮罩小幫手：傳入的已經是淨化過的單字 ---
-        function maskWord(word) {
-            let parts = word.split(' ');
-            let res = parts.map(p => {
-                if (p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; 
-                if (p.length <= 2) return p;
-                return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1];
-            });
-            return res.join('  ');
-        }
+        function maskWord(word) { let parts = word.split(' '); return parts.map(p => { if (p.includes('.') || p.includes('/') || p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; if (p.length <= 2) return p; return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1]; }).join('  '); }
 
-        // --- 開始測驗邏輯 ---
         function startGame(isReview = false) {
             isReviewQuizMode = isReview;
             const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value;
-
-            if (isReviewQuizMode) {
-                showLoading('生成記憶複習卷...');
-                apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res));
-            } else {
-                const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value;
-                if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning');
-                showLoading('抽取題目中...');
-                apiCall('getAllQuestions', { numQuestions: num, sessionToken: currentUser==='訪客'?null:sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res));
-            }
+            if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } 
+            else { const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: currentUser==='訪客'?null:sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); }
         }
 
         function processQuizData(res) {
-            Swal.close();
-            if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; }
-            quizData = res.questions;
-            totalQuestions = res.totalQuestions;
-            if (quizData.length > 0) {
-                currentQuestionIndex = 0; userAnswers = {};
-                document.getElementById('totalQNum').textContent = totalQuestions;
-                document.getElementById('typingInput').value = '';
-                showView('quizView'); renderQuestion(0);
-            }
+            Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; }
+            quizData = res.questions; totalQuestions = res.totalQuestions;
+            if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; document.getElementById('typingInput').value = ''; showView('quizView'); renderQuestion(0); }
         }
 
         function renderQuestion(index) {
-            clearTimeout(autoAdvanceTimer); 
-            currentQuestionIndex = index; const q = quizData[index];
-            document.getElementById('currentQNum').textContent = index + 1;
-            document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction;
+            clearTimeout(autoAdvanceTimer); currentQuestionIndex = index; const q = quizData[index];
+            document.getElementById('currentQNum').textContent = index + 1; document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction;
             
-            const meaningDisplay = document.getElementById('meaningDisplay');
-            const hintDiv = document.getElementById('hintDisplay');
-            const optContainer = document.getElementById('optionsContainer');
-            const typeContainer = document.getElementById('typingContainer');
-            const typeInput = document.getElementById('typingInput');
-            const manualNextBtn = document.getElementById('manualNextBtn');
-            const prevButton = document.getElementById('prevButton');
-            const nextButton = document.getElementById('nextButton');
+            const meaningDisplay = document.getElementById('meaningDisplay'); const hintDiv = document.getElementById('hintDisplay'); const optContainer = document.getElementById('optionsContainer'); const typeContainer = document.getElementById('typingContainer'); const typeInput = document.getElementById('typingInput'); const manualNextBtn = document.getElementById('manualNextBtn'); const prevButton = document.getElementById('prevButton'); const nextButton = document.getElementById('nextButton');
 
-            // 預設重置
-            hintDiv.style.display = 'none';
-            optContainer.style.display = 'none';
-            typeContainer.style.display = 'none';
-            meaningDisplay.style.display = 'block';
-            manualNextBtn.style.display = 'none';
-
-            // 顯示底部導覽按鈕
-            prevButton.style.display = 'block';
-            nextButton.style.display = 'block';
+            hintDiv.style.display = 'none'; optContainer.style.display = 'none'; typeContainer.style.display = 'none'; meaningDisplay.style.display = 'block'; manualNextBtn.style.display = 'none'; prevButton.style.display = 'block'; nextButton.style.display = 'block';
 
             if (q.qType === 'listen') {
                 meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>';
-                setTimeout(() => playCurrentWordAudio(), 400); 
-                optContainer.style.display = 'block';
-                renderOptionsUI(q, optContainer);
-            } 
-            else if (q.qType === 'spell') {
-                // 拼寫題：顯示中文，給頭尾提示 (傳入已淨化的單字)，沒有發音按鈕
-                meaningDisplay.textContent = q.questionText; 
-                hintDiv.style.display = 'block';
-                hintDiv.textContent = maskWord(getPureWord(q.correctWord)); 
-
-                typeContainer.style.display = 'block';
-                typeInput.value = userAnswers[q.id] || '';
-                setTimeout(() => typeInput.focus(), 100);
-                
-                typeInput.onkeydown = function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        userAnswers[q.id] = typeInput.value.trim();
-                        handleNextQuestion();
-                    }
-                };
-                
-                // 拼寫題隱藏常規底部按鈕，改用專屬大按鈕防呆
-                prevButton.style.display = 'none';
-                nextButton.style.display = 'none';
-                manualNextBtn.style.display = 'block';
-                manualNextBtn.textContent = (index === totalQuestions - 1) ? '交卷送出' : '下一題';
-            } 
-            else {
-                meaningDisplay.textContent = q.questionText; 
-                optContainer.style.display = 'block';
-                renderOptionsUI(q, optContainer);
-            }
+                setTimeout(() => playCurrentWordAudio(), 400); optContainer.style.display = 'block'; renderOptionsUI(q, optContainer);
+            } else if (q.qType === 'spell') {
+                meaningDisplay.textContent = q.questionText; hintDiv.style.display = 'block'; hintDiv.textContent = maskWord(getPureWord(q.correctWord)); typeContainer.style.display = 'block'; typeInput.value = userAnswers[q.id] || ''; setTimeout(() => typeInput.focus(), 100);
+                typeInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); userAnswers[q.id] = typeInput.value.trim(); handleNextQuestion(); } };
+                prevButton.style.display = 'none'; nextButton.style.display = 'none'; manualNextBtn.style.display = 'block'; manualNextBtn.textContent = (index === totalQuestions - 1) ? '交卷送出' : '下一題';
+            } else { meaningDisplay.textContent = q.questionText; optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); }
             updateNavButtons();
         }
 
         function renderOptionsUI(q, container) {
             container.innerHTML = '';
             q.options.forEach(word => {
-                const btn = document.createElement('button'); 
-                btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`; 
-                btn.textContent = word;
-                btn.onclick = () => { 
-                    userAnswers[q.id] = word; 
-                    Array.from(container.children).forEach(b => b.classList.remove('selected')); 
-                    btn.classList.add('selected'); 
-                    
-                    clearTimeout(autoAdvanceTimer);
-                    autoAdvanceTimer = setTimeout(() => {
-                        handleNextQuestion();
-                    }, 400); 
-                };
+                const btn = document.createElement('button'); btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`; btn.textContent = word;
+                btn.onclick = () => { userAnswers[q.id] = word; Array.from(container.children).forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); clearTimeout(autoAdvanceTimer); autoAdvanceTimer = setTimeout(() => { handleNextQuestion(); }, 400); };
                 container.appendChild(btn);
             });
         }
 
-        function handleNextQuestion() {
-            clearTimeout(autoAdvanceTimer);
-            const q = quizData[currentQuestionIndex];
-            if (q.qType === 'spell') { 
-                const inputVal = document.getElementById('typingInput').value.trim(); 
-                if(inputVal) userAnswers[q.id] = inputVal; 
-            }
-            
-            if (currentQuestionIndex < quizData.length - 1) {
-                changeQuestion(1);
-            } else {
-                submitQuiz(); 
-            }
-        }
-        
-        function changeQuestion(delta) { 
-            const q = quizData[currentQuestionIndex];
-            if (q.qType === 'spell' && delta < 0) {
-                userAnswers[q.id] = document.getElementById('typingInput').value.trim();
-            }
-            const newIdx = currentQuestionIndex + delta; 
-            if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); 
-        }
+        function handleNextQuestion() { clearTimeout(autoAdvanceTimer); const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { const inputVal = document.getElementById('typingInput').value.trim(); if(inputVal) userAnswers[q.id] = inputVal; } if (currentQuestionIndex < quizData.length - 1) { changeQuestion(1); } else { submitQuiz(); } }
+        function changeQuestion(delta) { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell' && delta < 0) { userAnswers[q.id] = document.getElementById('typingInput').value.trim(); } const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
+        function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
 
-        function updateNavButtons() {
-            const isLast = currentQuestionIndex === quizData.length - 1; 
-            document.getElementById('prevButton').disabled = currentQuestionIndex === 0;
-            const nextBtn = document.getElementById('nextButton');
-            nextBtn.textContent = isLast ? '交卷送出' : '下一題'; 
-            nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary';
-        }
-
-        function submitQuiz() {
-            // 🛡️ 抓漏防呆：未作答警告
-            const unans = quizData.length - Object.keys(userAnswers).length;
-            if (unans > 0) {
-                Swal.fire({
-                    title: `還有 ${unans} 題未作答！`,
-                    text: '確定要提早交卷嗎？',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#ef4444',
-                    confirmButtonText: '確定交卷',
-                    cancelButtonText: '繼續作答'
-                }).then(r => {
-                    if(r.isConfirmed) processSubmit();
-                });
-            } else {
-                processSubmit();
-            }
-        }
+        function submitQuiz() { const unans = quizData.length - Object.keys(userAnswers).length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
 
         function processSubmit() {
             let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
             quizData.forEach((q, i) => {
-                const uAns = userAnswers[q.id] || ''; 
-                let isCorr = false;
-                // 🎯 核心比對修復：過濾掉字典詞性再比對
-                if (q.qType === 'spell') {
-                    isCorr = (uAns.toLowerCase() === getPureWord(q.correctAnswer).toLowerCase());
-                } else {
-                    isCorr = (uAns === q.correctAnswer);
-                }
-                
+                const uAns = userAnswers[q.id] || ''; let isCorr = false;
+                if (q.qType === 'spell') { isCorr = (uAns.toLowerCase() === getPureWord(q.correctAnswer).toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); }
                 if (isCorr) correctCount++;
                 submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
-
-                detailDiv.innerHTML += `
-                    <div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;">
-                        <h4 style="margin-bottom: 8px;">${i+1}. ${q.qType === 'listen' ? '🎧 純聽力題' : q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4>
-                        <p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p>
-                    </div>`;
+                detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;"><h4 style="margin-bottom: 8px;">${i+1}. ${q.qType === 'listen' ? '🎧 純聽力題' : q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p></div>`;
             });
-
-            if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') Swal.fire('太神啦！', '滿分通關！獲得 🥇 榮譽金牌', 'success');
-            else if (isReviewQuizMode && correctCount > 0) Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success');
-
+            if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') Swal.fire('太神啦！', '滿分通關！獲得 🥇 榮譽金牌', 'success'); else if (isReviewQuizMode && correctCount > 0) Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success');
             document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; showView('resultView'); drawChart(correctCount, totalQuestions - correctCount);
             if (currentUser !== '訪客') apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode });
         }
 
-        function drawChart(correct, wrong) {
-            const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } });
-        }
+        function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
 
         // --- 🃏 記憶系統 ---
-        let reviewCardsData = [];
-        let currentFlashcardIndex = 0;
-        let showFlashcardMode = true;
-        let touchStartX = 0; let touchEndX = 0;
+        let reviewCardsData = []; let currentFlashcardIndex = 0; let showFlashcardMode = true; let touchStartX = 0; let touchEndX = 0;
+        function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; renderReviewUI(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = ''; document.getElementById('listModeContainer').style.display = 'block'; document.getElementById('listModeContainer').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } }); }
+        function toggleFlashcardMode() { showFlashcardMode = !showFlashcardMode; renderReviewUI(); }
+        function renderReviewUI() { if (showFlashcardMode) { document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; renderSingleFlashcard(); } else { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'block'; renderListMode(); } }
+        function renderSingleFlashcard() { if (reviewCardsData.length === 0) return; const q = reviewCardsData[currentFlashcardIndex]; const area = document.getElementById('singleFlashcardArea'); document.getElementById('fcCounter').textContent = `${currentFlashcardIndex + 1} / ${reviewCardsData.length}`; document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0; document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1; const hasChinese = /[\u4E00-\u9FFF]/.test(q.question); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; const safeEnWord = getPureWord(enWord).replace(/'/g, "\\'"); area.innerHTML = `<div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};"><div class="flashcard-inner"><div class="flashcard-front"><div class="fc-word" style="font-size: 1.8em;">${chWord}</div><div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div><div class="fc-hint">點擊卡片翻面看英文</div></div><div class="flashcard-back"><button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><div class="fc-word">${enWord}</div>${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}</div></div></div>`; const cardElement = document.getElementById('fcContainer'); cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40) { if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); } if (touchEndX > touchStartX + 40) { if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); } }, {passive: true}); }
+        function changeFlashcard(delta) { const newIdx = currentFlashcardIndex + delta; if (newIdx >= 0 && newIdx < reviewCardsData.length) { currentFlashcardIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
+        function renderListMode() { let html = ''; reviewCardsData.forEach((q, i) => { const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; const hasChinese = /[\u4E00-\u9FFF]/.test(q.question); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const safeEnWord = getPureWord(enWord).replace(/'/g, "\\'"); html += `<div class="review-list-item" style="opacity: ${q.isDue ? '1' : '0.6'};"><div style="flex: 1;"><strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br><span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${enWord}</span></div><button class="speak-btn" style="position:relative; width:45px; height:45px; border: 1px solid var(--border-color); box-shadow:none;" onclick="speakWord('${safeEnWord}')">🔊</button></div>`; }); document.getElementById('listModeContainer').innerHTML = html; }
 
-        function loadIncorrectQuestions() {
-            document.getElementById('flashcardModeContainer').style.display = 'none';
-            document.getElementById('listModeContainer').style.display = 'none';
-            document.getElementById('startReviewBtn').style.display = 'none';
-
-            document.getElementById('flashcardModeContainer').style.display = 'block';
-            document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>';
-
-            apiCall('getIncorrectQuestions', { username: currentUser }).then(res => {
-                reviewCardsData = res.questions || [];
-                if (reviewCardsData.length > 0) {
-                    let dueCount = 0, pendingCount = 0;
-                    reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++);
-                    document.getElementById('dueCountLabel').textContent = dueCount;
-                    document.getElementById('pendingCountLabel').textContent = pendingCount;
-                    if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block';
-
-                    currentFlashcardIndex = 0;
-                    renderReviewUI();
-                } else {
-                    document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0';
-                    document.getElementById('singleFlashcardArea').innerHTML = '';
-                    document.getElementById('listModeContainer').style.display = 'block';
-                    document.getElementById('listModeContainer').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>';
-                }
-            });
-        }
-
-        function toggleFlashcardMode() {
-            showFlashcardMode = !showFlashcardMode;
-            renderReviewUI();
-        }
-
-        function renderReviewUI() {
-            if (showFlashcardMode) {
-                document.getElementById('listModeContainer').style.display = 'none';
-                document.getElementById('flashcardModeContainer').style.display = 'block';
-                renderSingleFlashcard();
-            } else {
-                document.getElementById('flashcardModeContainer').style.display = 'none';
-                document.getElementById('listModeContainer').style.display = 'block';
-                renderListMode();
-            }
-        }
-
-        function renderSingleFlashcard() {
-            if (reviewCardsData.length === 0) return;
-            const q = reviewCardsData[currentFlashcardIndex];
-            const area = document.getElementById('singleFlashcardArea');
-            
-            document.getElementById('fcCounter').textContent = `${currentFlashcardIndex + 1} / ${reviewCardsData.length}`;
-            document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0;
-            document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1;
-
-            const hasChinese = /[\u4E00-\u9FFF]/.test(q.question);
-            const chWord = hasChinese ? q.question : q.correctAnswer;
-            const enWord = hasChinese ? q.correctAnswer : q.question;
-            const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後';
-            // 🎯 傳給發音函式的要是乾淨的純單字
-            const safeEnWord = getPureWord(enWord).replace(/'/g, "\\'");
-
-            area.innerHTML = `
-                <div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};">
-                    <div class="flashcard-inner">
-                        <div class="flashcard-front">
-                            <div class="fc-word" style="font-size: 1.8em;">${chWord}</div>
-                            <div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div>
-                            <div class="fc-hint">點擊卡片翻面看英文</div>
-                        </div>
-                        <div class="flashcard-back">
-                            <button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button>
-                            <div class="fc-word">${enWord}</div>
-                            ${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}
-                        </div>
-                    </div>
-                </div>`;
-            
-            const cardElement = document.getElementById('fcContainer');
-            cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
-            cardElement.addEventListener('touchend', e => {
-                touchEndX = e.changedTouches[0].screenX;
-                if (touchEndX < touchStartX - 40) {
-                    if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); 
-                }
-                if (touchEndX > touchStartX + 40) {
-                    if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); 
-                }
-            }, {passive: true});
-        }
-
-        function changeFlashcard(delta) {
-            const newIdx = currentFlashcardIndex + delta;
-            if (newIdx >= 0 && newIdx < reviewCardsData.length) { 
-                currentFlashcardIndex = newIdx; 
-                const wrapper = document.getElementById('slideWrapper');
-                
-                wrapper.classList.remove('slide-left', 'slide-right');
-                void wrapper.offsetWidth; 
-                wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right');
-                
-                renderSingleFlashcard(); 
-            }
-        }
-
-        function renderListMode() {
-            let html = '';
-            reviewCardsData.forEach((q, i) => {
-                const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後';
-                const hasChinese = /[\u4E00-\u9FFF]/.test(q.question);
-                const chWord = hasChinese ? q.question : q.correctAnswer;
-                const enWord = hasChinese ? q.correctAnswer : q.question;
-                const safeEnWord = getPureWord(enWord).replace(/'/g, "\\'");
-
-                html += `
-                    <div class="review-list-item" style="opacity: ${q.isDue ? '1' : '0.6'};">
-                        <div style="flex: 1;">
-                            <strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br>
-                            <span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${enWord}</span>
-                        </div>
-                        <button class="speak-btn" style="position:relative; width:45px; height:45px; border: 1px solid var(--border-color); box-shadow:none;" onclick="speakWord('${safeEnWord}')">🔊</button>
-                    </div>`;
-            });
-            document.getElementById('listModeContainer').innerHTML = html;
-        }
-
-        // 周邊更新
+        // 周邊功能
         function updateNavbarBadges() { apiCall('getProfileData', { username: currentUser }).then(res => { if(res.success) { const streakEl = document.getElementById('navStreak'); if (res.streak > 0) { streakEl.style.display = 'inline-block'; streakEl.textContent = `🔥 ${res.streak}`; } document.getElementById('navMedal').style.display = res.hasGoldMedal ? 'inline-block' : 'none'; } }); }
         function showProfileView() { document.getElementById('profileUsernameDisplay').textContent = currentUser; apiCall('getProfileData', { username: currentUser }).then(res => { if (res.success) { const av = res.avatar || '👤'; const avDiv = document.getElementById('profileAvatarDisplay'); if(av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:90px; height:90px; border-radius:50%; object-fit:cover;">`; } else { avDiv.textContent = av; } document.getElementById('profileCorrectRate').textContent = res.correctRate; document.getElementById('profileTotalAnswered').textContent = res.totalAnswered; let badgesHtml = ''; if (res.hasGoldMedal) badgesHtml += '<span title="滿分金牌">🥇 金牌得主</span> '; if (res.streak > 0) badgesHtml += `<span class="badge" style="font-size:0.9em;">🔥 ${res.streak} 天連勝</span>`; document.getElementById('profileBadgesDisplay').innerHTML = badgesHtml; } }); }
         function handleAvatarUpdate() { const newAvatar = document.getElementById('newAvatarInput').value.trim(); if(!newAvatar) return Swal.fire('請輸入資料', '', 'info'); showLoading('更新中...'); apiCall('updateAvatar', { username: currentUser, newAvatar }).then(res => { Swal.fire(res.success?'成功':'失敗', res.message, res.success?'success':'error'); if (res.success) showProfileView(); document.getElementById('newAvatarInput').value = ''; }); }
-        
-        // 🏆 排行榜
-        function loadLeaderboardData() { 
-            const container = document.getElementById('leaderboardTableContainer'); 
-            container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; 
-            
-            apiCall('getLeaderboardData').then(res => { 
-                if(res.data && res.data.length > 0) { 
-                    let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>答對率</th><th>題數</th></tr>'; 
-                    res.data.forEach((d, i) => { 
-                        const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; 
-                        
-                        const isMe = String(d.username).trim().toLowerCase() === String(currentUser).trim().toLowerCase();
-                        const bgColor = isMe ? '#d1fae5' : (i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent');
-                        const borderStyle = isMe ? 'border: 2px solid #10b981; box-shadow: inset 0 0 0 2px #10b981;' : '';
-                        
-                        const medal = d.medal ? '🥇' : ''; 
-                        const streak = d.streak > 0 ? `<span style="color:#d97706; font-size:0.8em; font-weight:bold; margin-left:5px;">🔥${d.streak}</span>` : ''; 
-                        const nameDisplay = isMe ? `<span style="color:#047857;">${d.username} (你)</span>` : d.username;
-
-                        html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}">
-                            <td style="font-weight:700; text-align:center;">${rank}</td>
-                            <td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay} ${medal} ${streak}</td>
-                            <td style="color:var(--primary-color); font-weight:800; text-align:center;">${d.rateDisplay}</td>
-                            <td style="text-align:center;">${d.totalAns}</td>
-                        </tr>`; 
-                    }); 
-                    container.innerHTML = html + '</table>'; 
-                } else { container.innerHTML = '<p style="text-align:center; padding:20px;">尚無資料</p>'; } 
-            }); 
-        }
+        function loadLeaderboardData() { const container = document.getElementById('leaderboardTableContainer'); container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; apiCall('getLeaderboardData').then(res => { if(res.data && res.data.length > 0) { let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>答對率</th><th>題數</th></tr>'; res.data.forEach((d, i) => { const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; const isMe = String(d.username).trim().toLowerCase() === String(currentUser).trim().toLowerCase(); const bgColor = isMe ? '#d1fae5' : (i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent'); const borderStyle = isMe ? 'border: 2px solid #10b981; box-shadow: inset 0 0 0 2px #10b981;' : ''; const medal = d.medal ? '🥇' : ''; const streak = d.streak > 0 ? `<span style="color:#d97706; font-size:0.8em; font-weight:bold; margin-left:5px;">🔥${d.streak}</span>` : ''; const nameDisplay = isMe ? `<span style="color:#047857;">${d.username} (你)</span>` : d.username; html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay} ${medal} ${streak}</td><td style="color:var(--primary-color); font-weight:800; text-align:center;">${d.rateDisplay}</td><td style="text-align:center;">${d.totalAns}</td></tr>`; }); container.innerHTML = html + '</table>'; } else { container.innerHTML = '<p style="text-align:center; padding:20px;">尚無資料</p>'; } }); }
 
         window.onload = () => { if (currentUser) showView('setupView'); else showView('loginView'); };
     </script>
