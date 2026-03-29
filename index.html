@@ -221,6 +221,7 @@
             </div>
             
             <div class="question-card">
+                <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
             </div>
             
@@ -307,7 +308,7 @@
 
         <div id="aiEssayView" class="view-section view-container" style="max-width: 800px;">
             <h2>✍️ AI 作文批改</h2>
-            <p class="subtitle">大考中心鐵血模式：依據 115 年標準，提供五大細項給分與示範。</p>
+            <p class="subtitle">大考中心鐵血模式：依據 115 年標準，提供五大細項給分與分析。</p>
             <div class="input-group">
                 <label>作文題目 / 寫作情境</label>
                 <input type="text" id="essayTopicInput" placeholder="例如: 餐廳出現寵物... (選填)">
@@ -336,10 +337,9 @@
                     <tr><td>拼字</td><td id="s-spell" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-spell"></td></tr>
                 </table>
 
-                <div class="ai-title">修改建議與示範</div>
+                <div class="ai-title">修改建議</div>
                 <div class="ai-field"><strong>💡 主要建議：</strong><p id="resEssaySuggestions"></p></div>
-                <div class="ai-field"><strong>🎯 改寫重點說明：</strong><div id="resEssayKey" style="line-height:1.6; margin-bottom:15px; color:var(--text-muted);"></div></div>
-                <div class="ai-field"><strong>📝 修正版高分作文示範：</strong><div id="resEssayRevised" style="background:#fef9c3; padding:15px; border-radius:8px; line-height:1.6; font-family:serif;"></div></div>
+                <div class="ai-field"><strong>🎯 改寫重點說明：</strong><div id="resEssayKey" style="line-height:1.6; color:var(--text-muted);"></div></div>
             </div>
         </div>
 
@@ -395,22 +395,13 @@
         let isReviewQuizMode = false; let autoAdvanceTimer = null; 
         let userFavoriteWords = new Set();
 
-        // 🎯 前端備用淨化器 (除掉多餘符號，避免 Siri 發瘋)
+        // 🎯 前端備用淨化器 
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
             return rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim(); 
         }
         
-        function speakWord(text) { 
-            if (!('speechSynthesis' in window)) return; 
-            window.speechSynthesis.cancel(); 
-            // 把非英文字母清掉，避免語音引擎把它當成縮寫逐字唸出
-            const cleanText = text.replace(/[^a-zA-Z\s]/g, '').trim();
-            const u = new SpeechSynthesisUtterance(cleanText); 
-            u.lang = 'en-US'; 
-            u.rate = 0.9; 
-            window.speechSynthesis.speak(u); 
-        }
+        function speakWord(text) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.speak(u); }
         function playCurrentWordAudio() { speakWord(getPureWord(quizData[currentQuestionIndex].correctWord)); }
 
         const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'vocabBookView', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
@@ -451,6 +442,7 @@
             if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); }
         }
 
+        // 🎯 全新智慧拆字引擎 (完美處理 I (me, my) 這種括號與符號)
         let currentSpellTemplate = [];
         function initSpellTemplate(word) {
             const pureWord = getPureWord(word);
@@ -460,12 +452,17 @@
                 if (/[^a-zA-Z]/.test(char)) { 
                     currentSpellTemplate.push(char); 
                 } else {
+                    let isEdge = false;
                     let start = i, end = i;
                     while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--;
                     while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++;
+                    
                     const wordLen = end - start + 1;
-                    if (wordLen <= 2 || i === start || i === end) { currentSpellTemplate.push(char); } 
-                    else { currentSpellTemplate.push('_'); }
+                    if (wordLen <= 2 || i === start || i === end) {
+                        currentSpellTemplate.push(char);
+                    } else {
+                        currentSpellTemplate.push('_');
+                    }
                 }
             }
         }
@@ -474,11 +471,22 @@
             const val = document.getElementById('typingInput').value.toLowerCase();
             let displayStr = "";
             let typedIndex = 0;
+            
             for(let i=0; i<currentSpellTemplate.length; i++) {
-                if (currentSpellTemplate[i] === ' ') { displayStr += "&nbsp;&nbsp;"; continue; }
-                if (currentSpellTemplate[i] !== '_') { displayStr += currentSpellTemplate[i] + " "; continue; }
-                if (typedIndex < val.length) { displayStr += `<span style="color:var(--danger-color);">${val[typedIndex]}</span> `; } 
-                else { displayStr += `<span style="color:#94a3b8;">_</span> `; }
+                if (currentSpellTemplate[i] === ' ') {
+                    displayStr += "&nbsp;&nbsp;"; 
+                    continue;
+                }
+                if (currentSpellTemplate[i] !== '_') {
+                    displayStr += currentSpellTemplate[i] + " ";
+                    continue;
+                }
+                
+                if (typedIndex < val.length) {
+                    displayStr += `<span style="color:var(--danger-color);">${val[typedIndex]}</span> `;
+                } else {
+                    displayStr += `<span style="color:#94a3b8;">_</span> `;
+                }
                 typedIndex++;
             }
             document.getElementById('spellVisual').innerHTML = displayStr;
@@ -506,13 +514,17 @@
                 renderOptionsUI(q, optContainer); 
             } 
             else if (q.qType === 'spell') { 
-                meaningDisplay.textContent = q.questionText; 
+                meaningDisplay.textContent = q.questionText; // 卡片內只有乾淨中文
                 spellArea.style.display = 'flex'; 
+                
                 initSpellTemplate(q.correctWord);
-                typingInput.value = userAnswers[q.id] || ''; 
+                typingInput.value = userAnswers[q.id] || ''; // 恢復作答紀錄
                 updateSpellVisual();
+                
                 setTimeout(() => typingInput.focus(), 100); 
-                typingInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } }; 
+                typingInput.onkeydown = function(e) { 
+                    if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } 
+                }; 
             } 
             else { 
                 meaningDisplay.textContent = q.questionText; 
@@ -525,7 +537,8 @@
         function renderOptionsUI(q, container) { container.innerHTML = ''; q.options.forEach(word => { const btn = document.createElement('button'); btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`; btn.textContent = word; btn.onclick = () => { userAnswers[q.id] = word; Array.from(container.children).forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); clearTimeout(autoAdvanceTimer); autoAdvanceTimer = setTimeout(() => { handleNextQuestion(); }, 400); }; container.appendChild(btn); }); }
         
         function handleNextQuestion() { 
-            clearTimeout(autoAdvanceTimer); const q = quizData[currentQuestionIndex]; 
+            clearTimeout(autoAdvanceTimer); 
+            const q = quizData[currentQuestionIndex]; 
             if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } 
             if (currentQuestionIndex < quizData.length - 1) { changeQuestion(1); } else { submitQuiz(); } 
         }
@@ -545,8 +558,12 @@
             let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id] || ''; let isCorr = false;
+                
+                // 🎯 答案核對邏輯：只抽出純英文字母進行比對，容錯率超高！
                 if (q.qType === 'spell') { 
-                    let tempTypedIndex = 0; let reconstructedAnswer = ""; const pureWord = getPureWord(q.correctAnswer);
+                    const pureWord = getPureWord(q.correctAnswer);
+                    let tempTypedIndex = 0;
+                    let reconstructedAnswer = "";
                     for(let j=0; j<pureWord.length; j++) {
                         let c = pureWord[j];
                         if (/[^a-zA-Z]/.test(c)) { reconstructedAnswer += c; }
@@ -556,21 +573,36 @@
                             while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++;
                             const wordLen = end - start + 1;
                             if (wordLen <= 2 || j === start || j === end) { reconstructedAnswer += c; }
-                            else { reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : ""; tempTypedIndex++; }
+                            else {
+                                reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "";
+                                tempTypedIndex++;
+                            }
                         }
                     }
                     isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); 
-                } else { isCorr = (uAns === q.correctAnswer); }
+                } else { 
+                    isCorr = (uAns === q.correctAnswer); 
+                }
+                
                 if (isCorr) correctCount++;
+                
                 submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
-                detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;"><h4 style="margin-bottom: 8px;">${i+1}. ${q.qType === 'listen' ? '🎧 純聽力題' : q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p></div>`;
+                
+                detailDiv.innerHTML += `
+                    <div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px;">${i+1}. ${q.qType === 'listen' ? '🎧 純聽力題' : q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4>
+                        <p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p>
+                    </div>`;
             });
             
             if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！獲得 🥇 榮譽金牌', 'success'); } else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); }
             
-            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; showView('resultView'); 
+            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; 
+            showView('resultView'); 
+            
             document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%';
             drawChart(correctCount, totalQuestions - correctCount);
+            
             if (currentUser !== '訪客') { apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); }
         }
 
@@ -631,7 +663,7 @@
         }
 
         function addCustomVocab() {
-            if (currentUser === '訪客') return Swal.fire('限制', '登入後才能加入自訂單字', 'info');
+            if (currentUser === '訪客') return Swal.fire('限制', '登入後才能建立自訂單字喔！', 'info');
             Swal.fire({ title: '✍️ 加入自訂單字', html: '<input id="swal-word" class="swal2-input" placeholder="英文單字">' + '<input id="swal-meaning" class="swal2-input" placeholder="中文意思 (選填)">', focusConfirm: false, showCancelButton: true, confirmButtonText: '加入我的不熟單字', preConfirm: () => { const w = document.getElementById('swal-word').value.trim(); if (!w) Swal.showValidationMessage('單字不能為空！'); return { word: w, meaning: document.getElementById('swal-meaning').value.trim() }; } }).then((result) => { if (result.isConfirmed) { const { word, meaning } = result.value; apiCall('toggleFavorite', { username: currentUser, word: word, meaning: meaning, isAdding: true }).then(() => { userFavoriteWords.add(word); Swal.fire('已加入', '', 'success'); }); } });
         }
 
@@ -689,14 +721,11 @@
                 spinner.style.display = 'none';
                 if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>📌 意思：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🌱 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 例句：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:#94a3b8; margin-top:5px;">⚡ 快取秒讀</div>' : ''}`; content.style.display = 'block'; } 
                 else { content.innerHTML = `<span style="color:red;">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; }
-            }).catch(e => {
-                spinner.style.display = 'none';
-                content.innerHTML = `<span style="color:red;">連線失敗，請重試</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; 
             });
         }
 
         // ==========================================
-        // 🤖 AI 作文與家教 (加入前端連線失敗防護)
+        // 🤖 AI 作文與家教 (拔除範文版)
         // ==========================================
         function gradeAiEssay() {
             const text = document.getElementById('essayInput').value.trim();
@@ -726,17 +755,16 @@
                     document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis;
                     document.getElementById('resEssaySuggestions').textContent = res.data.suggestions;
                     document.getElementById('resEssayKey').innerHTML = res.data.keyImprovements.replace(/\n/g, '<br>');
-                    document.getElementById('resEssayRevised').innerHTML = res.data.revisedEssay.replace(/\n/g, '<br>');
                     
                     document.getElementById('essayResult').style.display = 'block';
                     updateNavbarBadges(); 
                 } else {
-                    Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度未扣除）', 'error');
+                    Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error');
                 }
             }).catch(e => {
                 btn.disabled = false;
                 document.getElementById('essayLoading').style.display = 'none';
-                Swal.fire('連線逾時', 'AI 思考時間較長或網路不穩，您的額度沒有被扣除，請再試一次！', 'error');
+                Swal.fire('網路錯誤', '無法連線到伺服器', 'error');
             });
         }
 
@@ -759,10 +787,6 @@
                 } else {
                     Swal.fire('呼叫老師失敗', res.message, 'error');
                 }
-            }).catch(e => {
-                btn.disabled = false;
-                document.getElementById('tutorLoading').style.display = 'none';
-                Swal.fire('連線逾時', 'AI 思考時間較長或網路不穩，您的額度沒有被扣除，請再試一次！', 'error');
             });
         }
 
