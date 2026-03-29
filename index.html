@@ -49,6 +49,12 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 120px; }
 
+        /* 🎯 全新智慧拆字填空 UI */
+        .spell-input-wrapper { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin: 20px 0; gap: 5px;}
+        .spell-char { font-size: 1.8em; font-weight: 800; color: var(--primary-color); margin: 0 2px;}
+        .spell-input { border: none !important; border-bottom: 3px solid var(--primary-hover) !important; background: transparent !important; color: var(--danger-color) !important; font-size: 1.8em !important; font-weight: 800 !important; text-align: center !important; outline: none !important; padding: 0 !important; margin: 0 4px !important; font-family: monospace !important; border-radius: 0 !important;}
+        .spell-input:focus { border-bottom-color: var(--secondary-color) !important; }
+
         .btn { padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active:not(:disabled) { transform: scale(0.98); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -68,7 +74,6 @@
         .speak-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.3em; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: flex; justify-content: center; align-items: center; z-index: 10;}
         .speak-btn:hover { transform: scale(1.1); color: var(--primary-color); }
         .audio-only-btn { font-size: 3em; cursor: pointer; display: inline-block; padding: 20px; background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; transition: 0.2s; }
-        
         .option-btn { display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: 0.2s; line-height: 1.4; }
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
 
@@ -108,7 +113,6 @@
         .az-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
         .az-btn.disabled { opacity: 0.3; cursor: not-allowed; background: #f1f5f9; border-color: #e2e8f0; color: #94a3b8;}
 
-        /* AI 區塊 */
         .ai-result-box { background: #f8fafc; border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 25px; margin-top: 20px; text-align: left; display: none;}
         .ai-title { color: var(--primary-color); font-weight: 800; font-size: 1.3em; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
         .ai-field { margin-bottom: 15px; }
@@ -222,6 +226,7 @@
             </div>
             
             <div class="question-card">
+                <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
             </div>
             
@@ -456,7 +461,6 @@
                 } else {
                     // 如果是英文，判斷它在哪個單字區塊裡
                     let isEdge = false;
-                    // 尋找當前英文字母區塊的頭尾
                     let start = i, end = i;
                     while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--;
                     while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++;
@@ -512,6 +516,8 @@
             const speakBtn = document.getElementById('qSpeakBtn');
             
             optContainer.style.display = 'none'; spellArea.style.display = 'none'; meaningDisplay.style.display = 'block'; 
+            
+            // 🔇 測驗中的一般題目絕對不顯示發音按鈕！
             speakBtn.style.display = 'none'; 
 
             if (q.qType === 'listen') { 
@@ -524,13 +530,17 @@
                 meaningDisplay.textContent = q.questionText; // 卡片內只有乾淨中文
                 spellArea.style.display = 'flex'; 
                 
+                // 初始化拆字引擎
                 initSpellTemplate(q.correctWord);
                 typingInput.value = userAnswers[q.id] || ''; // 恢復作答紀錄
                 updateSpellVisual();
                 
                 setTimeout(() => typingInput.focus(), 100); 
                 typingInput.onkeydown = function(e) { 
-                    if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } 
+                    if (e.key === 'Enter') { 
+                        e.preventDefault(); 
+                        handleNextQuestion(); 
+                    } 
                 }; 
             } 
             else { 
@@ -570,7 +580,6 @@
                 if (q.qType === 'spell') { 
                     const correctLettersOnly = getPureWord(q.correctAnswer).replace(/[^a-zA-Z]/g, '').toLowerCase();
                     const typedLettersOnly = uAns.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                    // 因為 UI 已經印出了頭尾跟短字，使用者輸入的只有「缺少的字母」，所以核對邏輯要變：
                     // 只要把使用者輸入的字串依序填入模板，看看出來的結果是不是對的
                     let tempTypedIndex = 0;
                     let reconstructedAnswer = "";
