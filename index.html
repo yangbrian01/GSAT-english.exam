@@ -49,7 +49,19 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 120px; }
         
-        .typing-input { font-size: 1.5em !important; text-align: center; padding: 20px !important; letter-spacing: 2px; color: var(--primary-color); font-weight: 700;}
+        /* 🎯 全新拼寫題填空樣式 */
+        .typing-input { 
+            font-size: 1.8em !important; 
+            text-align: center; 
+            padding: 15px !important; 
+            letter-spacing: 6px; 
+            color: var(--primary-color); 
+            font-weight: 800;
+            border: 2px dashed var(--primary-hover) !important;
+            background-color: #f5f3ff !important;
+            text-transform: lowercase;
+        }
+        .typing-input::placeholder { color: #94a3b8; font-weight: 600; letter-spacing: 6px;}
 
         .btn { padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active:not(:disabled) { transform: scale(0.98); }
@@ -215,15 +227,19 @@
                 <div id="quizInstruction" style="font-weight: 700; color: var(--primary-color);"></div>
                 <div style="font-weight: 600; color: var(--text-muted);"><span id="currentQNum"></span> / <span id="totalQNum"></span></div>
             </div>
+            
             <div class="question-card">
                 <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
-                <div id="hintDisplay" style="display:none; font-size: 0.65em; letter-spacing: 6px; margin-top: 15px; color: var(--text-muted); font-weight: 600;"></div>
             </div>
-            <div id="optionsContainer"></div>
-            <div id="typingContainer" style="display:none;"><input type="text" id="typingInput" class="typing-input" placeholder="請拼出完整英文... (按 Enter 跳題)" autocomplete="off"></div>
             
-            <div class="flex-row" style="margin-top: 30px;">
+            <div id="optionsContainer"></div>
+            
+            <div id="typingContainer" style="display:none;">
+                <input type="text" id="typingInput" class="typing-input" autocomplete="off">
+            </div>
+            
+            <div class="flex-row" style="margin-top: 30px;" id="navButtonsArea">
                 <button id="prevButton" class="btn btn-secondary" style="flex: 1;" onclick="changeQuestion(-1)" disabled>上一題</button>
                 <button id="nextButton" class="btn btn-primary" style="flex: 1;" onclick="handleNextQuestion()">下一題</button>
             </div>
@@ -301,40 +317,22 @@
 
         <div id="profileView" class="view-section view-container">
             <h2>👤 個人檔案與設定</h2>
-            
             <div class="profile-card" style="text-align: center;">
                 <div class="avatar-preview" id="profileAvatarPreview">👤</div>
                 <h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800; font-size: 1.8em; margin-bottom: 5px;"></h3>
                 <div id="profileBadgesDisplay" style="margin-bottom: 15px;"></div>
-                
-                <div class="input-group" style="text-align: left;">
-                    <label>更換大頭貼照</label>
-                    <input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: white;" onchange="handleAvatarFile(event)">
-                    <p class="input-desc">支援 JPG/PNG 圖片上傳，將自動壓縮。</p>
-                </div>
+                <div class="input-group" style="text-align: left;"><label>更換大頭貼照</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: white;" onchange="handleAvatarFile(event)"><p class="input-desc">支援 JPG/PNG 圖片上傳，將自動壓縮。</p></div>
             </div>
-
             <div class="profile-card">
                 <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">帳號安全</h3>
                 <div class="input-group"><label>修改使用者名稱</label><input type="text" id="profNewUsername" placeholder="輸入新的名稱 (留空則不修改)"></div>
                 <div class="input-group"><label>修改密碼</label><input type="password" id="profNewPassword" placeholder="輸入新密碼 (留空則不修改)"></div>
                 <button class="btn btn-secondary" onclick="handleCredentialUpdate()">儲存帳號設定</button>
             </div>
-
             <div class="profile-card">
                 <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">🧠 AI 服務配額與金鑰</h3>
-                
-                <div id="quotaInfoBox">
-                    <div class="quota-box"><span>🤖 解題家教</span><strong id="qTutor">今日已用: 0 / 2 次</strong></div>
-                    <div class="quota-box"><span>✍️ 作文批改</span><strong id="qEssay">今日已用: 0 / 1 篇</strong></div>
-                    <p class="input-desc" style="color: #d97706; margin-bottom: 15px;">※ 系統配額為全免費提供，每日重置。字典查詢不扣配額。</p>
-                </div>
-
-                <div class="input-group" style="margin-top: 20px;">
-                    <label style="color: var(--primary-color);">綁定專屬 Gemini API Key 解鎖無限額度</label>
-                    <p class="input-desc">什麼是 API Key？它就像是你專屬的 AI 通行證。只要前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--primary-color); text-decoration:underline;">Google AI Studio</a> 免費申請一串金鑰並填入下方，你就能無限次數使用家教與改作文功能！</p>
-                    <input type="text" id="profApiKey" placeholder="輸入你的 API Key (以 AIza 開頭...)">
-                </div>
+                <div id="quotaInfoBox"><div class="quota-box"><span>🤖 解題家教</span><strong id="qTutor">今日已用: 0 / 2 次</strong></div><div class="quota-box"><span>✍️ 作文批改</span><strong id="qEssay">今日已用: 0 / 1 篇</strong></div><p class="input-desc" style="color: #d97706; margin-bottom: 15px;">※ 系統配額為全免費提供，每日重置。字典查詢不扣配額。</p></div>
+                <div class="input-group" style="margin-top: 20px;"><label style="color: var(--primary-color);">綁定專屬 Gemini API Key 解鎖無限額度</label><p class="input-desc">前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--primary-color); text-decoration:underline;">Google AI Studio</a> 申請金鑰，你就能無限次數使用！</p><input type="text" id="profApiKey" placeholder="輸入你的 API Key (以 AIza 開頭...)"></div>
                 <button class="btn btn-outline" onclick="handleApiKeyUpdate()">綁定 API Key</button>
             </div>
         </div>
@@ -392,7 +390,122 @@
         }
 
         // ==========================================
-        // 📖 單字書 A-Z 與 AI 快取邏輯
+        // 測驗系統邏輯
+        // ==========================================
+        function startGame(isReview = false) {
+            isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value;
+            if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } 
+            else { const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: currentUser==='訪客'?null:sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); }
+        }
+
+        function processQuizData(res) {
+            Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; }
+            quizData = res.questions; totalQuestions = res.totalQuestions;
+            if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; document.getElementById('typingInput').value = ''; showView('quizView'); renderQuestion(0); }
+        }
+
+        function maskWord(word) { 
+            let parts = word.split(' '); 
+            return parts.map(p => { 
+                if (p.includes('.') || p.includes('/') || p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; 
+                if (p.length <= 2) return p; 
+                return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1]; 
+            }).join('  '); 
+        }
+
+        function renderQuestion(index) {
+            clearTimeout(autoAdvanceTimer); currentQuestionIndex = index; const q = quizData[index];
+            document.getElementById('currentQNum').textContent = index + 1; document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction;
+            
+            const meaningDisplay = document.getElementById('meaningDisplay'); 
+            const optContainer = document.getElementById('optionsContainer'); 
+            const typeContainer = document.getElementById('typingContainer'); 
+            const typeInput = document.getElementById('typingInput'); 
+            const prevButton = document.getElementById('prevButton'); 
+            const nextButton = document.getElementById('nextButton');
+            const speakBtn = document.getElementById('qSpeakBtn');
+            const navButtonsArea = document.getElementById('navButtonsArea');
+            
+            optContainer.style.display = 'none'; 
+            typeContainer.style.display = 'none'; 
+            meaningDisplay.style.display = 'block'; 
+            speakBtn.style.display = 'none';
+            navButtonsArea.style.display = 'flex'; // 導覽按鈕永遠顯示
+
+            if (q.qType === 'listen') { 
+                // 🎧 純聽力：隱藏文字，只顯示耳機
+                meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>'; 
+                setTimeout(() => playCurrentWordAudio(), 400); 
+                optContainer.style.display = 'block'; 
+                renderOptionsUI(q, optContainer); 
+            } 
+            else if (q.qType === 'spell') { 
+                // ✍️ 拼寫：顯示中文，下方輸入框顯示提示作為 placeholder
+                meaningDisplay.textContent = q.questionText; 
+                
+                typeContainer.style.display = 'block'; 
+                typeInput.value = userAnswers[q.id] || ''; 
+                // 🎯 把遮罩字串放在 placeholder 裡！
+                typeInput.placeholder = maskWord(getPureWord(q.correctWord));
+                
+                setTimeout(() => typeInput.focus(), 100); 
+                typeInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } }; 
+            } 
+            else { 
+                // 📚 一般選擇題：嚴格關閉發音
+                meaningDisplay.textContent = q.questionText; 
+                optContainer.style.display = 'block'; 
+                renderOptionsUI(q, optContainer); 
+            }
+            updateNavButtons();
+        }
+
+        function renderOptionsUI(q, container) { container.innerHTML = ''; q.options.forEach(word => { const btn = document.createElement('button'); btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`; btn.textContent = word; btn.onclick = () => { userAnswers[q.id] = word; Array.from(container.children).forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); clearTimeout(autoAdvanceTimer); autoAdvanceTimer = setTimeout(() => { handleNextQuestion(); }, 400); }; container.appendChild(btn); }); }
+        
+        function handleNextQuestion() { 
+            clearTimeout(autoAdvanceTimer); 
+            const q = quizData[currentQuestionIndex]; 
+            if (q.qType === 'spell') { const inputVal = document.getElementById('typingInput').value.trim(); userAnswers[q.id] = inputVal; } 
+            if (currentQuestionIndex < quizData.length - 1) { changeQuestion(1); } else { submitQuiz(); } 
+        }
+        
+        function changeQuestion(delta) { 
+            const q = quizData[currentQuestionIndex]; 
+            if (q.qType === 'spell') { userAnswers[q.id] = document.getElementById('typingInput').value.trim(); } 
+            const newIdx = currentQuestionIndex + delta; 
+            if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); 
+        }
+        
+        function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
+        
+        function submitQuiz() { const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k] !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
+
+        function processSubmit() {
+            let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
+            quizData.forEach((q, i) => {
+                const uAns = userAnswers[q.id] || ''; let isCorr = false;
+                if (q.qType === 'spell') { isCorr = (uAns.toLowerCase() === getPureWord(q.correctAnswer).toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); }
+                if (isCorr) correctCount++;
+                
+                submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
+                
+                detailDiv.innerHTML += `
+                    <div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px;">${i+1}. ${q.qType === 'listen' ? '🎧 純聽力題' : q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4>
+                        <p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p>
+                    </div>`;
+            });
+            
+            if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！獲得 🥇 榮譽金牌', 'success'); } else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); }
+            
+            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; showView('resultView'); drawChart(correctCount, totalQuestions - correctCount);
+            if (currentUser !== '訪客') { apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); }
+        }
+
+        function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
+
+        // ==========================================
+        // 單字書與收藏
         // ==========================================
         let currentVocabList = []; let currentLetterList = []; let currentVocabCardIndex = 0; let currentLevel = 0;
 
@@ -422,13 +535,13 @@
         function showLetterCards(letter) { currentLetterList = currentVocabList.filter(w => w.firstLetter === letter); currentVocabCardIndex = 0; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').style.display = 'inline-block'; renderSingleVocabCard(); }
 
         function loadVocabFavorites() {
-            if (currentUser === '訪客') return Swal.fire('訪客限制', '登入後才能建立專屬的不熟單字本喔！', 'info');
+            if (currentUser === '訪客') return Swal.fire('訪客限制', '登入後才能使用', 'info');
             currentLevel = 0; document.getElementById('vocabHomeGrid').style.display = 'none'; document.getElementById('vocabLoading').style.display = 'block';
             apiCall('getFavorites', { username: currentUser }).then(res => {
                 document.getElementById('vocabLoading').style.display = 'none';
                 if (res.success) {
                     userFavoriteWords.clear(); res.words.forEach(w => userFavoriteWords.add(w.word));
-                    if (res.words.length === 0) { Swal.fire('空空如也', '目前還沒有收藏任何不熟單字喔！', 'info'); backToVocabHome(); } 
+                    if (res.words.length === 0) { Swal.fire('空空如也', '無收藏單字', 'info'); backToVocabHome(); } 
                     else { currentLetterList = res.words; currentVocabCardIndex = 0; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').style.display = 'inline-block'; document.getElementById('vbBackToAzBtn').textContent = '返回單字書首頁'; renderSingleVocabCard(); }
                 }
             });
@@ -446,7 +559,7 @@
         }
 
         function addCustomVocab() {
-            if (currentUser === '訪客') return Swal.fire('限制', '登入後才能建立自訂單字喔！', 'info');
+            if (currentUser === '訪客') return Swal.fire('限制', '登入後才能加入自訂單字', 'info');
             Swal.fire({ title: '✍️ 加入自訂單字', html: '<input id="swal-word" class="swal2-input" placeholder="英文單字">' + '<input id="swal-meaning" class="swal2-input" placeholder="中文意思 (選填)">', focusConfirm: false, showCancelButton: true, confirmButtonText: '加入我的不熟單字', preConfirm: () => { const w = document.getElementById('swal-word').value.trim(); if (!w) Swal.showValidationMessage('單字不能為空！'); return { word: w, meaning: document.getElementById('swal-meaning').value.trim() }; } }).then((result) => { if (result.isConfirmed) { const { word, meaning } = result.value; apiCall('toggleFavorite', { username: currentUser, word: word, meaning: meaning, isAdding: true }).then(() => { userFavoriteWords.add(word); Swal.fire('已加入', '', 'success'); }); } });
         }
 
@@ -484,13 +597,10 @@
             cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40 && currentVocabCardIndex < currentLetterList.length - 1) document.getElementById('vbNext').click(); if (touchEndX > touchStartX + 40 && currentVocabCardIndex > 0) document.getElementById('vbPrev').click(); }, {passive: true});
         }
 
-        function changeVocabCard(delta) {
-            const newIdx = currentVocabCardIndex + delta;
-            if (newIdx >= 0 && newIdx < currentLetterList.length) { currentVocabCardIndex = newIdx; const wrapper = document.getElementById('vbSlideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleVocabCard(); }
-        }
+        function changeVocabCard(delta) { const newIdx = currentVocabCardIndex + delta; if (newIdx >= 0 && newIdx < currentLetterList.length) { currentVocabCardIndex = newIdx; const wrapper = document.getElementById('vbSlideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleVocabCard(); } }
 
         function toggleFavOnCard(word, meaning) {
-            if (currentUser === '訪客') return Swal.fire('訪客限制', '登入後才能使用', 'info');
+            if (currentUser === '訪客') return;
             const btn = document.getElementById('cardFavBtn'); const isFav = userFavoriteWords.has(word);
             if (isFav) { userFavoriteWords.delete(word); btn.textContent = '🤍'; btn.style.color = '#cbd5e1'; } else { userFavoriteWords.add(word); btn.textContent = '❤️'; btn.style.color = '#ef4444'; }
             apiCall('toggleFavorite', { username: currentUser, word: word, meaning: meaning, isAdding: !isFav });
@@ -549,124 +659,34 @@
         }
 
         // ==========================================
-        // 測驗系統邏輯 (還原上下一題按鈕)
+        // SRS 記憶閃卡
         // ==========================================
-        function startGame(isReview = false) {
-            isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value;
-            if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } 
-            else { const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: currentUser==='訪客'?null:sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); }
-        }
-
-        function processQuizData(res) {
-            Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; }
-            quizData = res.questions; totalQuestions = res.totalQuestions;
-            if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; document.getElementById('typingInput').value = ''; showView('quizView'); renderQuestion(0); }
-        }
-
-        function maskWord(word) { let parts = word.split(' '); return parts.map(p => { if (p.includes('.') || p.includes('/') || p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; if (p.length <= 2) return p; return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1]; }).join('  '); }
-
-        function renderQuestion(index) {
-            clearTimeout(autoAdvanceTimer); currentQuestionIndex = index; const q = quizData[index];
-            document.getElementById('currentQNum').textContent = index + 1; document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction;
-            
-            const meaningDisplay = document.getElementById('meaningDisplay'); const hintDiv = document.getElementById('hintDisplay'); const optContainer = document.getElementById('optionsContainer'); const typeContainer = document.getElementById('typingContainer'); const typeInput = document.getElementById('typingInput'); const prevButton = document.getElementById('prevButton'); const nextButton = document.getElementById('nextButton');
-            const speakBtn = document.getElementById('qSpeakBtn');
-            
-            hintDiv.style.display = 'none'; optContainer.style.display = 'none'; typeContainer.style.display = 'none'; meaningDisplay.style.display = 'block'; prevButton.style.display = 'block'; nextButton.style.display = 'block'; speakBtn.style.display = 'none';
-
-            if (q.qType === 'listen') { 
-                // 🎧 純聽力：隱藏文字，只顯示耳機
-                meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>'; 
-                setTimeout(() => playCurrentWordAudio(), 400); 
-                optContainer.style.display = 'block'; 
-                renderOptionsUI(q, optContainer); 
-            } 
-            else if (q.qType === 'spell') { 
-                // ✍️ 拼寫：顯示中文與提示
-                meaningDisplay.textContent = q.questionText; 
-                hintDiv.style.display = 'block'; 
-                hintDiv.textContent = maskWord(getPureWord(q.correctWord)); 
-                typeContainer.style.display = 'block'; 
-                typeInput.value = userAnswers[q.id] || ''; 
-                setTimeout(() => typeInput.focus(), 100); 
-                typeInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } }; 
-            } 
-            else { 
-                // 📚 選擇題
-                meaningDisplay.textContent = q.questionText; 
-                if (q.qType === 'en2ch') speakBtn.style.display = 'flex';
-                optContainer.style.display = 'block'; 
-                renderOptionsUI(q, optContainer); 
-            }
-            updateNavButtons();
-        }
-
-        function renderOptionsUI(q, container) { container.innerHTML = ''; q.options.forEach(word => { const btn = document.createElement('button'); btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`; btn.textContent = word; btn.onclick = () => { userAnswers[q.id] = word; Array.from(container.children).forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); clearTimeout(autoAdvanceTimer); autoAdvanceTimer = setTimeout(() => { handleNextQuestion(); }, 400); }; container.appendChild(btn); }); }
-        
-        function handleNextQuestion() { 
-            clearTimeout(autoAdvanceTimer); 
-            const q = quizData[currentQuestionIndex]; 
-            if (q.qType === 'spell') { const inputVal = document.getElementById('typingInput').value.trim(); userAnswers[q.id] = inputVal; } 
-            if (currentQuestionIndex < quizData.length - 1) { changeQuestion(1); } else { submitQuiz(); } 
-        }
-        
-        function changeQuestion(delta) { 
-            const q = quizData[currentQuestionIndex]; 
-            if (q.qType === 'spell') { userAnswers[q.id] = document.getElementById('typingInput').value.trim(); } 
-            const newIdx = currentQuestionIndex + delta; 
-            if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); 
-        }
-        
-        function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
-        
-        function submitQuiz() { const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k] !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
-
-        function processSubmit() {
-            let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
-            quizData.forEach((q, i) => {
-                const uAns = userAnswers[q.id] || ''; let isCorr = false;
-                if (q.qType === 'spell') { isCorr = (uAns.toLowerCase() === getPureWord(q.correctAnswer).toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); }
-                if (isCorr) correctCount++;
-                submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
-                detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;"><h4 style="margin-bottom: 8px;">${i+1}. ${q.qType === 'listen' ? '🎧 純聽力題' : q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p></div>`;
-            });
-            if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') Swal.fire('太神啦！', '滿分通關！獲得 🥇 榮譽金牌', 'success'); else if (isReviewQuizMode && correctCount > 0) Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success');
-            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; showView('resultView'); drawChart(correctCount, totalQuestions - correctCount);
-            if (currentUser !== '訪客') apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode });
-        }
-
-        function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
-
-        // --- SRS 記憶閃卡 ---
         let reviewCardsData = []; let currentFlashcardIndex = 0;
         function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; renderSingleFlashcard(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } }); }
-        function renderSingleFlashcard() { if (reviewCardsData.length === 0) return; const q = reviewCardsData[currentFlashcardIndex]; const area = document.getElementById('singleFlashcardArea'); document.getElementById('fcCounter').textContent = `${currentFlashcardIndex + 1} / ${reviewCardsData.length}`; document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0; document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1; const hasChinese = /[\u4E00-\u9FFF]/.test(q.question); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; 
-        const cleanWord = getPureWord(enWord);
-        const safeEnWord = cleanWord.replace(/'/g, "\\'"); 
-        area.innerHTML = `<div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};"><div class="flashcard-inner"><div class="flashcard-front"><div class="fc-word" style="font-size: 1.8em;">${chWord}</div><div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div><div class="fc-hint">點擊卡片翻面看英文</div></div><div class="flashcard-back"><button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><div class="fc-word">${cleanWord}</div>${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}</div></div></div>`; const cardElement = document.getElementById('fcContainer'); cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40) { if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); } if (touchEndX > touchStartX + 40) { if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); } }, {passive: true}); }
+        function renderSingleFlashcard() { if (reviewCardsData.length === 0) return; const q = reviewCardsData[currentFlashcardIndex]; const area = document.getElementById('singleFlashcardArea'); document.getElementById('fcCounter').textContent = `${currentFlashcardIndex + 1} / ${reviewCardsData.length}`; document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0; document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1; const hasChinese = /[\u4E00-\u9FFF]/.test(q.question); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; const cleanWord = getPureWord(enWord); const safeEnWord = cleanWord.replace(/'/g, "\\'"); area.innerHTML = `<div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};"><div class="flashcard-inner"><div class="flashcard-front"><div class="fc-word" style="font-size: 1.8em;">${chWord}</div><div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div><div class="fc-hint">點擊卡片翻面看英文</div></div><div class="flashcard-back"><button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><div class="fc-word">${cleanWord}</div>${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}</div></div></div>`; const cardElement = document.getElementById('fcContainer'); cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40) { if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); } if (touchEndX > touchStartX + 40) { if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); } }, {passive: true}); }
         function changeFlashcard(delta) { const newIdx = currentFlashcardIndex + delta; if (newIdx >= 0 && newIdx < reviewCardsData.length) { currentFlashcardIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
 
         // ==========================================
-        // 個人資料更新與排行榜
+        // 個人資料與其他基礎邏輯
         // ==========================================
+        function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
+        function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');}else Swal.fire('失敗',res.message,'error');}); }
+        function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
+
         function updateNavbarBadges() { apiCall('getProfileData', { username: currentUser }).then(res => { if(res.success) { const st = document.getElementById('navStreak'); const dSt = document.getElementById('dashStreak'); if (res.streak > 0) { st.style.display = 'inline-block'; st.textContent = `🔥 ${res.streak}`; dSt.style.display = 'inline-block'; dSt.textContent = `🔥 連勝 ${res.streak} 天`; } const md = document.getElementById('navMedal'); const dMd = document.getElementById('dashMedal'); if(res.hasGoldMedal) { md.style.display = 'inline-block'; dMd.style.display = 'inline-block'; } } }); }
         function showProfileView() { document.getElementById('profileUsernameDisplay').textContent = currentUser; apiCall('getProfileData', { username: currentUser }).then(res => { if (res.success) { const av = res.avatar || '👤'; const avDiv = document.getElementById('profileAvatarPreview'); if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; } else { avDiv.innerHTML = av; } let badgesHtml = ''; if (res.hasGoldMedal) badgesHtml += '<span title="滿分金牌" style="font-size:1.5em; margin-right:10px;">🥇</span> '; if (res.streak > 0) badgesHtml += `<span class="badge" style="font-size:1em;">🔥 連勝 ${res.streak} 天</span>`; document.getElementById('profileBadgesDisplay').innerHTML = badgesHtml; if (res.hasApiKey) { document.getElementById('quotaInfoBox').innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${res.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${res.essayUsed} / 1 篇`; } } }); }
-        function handleAvatarUpdate() { const newAvatar = document.getElementById('newAvatarInput').value.trim(); if(!newAvatar) return Swal.fire('請輸入資料', '', 'info'); showLoading('更新中...'); apiCall('updateAvatarBase64', { username: currentUser, base64Img: newAvatar }).then(res => { Swal.fire(res.success?'成功':'失敗', res.message, res.success?'success':'error'); if (res.success) showProfileView(); document.getElementById('newAvatarInput').value = ''; }); }
         
         function handleAvatarFile(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
+            const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
             reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
+                const img = new Image(); img.onload = function() {
                     const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
                     const MAX_SIZE = 150; let width = img.width; let height = img.height;
                     if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
                     canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
                     const base64Data = canvas.toDataURL('image/jpeg', 0.8);
                     document.getElementById('profileAvatarPreview').innerHTML = `<img src="${base64Data}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`;
-                    showLoading('上傳中...');
-                    apiCall('updateAvatarBase64', { username: currentUser, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) Swal.fire('成功', '大頭貼已更新', 'success'); else Swal.fire('失敗', r.message, 'error'); });
+                    showLoading('上傳中...'); apiCall('updateAvatarBase64', { username: currentUser, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) Swal.fire('成功', '大頭貼已更新', 'success'); else Swal.fire('失敗', r.message, 'error'); });
                 }; img.src = e.target.result;
             }; reader.readAsDataURL(file);
         }
@@ -674,8 +694,7 @@
         function handleCredentialUpdate() {
             const newU = document.getElementById('profNewUsername').value.trim(); const newP = document.getElementById('profNewPassword').value;
             if (!newU && !newP) return; if (newU && newU.length < 3) return Swal.fire('錯誤', '新帳號至少3碼', 'warning'); if (newP && newP.length < 4) return Swal.fire('錯誤', '新密碼至少4碼', 'warning');
-            showLoading('更新中...');
-            apiCall('updateUserCredentials', { username: currentUser, newUsername: newU, newPassword: newP }).then(res => { if(res.success) { Swal.fire('成功', '帳號資料已更新', 'success'); currentUser = res.newUsername; localStorage.setItem('user', currentUser); document.getElementById('profNewUsername').value = ''; document.getElementById('profNewPassword').value = ''; showProfileView(); } else Swal.fire('失敗', res.message, 'error'); });
+            showLoading('更新中...'); apiCall('updateUserCredentials', { username: currentUser, newUsername: newU, newPassword: newP }).then(res => { if(res.success) { Swal.fire('成功', '帳號資料已更新', 'success'); currentUser = res.newUsername; localStorage.setItem('user', currentUser); document.getElementById('profNewUsername').value = ''; document.getElementById('profNewPassword').value = ''; showProfileView(); } else Swal.fire('失敗', res.message, 'error'); });
         }
 
         function handleApiKeyUpdate() {
