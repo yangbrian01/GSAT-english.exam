@@ -277,7 +277,6 @@
 
         <div id="aiTutorView" class="view-section view-container">
             <h2>🤖 隨身解題家教</h2>
-            <p class="subtitle">遇到不懂的文法或題目？貼上來，AI 老師幫你解惑！</p>
             <div class="input-group"><label>題目或段落內容</label><textarea id="tutorContextInput" placeholder="例如: Having finished his homework..."></textarea></div>
             <div class="input-group"><label>你想問什麼？</label><input type="text" id="tutorDoubtInput" placeholder="例如: 為什麼是用 Having finished？"></div>
             <button id="btnAskTutor" class="btn btn-primary" onclick="askAiTutor()">🙋‍♂️ 舉手發問</button>
@@ -312,7 +311,12 @@
         let isReviewQuizMode = false; let autoAdvanceTimer = null; 
         let userFavoriteWords = new Set();
 
-        function getPureWord(rawWord) { if (!rawWord) return ''; return rawWord.replace(/\s+[a-zA-Z]+\..*$/i, '').trim(); }
+        // 🎯 終極淨化器：把字典的 n. v. adj. phr. 徹底清光
+        function getPureWord(rawWord) { 
+            if (!rawWord) return ''; 
+            return rawWord.toString().replace(/(?:\s+)?(?:adj|adv|n|v|prep|conj|pron|phr|vi|vt)\..*$/i, '').trim(); 
+        }
+        
         function speakWord(text) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.speak(u); }
         function playCurrentWordAudio() { speakWord(getPureWord(quizData[currentQuestionIndex].correctWord)); }
 
@@ -404,14 +408,18 @@
             document.getElementById('vbCounter').textContent = `${currentVocabCardIndex + 1} / ${currentLetterList.length}`;
             document.getElementById('vbPrev').disabled = currentVocabCardIndex === 0; document.getElementById('vbNext').disabled = currentVocabCardIndex === currentLetterList.length - 1;
 
-            const isFav = userFavoriteWords.has(q.word); const safeEnWord = q.pureWord.replace(/'/g, "\\'");
+            const isFav = userFavoriteWords.has(q.word); 
+            // 🎯 確保卡片上的英文永遠乾淨無瑕
+            const cleanWord = getPureWord(q.word);
+            const safeEnWord = cleanWord.replace(/'/g, "\\'");
+            
             area.innerHTML = `
                 <div class="flashcard-container" id="vbContainer" onclick="this.classList.toggle('flipped')">
                     <div class="flashcard-inner">
                         <div class="flashcard-front">
                             <button class="speak-btn" style="position:absolute; top:15px; right:15px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button>
                             <button style="position:absolute; top:15px; left:15px; background:none; border:none; font-size:1.8em; cursor:pointer; color:${isFav?'#ef4444':'#cbd5e1'};" onclick="event.stopPropagation(); toggleFavOnCard('${q.word}', '${q.meaning}')" id="cardFavBtn">${isFav?'❤️':'🤍'}</button>
-                            <div class="fc-word">${q.word}</div>
+                            <div class="fc-word">${cleanWord}</div>
                             <div class="fc-hint">點擊翻面</div>
                         </div>
                         <div class="flashcard-back" style="overflow-y: auto;">
@@ -448,20 +456,20 @@
             apiCall('aiDictionary', { word: pureWord }).then(res => {
                 spinner.style.display = 'none';
                 if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>📌 意思：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🌱 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 例句：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:#94a3b8; margin-top:5px;">⚡ 快取秒讀</div>' : ''}`; content.style.display = 'block'; } 
-                else { content.innerHTML = `<span style="color:red;">AI 查詢失敗，可能達到連線限制，請稍後再試</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; }
+                else { content.innerHTML = `<span style="color:red;">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; }
             });
         }
 
         // ==========================================
-        // 🤖 AI 作文與家教 (防呆與防連點)
+        // 🤖 AI 作文與家教 (防連點)
         // ==========================================
         function gradeAiEssay() {
             const text = document.getElementById('essayInput').value.trim();
             if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning');
-            const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; // 防連點鎖定
+            const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; 
             document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block';
             apiCall('aiEssayGrading', { essayText: text }).then(res => {
-                btn.disabled = false; // 解除鎖定
+                btn.disabled = false; 
                 document.getElementById('essayLoading').style.display = 'none';
                 if (res.success && res.data) {
                     document.getElementById('resEssayScore').textContent = `${res.data.totalScore} / 20`;
@@ -479,10 +487,10 @@
             const context = document.getElementById('tutorContextInput').value.trim();
             const doubt = document.getElementById('tutorDoubtInput').value.trim();
             if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning');
-            const btn = document.getElementById('btnAskTutor'); btn.disabled = true; // 防連點鎖定
+            const btn = document.getElementById('btnAskTutor'); btn.disabled = true; 
             document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block';
             apiCall('aiTutor', { question: context, doubt: doubt }).then(res => {
-                btn.disabled = false; // 解除鎖定
+                btn.disabled = false; 
                 document.getElementById('tutorLoading').style.display = 'none';
                 if (res.success && res.data) {
                     document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>');
@@ -492,11 +500,12 @@
         }
 
         // ==========================================
-        // 基礎測驗與其他邏輯 (不變)
+        // 基礎測驗與其他邏輯
         // ==========================================
         function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號>3, 密碼>4','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
+        
         function maskWord(word) { let parts = word.split(' '); return parts.map(p => { if (p.includes('.') || p.includes('/') || p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; if (p.length <= 2) return p; return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1]; }).join('  '); }
 
         function startGame(isReview = false) {
@@ -516,11 +525,27 @@
             document.getElementById('currentQNum').textContent = index + 1; document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction;
             
             const meaningDisplay = document.getElementById('meaningDisplay'); const hintDiv = document.getElementById('hintDisplay'); const optContainer = document.getElementById('optionsContainer'); const typeContainer = document.getElementById('typingContainer'); const typeInput = document.getElementById('typingInput'); const manualNextBtn = document.getElementById('manualNextBtn'); const prevButton = document.getElementById('prevButton'); const nextButton = document.getElementById('nextButton');
-            hintDiv.style.display = 'none'; optContainer.style.display = 'none'; typeContainer.style.display = 'none'; meaningDisplay.style.display = 'block'; manualNextBtn.style.display = 'none'; prevButton.style.display = 'block'; nextButton.style.display = 'block';
+            const speakBtn = document.getElementById('qSpeakBtn');
+            
+            hintDiv.style.display = 'none'; optContainer.style.display = 'none'; typeContainer.style.display = 'none'; meaningDisplay.style.display = 'block'; manualNextBtn.style.display = 'none'; prevButton.style.display = 'block'; nextButton.style.display = 'block'; speakBtn.style.display = 'none';
 
-            if (q.qType === 'listen') { meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>'; setTimeout(() => playCurrentWordAudio(), 400); optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); } 
-            else if (q.qType === 'spell') { meaningDisplay.textContent = q.questionText; hintDiv.style.display = 'block'; hintDiv.textContent = maskWord(getPureWord(q.correctWord)); typeContainer.style.display = 'block'; typeInput.value = userAnswers[q.id] || ''; setTimeout(() => typeInput.focus(), 100); typeInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); userAnswers[q.id] = typeInput.value.trim(); handleNextQuestion(); } }; prevButton.style.display = 'none'; nextButton.style.display = 'none'; manualNextBtn.style.display = 'block'; manualNextBtn.textContent = (index === totalQuestions - 1) ? '交卷送出' : '下一題'; } 
-            else { meaningDisplay.textContent = q.questionText; optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); }
+            if (q.qType === 'listen') { 
+                meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>'; setTimeout(() => playCurrentWordAudio(), 400); optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); 
+            } 
+            else if (q.qType === 'spell') { 
+                meaningDisplay.textContent = q.questionText; hintDiv.style.display = 'block'; 
+                // 🎯 魔王模式提示遮罩，保證是純單字
+                hintDiv.textContent = maskWord(getPureWord(q.correctWord)); 
+                typeContainer.style.display = 'block'; typeInput.value = userAnswers[q.id] || ''; setTimeout(() => typeInput.focus(), 100); 
+                typeInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); userAnswers[q.id] = typeInput.value.trim(); handleNextQuestion(); } }; 
+                prevButton.style.display = 'none'; nextButton.style.display = 'none'; manualNextBtn.style.display = 'block'; manualNextBtn.textContent = (index === totalQuestions - 1) ? '交卷送出' : '下一題'; 
+            } 
+            else { 
+                // 🎯 經典選擇題：如果顯示的是英文，加上發音按鈕
+                meaningDisplay.textContent = q.questionText; 
+                if (q.qType === 'en2ch') speakBtn.style.display = 'flex';
+                optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); 
+            }
             updateNavButtons();
         }
 
@@ -532,7 +557,13 @@
 
         function processSubmit() {
             let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
-            quizData.forEach((q, i) => { const uAns = userAnswers[q.id] || ''; let isCorr = false; if (q.qType === 'spell') { isCorr = (uAns.toLowerCase() === getPureWord(q.correctAnswer).toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); } if (isCorr) correctCount++; submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr }); detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;"><h4 style="margin-bottom: 8px;">${i+1}. ${q.qType === 'listen' ? '🎧 純聽力題' : q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p></div>`; });
+            quizData.forEach((q, i) => {
+                const uAns = userAnswers[q.id] || ''; let isCorr = false;
+                if (q.qType === 'spell') { isCorr = (uAns.toLowerCase() === getPureWord(q.correctAnswer).toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); }
+                if (isCorr) correctCount++;
+                submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
+                detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;"><h4 style="margin-bottom: 8px;">${i+1}. ${q.qType === 'listen' ? '🎧 純聽力題' : q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p></div>`;
+            });
             if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') Swal.fire('太神啦！', '滿分通關！獲得 🥇 榮譽金牌', 'success'); else if (isReviewQuizMode && correctCount > 0) Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success');
             document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; showView('resultView'); drawChart(correctCount, totalQuestions - correctCount);
             if (currentUser !== '訪客') apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode });
@@ -540,8 +571,14 @@
 
         function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
 
+        // --- SRS 記憶閃卡 ---
+        let reviewCardsData = []; let currentFlashcardIndex = 0;
         function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; renderSingleFlashcard(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } }); }
-        function renderSingleFlashcard() { if (reviewCardsData.length === 0) return; const q = reviewCardsData[currentFlashcardIndex]; const area = document.getElementById('singleFlashcardArea'); document.getElementById('fcCounter').textContent = `${currentFlashcardIndex + 1} / ${reviewCardsData.length}`; document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0; document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1; const hasChinese = /[\u4E00-\u9FFF]/.test(q.question); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; const safeEnWord = getPureWord(enWord).replace(/'/g, "\\'"); area.innerHTML = `<div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};"><div class="flashcard-inner"><div class="flashcard-front"><div class="fc-word" style="font-size: 1.8em;">${chWord}</div><div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div><div class="fc-hint">點擊卡片翻面看英文</div></div><div class="flashcard-back"><button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><div class="fc-word">${enWord}</div>${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}</div></div></div>`; const cardElement = document.getElementById('fcContainer'); cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40) { if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); } if (touchEndX > touchStartX + 40) { if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); } }, {passive: true}); }
+        function renderSingleFlashcard() { if (reviewCardsData.length === 0) return; const q = reviewCardsData[currentFlashcardIndex]; const area = document.getElementById('singleFlashcardArea'); document.getElementById('fcCounter').textContent = `${currentFlashcardIndex + 1} / ${reviewCardsData.length}`; document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0; document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1; const hasChinese = /[\u4E00-\u9FFF]/.test(q.question); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; 
+        // 🎯 這裡也套用純單字淨化器
+        const cleanWord = getPureWord(enWord);
+        const safeEnWord = cleanWord.replace(/'/g, "\\'"); 
+        area.innerHTML = `<div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};"><div class="flashcard-inner"><div class="flashcard-front"><div class="fc-word" style="font-size: 1.8em;">${chWord}</div><div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div><div class="fc-hint">點擊卡片翻面看英文</div></div><div class="flashcard-back"><button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><div class="fc-word">${cleanWord}</div>${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}</div></div></div>`; const cardElement = document.getElementById('fcContainer'); cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40) { if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); } if (touchEndX > touchStartX + 40) { if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); } }, {passive: true}); }
         function changeFlashcard(delta) { const newIdx = currentFlashcardIndex + delta; if (newIdx >= 0 && newIdx < reviewCardsData.length) { currentFlashcardIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
 
         function updateNavbarBadges() { apiCall('getProfileData', { username: currentUser }).then(res => { if(res.success) { const st = document.getElementById('navStreak'); const dSt = document.getElementById('dashStreak'); if (res.streak > 0) { st.style.display = 'inline-block'; st.textContent = `🔥 ${res.streak}`; dSt.style.display = 'inline-block'; dSt.textContent = `🔥 連勝 ${res.streak} 天`; } const md = document.getElementById('navMedal'); const dMd = document.getElementById('dashMedal'); if(res.hasGoldMedal) { md.style.display = 'inline-block'; dMd.style.display = 'inline-block'; } } }); }
