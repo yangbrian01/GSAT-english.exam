@@ -49,27 +49,6 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 120px; }
 
-        /* 🎯 完美修復：去除紅字與紅底線的填空 UI */
-        .spell-input-wrapper { display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; margin: 30px 0; }
-        .spell-part { display: flex; align-items: baseline; margin: 0 8px; }
-        .spell-char { font-size: 1.8em; font-weight: 800; color: var(--primary-color); }
-        .spell-input { 
-            border: none !important; 
-            border-bottom: 3px solid var(--primary-color) !important; /* 改成實線與藍色 */
-            background: transparent !important; 
-            color: var(--primary-color) !important; /* 不再是紅色 */
-            font-size: 1.8em !important; 
-            font-weight: 800 !important; 
-            text-align: center !important; 
-            outline: none !important; 
-            padding: 0 5px !important; 
-            margin: 0 5px !important; 
-            letter-spacing: 5px !important; 
-            font-family: monospace !important; 
-            text-transform: lowercase !important; 
-            border-radius: 0 !important;
-        }
-
         .btn { padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active:not(:disabled) { transform: scale(0.98); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -89,8 +68,13 @@
         .speak-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.3em; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: flex; justify-content: center; align-items: center; z-index: 10;}
         .speak-btn:hover { transform: scale(1.1); color: var(--primary-color); }
         .audio-only-btn { font-size: 3em; cursor: pointer; display: inline-block; padding: 20px; background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; transition: 0.2s; }
+        
         .option-btn { display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: 0.2s; line-height: 1.4; }
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
+
+        /* 🎯 完美智慧填空 UI (置於卡片外部) */
+        .spell-input-area { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 30px; cursor: text; padding: 20px;}
+        .spell-visual-text { font-family: monospace; font-size: 2.2em; font-weight: 800; color: var(--primary-color); letter-spacing: 0.2em; text-align: center; line-height: 1.5; word-break: break-all;}
 
         /* --- 🃏 閃卡 --- */
         .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none; }
@@ -109,6 +93,11 @@
         @keyframes slideLeftAnim { 0% { transform: translateX(40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
         @keyframes slideRightAnim { 0% { transform: translateX(-40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
 
+        /* --- 📋 列表視圖的完美修復 --- */
+        .review-list-item { background: white; border: 2px solid var(--border-color); padding: 15px; border-radius: var(--radius-md); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 15px;}
+        .list-speak-btn { background: #f1f5f9; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.3em; cursor: pointer; flex-shrink: 0; color: var(--primary-color); transition: 0.2s; display: flex; justify-content: center; align-items: center;}
+        .list-speak-btn:hover { background: #e2e8f0; transform: scale(1.1); }
+
         /* --- 📖 單字書系統 --- */
         .vocab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .vocab-cat-btn { background: white; border: 2px solid var(--border-color); padding: 20px 10px; border-radius: var(--radius-md); text-align: center; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
@@ -119,6 +108,7 @@
         .az-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
         .az-btn.disabled { opacity: 0.3; cursor: not-allowed; background: #f1f5f9; border-color: #e2e8f0; color: #94a3b8;}
 
+        /* AI 區塊 */
         .ai-result-box { background: #f8fafc; border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 25px; margin-top: 20px; text-align: left; display: none;}
         .ai-title { color: var(--primary-color); font-weight: 800; font-size: 1.3em; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
         .ai-field { margin-bottom: 15px; }
@@ -134,8 +124,8 @@
         .flex-row { display: flex; gap: 15px; }
         .view-section { display: none; }
         .view-section.active { display: block; }
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .data-table th, .data-table td { padding: 15px 10px; border-bottom: 1px solid var(--border-color); }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95em;}
+        .data-table th, .data-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: top;}
         .me-row { background-color: #d1fae5 !important; border: 2px solid #10b981 !important; font-weight: bold; box-shadow: inset 0 0 0 1px #10b981;}
 
         @media (max-width: 768px) {
@@ -151,7 +141,7 @@
             .vocab-cat-btn { padding: 15px 5px; font-size: 0.9em; }
             .az-grid { grid-template-columns: repeat(6, 1fr); }
             .fc-word { font-size: 1.8em; }
-            .spell-char, .spell-input { font-size: 1.5em !important; }
+            .spell-visual-text { font-size: 1.6em; }
         }
     </style>
 </head>
@@ -230,13 +220,17 @@
                 <div id="quizInstruction" style="font-weight: 700; color: var(--primary-color);"></div>
                 <div style="font-weight: 600; color: var(--text-muted);"><span id="currentQNum"></span> / <span id="totalQNum"></span></div>
             </div>
+            
             <div class="question-card">
-                <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
             </div>
+            
             <div id="optionsContainer"></div>
             
-            <div id="spellInputContainer" style="display:none;"></div>
+            <div id="spellVisualArea" class="spell-input-area" style="display:none;" onclick="document.getElementById('typingInput').focus()">
+                <div id="spellVisual" class="spell-visual-text"></div>
+                <input type="text" id="typingInput" style="position: absolute; opacity: 0; width: 1px; height: 1px; left: 0; top: 0;" oninput="updateSpellVisual()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            </div>
             
             <div class="flex-row" style="margin-top: 30px;" id="navButtonsArea">
                 <button id="prevButton" class="btn btn-secondary" style="flex: 1;" onclick="changeQuestion(-1)" disabled>上一題</button>
@@ -247,10 +241,12 @@
         <div id="resultView" class="view-section view-container" style="max-width: 800px;">
             <h2>📊 測驗分析報告</h2>
             <p id="summary" style="font-size: 1.2em; font-weight: 800; color: var(--primary-color); margin-bottom: 20px;"></p>
+            
             <div style="position: relative; width: 200px; height: 200px; margin: 0 auto 30px auto;">
                 <canvas id="scoreChart"></canvas>
                 <div id="scorePercentage" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5em; font-weight: 800; color: var(--primary-color);"></div>
             </div>
+            
             <div id="detailResults" style="text-align: left; max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
             <button class="btn btn-primary" onclick="showView('setupView')">返回主頁</button>
         </div>
@@ -312,7 +308,7 @@
 
         <div id="aiEssayView" class="view-section view-container" style="max-width: 800px;">
             <h2>✍️ AI 作文批改</h2>
-            <p class="subtitle">大考中心鐵血模式：極少給滿分，嚴格挑剔。</p>
+            <p class="subtitle">大考中心鐵血模式：依據 115 年標準，提供五大細項給分與示範。</p>
             <div class="input-group">
                 <label>作文題目 / 寫作情境</label>
                 <input type="text" id="essayTopicInput" placeholder="例如: 餐廳出現寵物... (選填)">
@@ -323,7 +319,29 @@
             </div>
             <button id="btnGradeEssay" class="btn btn-primary" onclick="gradeAiEssay()">📝 繳交作文給 AI 批改</button>
             <div id="essayLoading" class="loading-box" style="display:none;"><div class="spinner"></div><p style="margin-top:15px;">老師仔細閱卷中，請稍候...</p></div>
-            <div id="essayResult" class="ai-result-box"><div class="ai-score" id="resEssayScore">-- / 20</div><div class="ai-title">批改報告</div><div class="ai-field"><strong>🎯 內容 (Content)：</strong><p id="resEssayContent"></p></div><div class="ai-field"><strong>🏗️ 組織 (Organization)：</strong><p id="resEssayOrg"></p></div><div class="ai-field"><strong>📚 詞彙 (Vocabulary)：</strong><p id="resEssayVocab"></p></div><div class="ai-field"><strong>🛠️ 文法 (Grammar)：</strong><p id="resEssayGrammar"></p></div><div class="ai-field"><strong>💡 總體建議：</strong><p id="resEssayGeneral" style="color: var(--primary-color); font-weight:600;"></p></div></div>
+            
+            <div id="essayResult" class="ai-result-box">
+                <div class="ai-score" id="resEssayScore">-- / 20</div>
+                <div style="text-align:center; font-weight:bold; color:var(--text-muted); margin-bottom:20px;" id="resEssayLevel"></div>
+
+                <div class="ai-title">整體評語</div>
+                <div class="ai-field"><p id="resEssayOverall"></p></div>
+
+                <div class="ai-title">評分細項分析</div>
+                <table class="data-table" style="margin-bottom: 20px; background: white;">
+                    <tr><th>項目</th><th>分數</th><th>評分分析</th></tr>
+                    <tr><td>內容</td><td id="s-content" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-content"></td></tr>
+                    <tr><td>組織</td><td id="s-org" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-org"></td></tr>
+                    <tr><td>語言使用</td><td id="s-lang" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-lang"></td></tr>
+                    <tr><td>字彙文法</td><td id="s-gram" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-gram"></td></tr>
+                    <tr><td>拼字</td><td id="s-spell" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-spell"></td></tr>
+                </table>
+
+                <div class="ai-title">修改建議與示範</div>
+                <div class="ai-field"><strong>💡 主要建議：</strong><p id="resEssaySuggestions"></p></div>
+                <div class="ai-field"><strong>🎯 改寫重點說明：</strong><div id="resEssayKey" style="line-height:1.6; margin-bottom:15px; color:var(--text-muted);"></div></div>
+                <div class="ai-field"><strong>📝 修正版高分作文示範：</strong><div id="resEssayRevised" style="background:#fef9c3; padding:15px; border-radius:8px; line-height:1.6; font-family:serif;"></div></div>
+            </div>
         </div>
 
         <div id="aiTutorView" class="view-section view-container">
@@ -425,56 +443,62 @@
             if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); }
         }
 
-        // 🎯 全新智慧拆字引擎 (專門對付 I(me,my...)) + 關閉 spellcheck
-        function buildSpellUI(word) {
-            const tokens = word.match(/([a-zA-Z]+|[^a-zA-Z]+)/g);
-            if (!tokens) return '';
-            let html = '<div class="spell-input-wrapper">';
-            tokens.forEach(token => {
-                if (/^[a-zA-Z]+$/.test(token)) {
-                    if (token.length <= 2) {
-                        html += `<input type="text" class="spell-input spell-part-input" maxlength="${token.length}" style="width: ${token.length * 1.5}em;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />`;
-                    } else {
-                        html += `<div class="spell-part"><span class="spell-char">${token[0]}</span>`;
-                        const midLen = token.length - 2;
-                        // 計算 placeholder 需要幾條底線
-                        const placeholders = Array(midLen).fill('_').join('');
-                        html += `<input type="text" class="spell-input spell-part-input" maxlength="${midLen}" placeholder="${placeholders}" style="width: ${midLen * 1.5}em;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />`;
-                        html += `<span class="spell-char">${token[token.length - 1]}</span></div>`;
-                    }
+        // 🎯 全新智慧拆字引擎 (完美處理 I (me, my) 這種括號與符號)
+        let currentSpellTemplate = [];
+        function initSpellTemplate(word) {
+            const pureWord = getPureWord(word);
+            currentSpellTemplate = [];
+            // 保留所有字元（包括空白與標點符號）
+            for(let i=0; i<pureWord.length; i++) {
+                const char = pureWord[i];
+                if (/[^a-zA-Z]/.test(char)) { 
+                    currentSpellTemplate.push(char); // 符號直接顯示
                 } else {
-                    html += `<span class="spell-char" style="white-space: pre;">${token}</span>`;
+                    // 如果是英文，判斷它在哪個單字區塊裡
+                    let isEdge = false;
+                    // 尋找當前英文字母區塊的頭尾
+                    let start = i, end = i;
+                    while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--;
+                    while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++;
+                    
+                    const wordLen = end - start + 1;
+                    if (wordLen <= 2 || i === start || i === end) {
+                        currentSpellTemplate.push(char);
+                    } else {
+                        currentSpellTemplate.push('_');
+                    }
                 }
-            });
-            html += '</div>';
-            return html;
+            }
         }
 
-        // 🎯 取得填空答案組合
-        function getSpellAnswer() {
-            const word = getPureWord(quizData[currentQuestionIndex].correctWord);
-            const tokens = word.match(/([a-zA-Z]+|[^a-zA-Z]+)/g);
-            let finalAns = '';
-            let inputs = document.querySelectorAll('.spell-part-input');
-            let inputIdx = 0;
-            if(tokens) {
-                tokens.forEach(token => {
-                    if (/^[a-zA-Z]+$/.test(token)) {
-                        if (token.length <= 2) {
-                            const val = inputs[inputIdx] ? inputs[inputIdx].value.trim() : '';
-                            finalAns += val;
-                            inputIdx++;
-                        } else {
-                            const val = inputs[inputIdx] ? inputs[inputIdx].value.trim() : '';
-                            finalAns += token[0] + val + token[token.length - 1];
-                            inputIdx++;
-                        }
-                    } else {
-                        finalAns += token;
-                    }
-                });
+        function updateSpellVisual() {
+            const val = document.getElementById('typingInput').value.toLowerCase();
+            let displayStr = "";
+            let typedIndex = 0;
+            
+            for(let i=0; i<currentSpellTemplate.length; i++) {
+                if (currentSpellTemplate[i] === ' ') {
+                    displayStr += "&nbsp;&nbsp;"; 
+                    continue;
+                }
+                if (currentSpellTemplate[i] !== '_') {
+                    displayStr += currentSpellTemplate[i] + " ";
+                    continue;
+                }
+                
+                // 遇到填空槽
+                if (typedIndex < val.length) {
+                    displayStr += `<span style="color:var(--danger-color);">${val[typedIndex]}</span> `;
+                } else {
+                    displayStr += `<span style="color:#94a3b8;">_</span> `;
+                }
+                typedIndex++;
             }
-            return finalAns;
+            document.getElementById('spellVisual').innerHTML = displayStr;
+        }
+
+        function getSpellAnswer() {
+            return document.getElementById('typingInput').value.trim();
         }
 
         function renderQuestion(index) {
@@ -483,12 +507,11 @@
             
             const meaningDisplay = document.getElementById('meaningDisplay'); 
             const optContainer = document.getElementById('optionsContainer'); 
-            const spellContainer = document.getElementById('spellInputContainer'); 
+            const spellArea = document.getElementById('spellVisualArea');
+            const typingInput = document.getElementById('typingInput');
             const speakBtn = document.getElementById('qSpeakBtn');
             
-            optContainer.style.display = 'none'; spellContainer.style.display = 'none'; meaningDisplay.style.display = 'block'; 
-            
-            // 🔇 絕對關閉發音按鈕
+            optContainer.style.display = 'none'; spellArea.style.display = 'none'; meaningDisplay.style.display = 'block'; 
             speakBtn.style.display = 'none'; 
 
             if (q.qType === 'listen') { 
@@ -498,26 +521,19 @@
                 renderOptionsUI(q, optContainer); 
             } 
             else if (q.qType === 'spell') { 
-                meaningDisplay.textContent = q.questionText; 
-                spellContainer.style.display = 'block'; 
+                meaningDisplay.textContent = q.questionText; // 卡片內只有乾淨中文
+                spellArea.style.display = 'flex'; 
                 
-                spellContainer.innerHTML = buildSpellUI(getPureWord(q.correctWord));
+                initSpellTemplate(q.correctWord);
+                typingInput.value = userAnswers[q.id] || ''; // 恢復作答紀錄
+                updateSpellVisual();
                 
-                const inputs = spellContainer.querySelectorAll('input');
-                if(inputs.length > 0) setTimeout(() => inputs[0].focus(), 100);
-                
-                inputs.forEach((inp, idx) => {
-                    inp.onkeydown = (e) => {
-                        if(e.key === 'Enter') {
-                            e.preventDefault();
-                            if(idx < inputs.length - 1) inputs[idx+1].focus();
-                            else handleNextQuestion();
-                        }
-                    };
-                });
+                setTimeout(() => typingInput.focus(), 100); 
+                typingInput.onkeydown = function(e) { 
+                    if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } 
+                }; 
             } 
             else { 
-                // 📚 一般選擇題絕對沒有喇叭
                 meaningDisplay.textContent = q.questionText; 
                 optContainer.style.display = 'block'; 
                 renderOptionsUI(q, optContainer); 
@@ -550,11 +566,31 @@
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id] || ''; let isCorr = false;
                 
-                // 🎯 強健的答案核對邏輯：只比對「純英文字母」
+                // 🎯 答案核對邏輯：只抽出純英文字母進行比對，容錯率超高！
                 if (q.qType === 'spell') { 
                     const correctLettersOnly = getPureWord(q.correctAnswer).replace(/[^a-zA-Z]/g, '').toLowerCase();
                     const typedLettersOnly = uAns.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                    isCorr = (typedLettersOnly === correctLettersOnly); 
+                    // 因為 UI 已經印出了頭尾跟短字，使用者輸入的只有「缺少的字母」，所以核對邏輯要變：
+                    // 只要把使用者輸入的字串依序填入模板，看看出來的結果是不是對的
+                    let tempTypedIndex = 0;
+                    let reconstructedAnswer = "";
+                    const pureWord = getPureWord(q.correctAnswer);
+                    for(let j=0; j<pureWord.length; j++) {
+                        let c = pureWord[j];
+                        if (/[^a-zA-Z]/.test(c)) { reconstructedAnswer += c; }
+                        else {
+                            let start = j, end = j;
+                            while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--;
+                            while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++;
+                            const wordLen = end - start + 1;
+                            if (wordLen <= 2 || j === start || j === end) { reconstructedAnswer += c; }
+                            else {
+                                reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "";
+                                tempTypedIndex++;
+                            }
+                        }
+                    }
+                    isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); 
                 } else { 
                     isCorr = (uAns === q.correctAnswer); 
                 }
@@ -575,7 +611,6 @@
             document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; 
             showView('resultView'); 
             
-            // 🍩 甜甜圈圓心的答對率完美回歸
             document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%';
             drawChart(correctCount, totalQuestions - correctCount);
             
@@ -701,7 +736,7 @@
         }
 
         // ==========================================
-        // 🤖 AI 作文與家教
+        // 🤖 AI 作文與家教 (完美套用大考中心標準)
         // ==========================================
         function gradeAiEssay() {
             const text = document.getElementById('essayInput').value.trim();
@@ -716,12 +751,31 @@
                 document.getElementById('essayLoading').style.display = 'none';
                 
                 if (res.success && res.data) {
-                    document.getElementById('resEssayScore').textContent = `${res.data.totalScore} / 20`;
-                    document.getElementById('resEssayContent').textContent = res.data.content;
-                    document.getElementById('resEssayOrg').textContent = res.data.organization;
-                    document.getElementById('resEssayVocab').textContent = res.data.vocabulary;
-                    document.getElementById('resEssayGrammar').textContent = res.data.grammar;
-                    document.getElementById('resEssayGeneral').textContent = res.data.general;
+                    // 大考中心評分細項展開
+                    document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`;
+                    document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`;
+                    
+                    document.getElementById('resEssayOverall').textContent = res.data.overallComment;
+                    
+                    document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`;
+                    document.getElementById('a-content').textContent = res.data.scores.content.analysis;
+                    
+                    document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`;
+                    document.getElementById('a-org').textContent = res.data.scores.organization.analysis;
+                    
+                    document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`;
+                    document.getElementById('a-lang').textContent = res.data.scores.language.analysis;
+                    
+                    document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`;
+                    document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis;
+                    
+                    document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`;
+                    document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis;
+
+                    document.getElementById('resEssaySuggestions').textContent = res.data.suggestions;
+                    document.getElementById('resEssayKey').innerHTML = res.data.keyImprovements.replace(/\n/g, '<br>');
+                    document.getElementById('resEssayRevised').innerHTML = res.data.revisedEssay.replace(/\n/g, '<br>');
+                    
                     document.getElementById('essayResult').style.display = 'block';
                     updateNavbarBadges(); 
                 } else {
@@ -756,7 +810,8 @@
         // 🧠 記憶閃卡系統 (SRS)
         // ==========================================
         let reviewCardsData = []; let currentFlashcardIndex = 0; let showFlashcardMode = true;
-        function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; showFlashcardMode = true; renderReviewUI(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } }); }
+        
+        function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; renderReviewUI(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } }); }
         
         function toggleFlashcardMode() {
             showFlashcardMode = !showFlashcardMode;
@@ -829,7 +884,7 @@
                             <strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br>
                             <span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${cleanWord}</span>
                         </div>
-                        <button class="speak-btn" style="position:relative; width:45px; height:45px; border: 1px solid var(--border-color); box-shadow:none;" onclick="speakWord('${safeEnWord}')">🔊</button>
+                        <button class="list-speak-btn" onclick="speakWord('${safeEnWord}')">🔊</button>
                     </div>`;
             });
             document.getElementById('listModeContainer').innerHTML = html;
