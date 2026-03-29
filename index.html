@@ -49,6 +49,27 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 120px; }
 
+        /* 🎯 完美修復：去除紅字與紅底線的填空 UI */
+        .spell-input-wrapper { display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; margin: 30px 0; }
+        .spell-part { display: flex; align-items: baseline; margin: 0 8px; }
+        .spell-char { font-size: 1.8em; font-weight: 800; color: var(--primary-color); }
+        .spell-input { 
+            border: none !important; 
+            border-bottom: 3px solid var(--primary-color) !important; /* 改成實線與藍色 */
+            background: transparent !important; 
+            color: var(--primary-color) !important; /* 不再是紅色 */
+            font-size: 1.8em !important; 
+            font-weight: 800 !important; 
+            text-align: center !important; 
+            outline: none !important; 
+            padding: 0 5px !important; 
+            margin: 0 5px !important; 
+            letter-spacing: 5px !important; 
+            font-family: monospace !important; 
+            text-transform: lowercase !important; 
+            border-radius: 0 !important;
+        }
+
         .btn { padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active:not(:disabled) { transform: scale(0.98); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -70,10 +91,6 @@
         .audio-only-btn { font-size: 3em; cursor: pointer; display: inline-block; padding: 20px; background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; transition: 0.2s; }
         .option-btn { display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: 0.2s; line-height: 1.4; }
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
-
-        /* 🎯 完美智慧填空 UI (置於卡片外部) */
-        .spell-input-area { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 30px; cursor: text; padding: 20px;}
-        .spell-visual-text { font-family: monospace; font-size: 2.2em; font-weight: 800; color: var(--primary-color); letter-spacing: 0.2em; text-align: center; line-height: 1.5; word-break: break-all;}
 
         /* --- 🃏 閃卡 --- */
         .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none; }
@@ -109,6 +126,7 @@
         .ai-field p { color: var(--text-muted); line-height: 1.5; }
         .ai-score { font-size: 3em; font-weight: 800; color: var(--secondary-color); text-align: center; margin: 10px 0; }
 
+        /* 個人檔案專區 */
         .profile-card { background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 25px; margin-bottom: 25px; }
         .avatar-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #f1f5f9; display: flex; justify-content: center; align-items: center; font-size: 3em; border: 2px solid var(--border-color); margin: 0 auto 15px auto;}
         .quota-box { display: flex; justify-content: space-between; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0;}
@@ -133,7 +151,7 @@
             .vocab-cat-btn { padding: 15px 5px; font-size: 0.9em; }
             .az-grid { grid-template-columns: repeat(6, 1fr); }
             .fc-word { font-size: 1.8em; }
-            .spell-visual-text { font-size: 1.6em; }
+            .spell-char, .spell-input { font-size: 1.5em !important; }
         }
     </style>
 </head>
@@ -212,18 +230,13 @@
                 <div id="quizInstruction" style="font-weight: 700; color: var(--primary-color);"></div>
                 <div style="font-weight: 600; color: var(--text-muted);"><span id="currentQNum"></span> / <span id="totalQNum"></span></div>
             </div>
-            
             <div class="question-card">
                 <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
             </div>
-            
             <div id="optionsContainer"></div>
             
-            <div id="spellVisualArea" class="spell-input-area" style="display:none;" onclick="document.getElementById('typingInput').focus()">
-                <div id="spellVisual" class="spell-visual-text"></div>
-                <input type="text" id="typingInput" style="position: absolute; opacity: 0; width: 1px; height: 1px; left: 0; top: 0;" oninput="updateSpellVisual()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            </div>
+            <div id="spellInputContainer" style="display:none;"></div>
             
             <div class="flex-row" style="margin-top: 30px;" id="navButtonsArea">
                 <button id="prevButton" class="btn btn-secondary" style="flex: 1;" onclick="changeQuestion(-1)" disabled>上一題</button>
@@ -234,12 +247,10 @@
         <div id="resultView" class="view-section view-container" style="max-width: 800px;">
             <h2>📊 測驗分析報告</h2>
             <p id="summary" style="font-size: 1.2em; font-weight: 800; color: var(--primary-color); margin-bottom: 20px;"></p>
-            
             <div style="position: relative; width: 200px; height: 200px; margin: 0 auto 30px auto;">
                 <canvas id="scoreChart"></canvas>
                 <div id="scorePercentage" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5em; font-weight: 800; color: var(--primary-color);"></div>
             </div>
-            
             <div id="detailResults" style="text-align: left; max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
             <button class="btn btn-primary" onclick="showView('setupView')">返回主頁</button>
         </div>
@@ -414,51 +425,56 @@
             if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); }
         }
 
-        // 🎯 全新智慧拆字引擎 (專門對付 I(me,my...))
-        let currentSpellTemplate = [];
-        function initSpellTemplate(word) {
-            const pureWord = getPureWord(word);
-            currentSpellTemplate = [];
-            let parts = pureWord.split(' ');
-            parts.forEach((p, pIdx) => {
-                for(let i=0; i<p.length; i++) {
-                    if (/[^a-zA-Z]/.test(p[i])) { currentSpellTemplate.push(p[i]); }
-                    else if (p.length <= 2) { currentSpellTemplate.push(p[i]); }
-                    else if (i === 0 || i === p.length - 1) { currentSpellTemplate.push(p[i]); }
-                    else { currentSpellTemplate.push('_'); }
-                }
-                if (pIdx < parts.length - 1) currentSpellTemplate.push(' ');
-            });
-        }
-
-        function updateSpellVisual() {
-            const val = document.getElementById('typingInput').value.toLowerCase();
-            let displayStr = "";
-            let typedIndex = 0;
-            
-            for(let i=0; i<currentSpellTemplate.length; i++) {
-                if (currentSpellTemplate[i] === ' ') {
-                    displayStr += "&nbsp;&nbsp;"; 
-                    continue;
-                }
-                if (/[^a-zA-Z_]/.test(currentSpellTemplate[i]) && currentSpellTemplate[i] !== '_') {
-                    displayStr += currentSpellTemplate[i] + " ";
-                    continue;
-                }
-                
-                // 字母或填空槽
-                if (typedIndex < val.length) {
-                    displayStr += val[typedIndex] + " ";
+        // 🎯 全新智慧拆字引擎 (專門對付 I(me,my...)) + 關閉 spellcheck
+        function buildSpellUI(word) {
+            const tokens = word.match(/([a-zA-Z]+|[^a-zA-Z]+)/g);
+            if (!tokens) return '';
+            let html = '<div class="spell-input-wrapper">';
+            tokens.forEach(token => {
+                if (/^[a-zA-Z]+$/.test(token)) {
+                    if (token.length <= 2) {
+                        html += `<input type="text" class="spell-input spell-part-input" maxlength="${token.length}" style="width: ${token.length * 1.5}em;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />`;
+                    } else {
+                        html += `<div class="spell-part"><span class="spell-char">${token[0]}</span>`;
+                        const midLen = token.length - 2;
+                        // 計算 placeholder 需要幾條底線
+                        const placeholders = Array(midLen).fill('_').join('');
+                        html += `<input type="text" class="spell-input spell-part-input" maxlength="${midLen}" placeholder="${placeholders}" style="width: ${midLen * 1.5}em;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />`;
+                        html += `<span class="spell-char">${token[token.length - 1]}</span></div>`;
+                    }
                 } else {
-                    displayStr += currentSpellTemplate[i] + " ";
+                    html += `<span class="spell-char" style="white-space: pre;">${token}</span>`;
                 }
-                typedIndex++;
-            }
-            document.getElementById('spellVisual').innerHTML = displayStr;
+            });
+            html += '</div>';
+            return html;
         }
 
+        // 🎯 取得填空答案組合
         function getSpellAnswer() {
-            return document.getElementById('typingInput').value.trim();
+            const word = getPureWord(quizData[currentQuestionIndex].correctWord);
+            const tokens = word.match(/([a-zA-Z]+|[^a-zA-Z]+)/g);
+            let finalAns = '';
+            let inputs = document.querySelectorAll('.spell-part-input');
+            let inputIdx = 0;
+            if(tokens) {
+                tokens.forEach(token => {
+                    if (/^[a-zA-Z]+$/.test(token)) {
+                        if (token.length <= 2) {
+                            const val = inputs[inputIdx] ? inputs[inputIdx].value.trim() : '';
+                            finalAns += val;
+                            inputIdx++;
+                        } else {
+                            const val = inputs[inputIdx] ? inputs[inputIdx].value.trim() : '';
+                            finalAns += token[0] + val + token[token.length - 1];
+                            inputIdx++;
+                        }
+                    } else {
+                        finalAns += token;
+                    }
+                });
+            }
+            return finalAns;
         }
 
         function renderQuestion(index) {
@@ -467,13 +483,12 @@
             
             const meaningDisplay = document.getElementById('meaningDisplay'); 
             const optContainer = document.getElementById('optionsContainer'); 
-            const spellArea = document.getElementById('spellVisualArea');
-            const typingInput = document.getElementById('typingInput');
+            const spellContainer = document.getElementById('spellInputContainer'); 
             const speakBtn = document.getElementById('qSpeakBtn');
             
-            optContainer.style.display = 'none'; spellArea.style.display = 'none'; meaningDisplay.style.display = 'block'; 
+            optContainer.style.display = 'none'; spellContainer.style.display = 'none'; meaningDisplay.style.display = 'block'; 
             
-            // 🔇 預設絕對關閉發音按鈕 (包含 en2ch 和 ch2en)
+            // 🔇 絕對關閉發音按鈕
             speakBtn.style.display = 'none'; 
 
             if (q.qType === 'listen') { 
@@ -483,23 +498,26 @@
                 renderOptionsUI(q, optContainer); 
             } 
             else if (q.qType === 'spell') { 
-                meaningDisplay.textContent = q.questionText; // 卡片內只有乾淨中文
-                spellArea.style.display = 'block'; 
+                meaningDisplay.textContent = q.questionText; 
+                spellContainer.style.display = 'block'; 
                 
-                // 初始化拆字引擎
-                initSpellTemplate(q.correctWord);
-                typingInput.value = userAnswers[q.id] || ''; // 恢復作答紀錄
-                updateSpellVisual();
+                spellContainer.innerHTML = buildSpellUI(getPureWord(q.correctWord));
                 
-                setTimeout(() => typingInput.focus(), 100); 
-                typingInput.onkeydown = function(e) { 
-                    if (e.key === 'Enter') { 
-                        e.preventDefault(); 
-                        handleNextQuestion(); 
-                    } 
-                }; 
+                const inputs = spellContainer.querySelectorAll('input');
+                if(inputs.length > 0) setTimeout(() => inputs[0].focus(), 100);
+                
+                inputs.forEach((inp, idx) => {
+                    inp.onkeydown = (e) => {
+                        if(e.key === 'Enter') {
+                            e.preventDefault();
+                            if(idx < inputs.length - 1) inputs[idx+1].focus();
+                            else handleNextQuestion();
+                        }
+                    };
+                });
             } 
             else { 
+                // 📚 一般選擇題絕對沒有喇叭
                 meaningDisplay.textContent = q.questionText; 
                 optContainer.style.display = 'block'; 
                 renderOptionsUI(q, optContainer); 
@@ -532,7 +550,7 @@
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id] || ''; let isCorr = false;
                 
-                // 🎯 強健的答案核對邏輯：只比對「純英文字母」，無視標點符號與空白！
+                // 🎯 強健的答案核對邏輯：只比對「純英文字母」
                 if (q.qType === 'spell') { 
                     const correctLettersOnly = getPureWord(q.correctAnswer).replace(/[^a-zA-Z]/g, '').toLowerCase();
                     const typedLettersOnly = uAns.replace(/[^a-zA-Z]/g, '').toLowerCase();
@@ -737,8 +755,8 @@
         // ==========================================
         // 🧠 記憶閃卡系統 (SRS)
         // ==========================================
-        let reviewCardsData = []; let currentFlashcardIndex = 0;
-        function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; renderSingleFlashcard(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } }); }
+        let reviewCardsData = []; let currentFlashcardIndex = 0; let showFlashcardMode = true;
+        function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; showFlashcardMode = true; renderReviewUI(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } }); }
         
         function toggleFlashcardMode() {
             showFlashcardMode = !showFlashcardMode;
@@ -793,17 +811,7 @@
             cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40) { if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); } if (touchEndX > touchStartX + 40) { if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); } }, {passive: true}); 
         }
 
-        function changeFlashcard(delta) { 
-            const newIdx = currentFlashcardIndex + delta; 
-            if (newIdx >= 0 && newIdx < reviewCardsData.length) { 
-                currentFlashcardIndex = newIdx; 
-                const wrapper = document.getElementById('slideWrapper'); 
-                wrapper.classList.remove('slide-left', 'slide-right'); 
-                void wrapper.offsetWidth; 
-                wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); 
-                renderSingleFlashcard(); 
-            } 
-        }
+        function changeFlashcard(delta) { const newIdx = currentFlashcardIndex + delta; if (newIdx >= 0 && newIdx < reviewCardsData.length) { currentFlashcardIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
 
         function renderListMode() {
             let html = '';
