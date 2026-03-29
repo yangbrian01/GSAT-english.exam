@@ -48,7 +48,7 @@
         input[type="text"], input[type="password"], input[type="number"], select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1em; background-color: #f8fafc; transition: 0.2s; font-family: inherit; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 120px; }
-        
+
         .btn { padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active:not(:disabled) { transform: scale(0.98); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -67,15 +67,19 @@
         
         .speak-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.3em; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: flex; justify-content: center; align-items: center; z-index: 10;}
         .speak-btn:hover { transform: scale(1.1); color: var(--primary-color); }
+        
         .audio-only-btn { font-size: 3em; cursor: pointer; display: inline-block; padding: 20px; background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; transition: 0.2s; }
+        .audio-only-btn:active { transform: scale(0.9); }
+
         .option-btn { display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: 0.2s; line-height: 1.4; }
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
 
-        /* 🎯 完美版填字 UI */
-        .spell-input-wrapper { display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; margin: 30px 0; }
-        .spell-part { display: flex; align-items: baseline; margin: 0 8px; }
-        .spell-char { font-size: 1.5em; font-weight: 800; color: var(--primary-color); }
-        .spell-input { border: none !important; border-bottom: 3px solid var(--primary-color) !important; background: transparent !important; color: var(--primary-color) !important; font-size: 1.5em !important; font-weight: 800 !important; text-align: center !important; outline: none !important; padding: 0 5px !important; margin: 0 5px !important; letter-spacing: 5px !important; font-family: monospace !important; text-transform: lowercase !important; border-radius: 0 !important;}
+        /* 🎯 完美版填字 UI (手機防出格版) */
+        .spell-input-wrapper { display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; margin: 20px 0; gap: 4px; }
+        .spell-part { display: flex; align-items: baseline; }
+        .spell-char { font-size: 1.2em; font-weight: 800; color: var(--primary-color); }
+        .spell-input { border: none !important; border-bottom: 3px solid var(--primary-color) !important; background: transparent !important; color: var(--primary-color) !important; font-size: 1.2em !important; font-weight: 800 !important; text-align: center !important; outline: none !important; padding: 0 !important; margin: 0 2px !important; letter-spacing: 2px !important; font-family: monospace !important; text-transform: lowercase !important; border-radius: 0 !important; max-width: 100%;}
+        .spell-input:focus { border-bottom-color: var(--secondary-color) !important; }
 
         /* --- 🃏 閃卡 --- */
         .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none; }
@@ -136,7 +140,10 @@
             .vocab-cat-btn { padding: 15px 5px; font-size: 0.9em; }
             .az-grid { grid-template-columns: repeat(6, 1fr); }
             .fc-word { font-size: 1.8em; }
-            .spell-char, .spell-input { font-size: 1.2em !important; }
+            /* 針對手機進一步縮小拼寫字體防爆版 */
+            .spell-char { font-size: 1em; }
+            .spell-input { font-size: 1em !important; letter-spacing: 1px !important; padding: 0 !important; margin: 0 1px !important; }
+            .spell-input-wrapper { margin: 15px 0; }
         }
     </style>
 </head>
@@ -352,10 +359,10 @@
         let isReviewQuizMode = false; let autoAdvanceTimer = null; 
         let userFavoriteWords = new Set();
 
-        // 🎯 前端備用淨化器 
+        // 🎯 前端備用淨化器 (強化版 Regex 同步後端)
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
-            return rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim(); 
+            return rawWord.toString().replace(/\s*\(?(?:adj|adv|n\.|v\.|n|v|prep|conj|pron|phr|vi|vt|num|art|pl)[\.\/\)].*$/i, '').trim(); 
         }
         
         function speakWord(text) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.speak(u); }
@@ -399,7 +406,7 @@
             if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); }
         }
 
-        // 🎯 構建完美填字 UI
+        // 🎯 建立完美的填空 UI
         function buildSpellUI(word) {
             const parts = word.split(' ');
             let html = '<div class="spell-input-wrapper">';
@@ -411,12 +418,13 @@
                     const pre = p[0];
                     const suf = p[p.length - 1];
                     const midLen = p.length - 2;
+                    // 以底線產生佔位符
                     const placeholders = Array(midLen).fill('_').join(' ');
                     html += `<span class="spell-char">${pre}</span>`;
-                    html += `<input type="text" class="spell-input" maxlength="${midLen}" placeholder="${placeholders}" style="width: ${midLen * 1.1}em;" autocomplete="off" />`;
+                    html += `<input type="text" class="spell-input" maxlength="${midLen}" placeholder="${placeholders}" style="width: ${midLen * 0.8}em;" autocomplete="off" />`;
                     html += `<span class="spell-char">${suf}</span>`;
                 }
-                html += '</div>&nbsp;&nbsp;';
+                html += '</div>';
             });
             html += '</div>';
             return html;
@@ -479,6 +487,8 @@
             } 
             else { 
                 meaningDisplay.textContent = q.questionText; 
+                // 🎯 只有這兩種情況會顯示英文，才需要顯示喇叭 (英選中)
+                if (q.qType === 'en2ch') speakBtn.style.display = 'flex';
                 optContainer.style.display = 'block'; 
                 renderOptionsUI(q, optContainer); 
             }
@@ -526,7 +536,6 @@
             document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; 
             showView('resultView'); 
             
-            // 🎯 畫出有百分比的甜甜圈
             document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%';
             drawChart(correctCount, totalQuestions - correctCount);
             
