@@ -49,6 +49,12 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 120px; }
 
+        /* 🎯 全新智慧拆字填空 UI */
+        .spell-input-wrapper { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin: 20px 0; gap: 5px;}
+        .spell-char { font-size: 1.8em; font-weight: 800; color: var(--primary-color); margin: 0 2px;}
+        .spell-input { border: none !important; border-bottom: 3px solid var(--primary-hover) !important; background: transparent !important; color: var(--danger-color) !important; font-size: 1.8em !important; font-weight: 800 !important; text-align: center !important; outline: none !important; padding: 0 !important; margin: 0 4px !important; font-family: monospace !important; border-radius: 0 !important;}
+        .spell-input:focus { border-bottom-color: var(--secondary-color) !important; }
+
         .btn { padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active:not(:disabled) { transform: scale(0.98); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -68,7 +74,6 @@
         .speak-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.3em; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: flex; justify-content: center; align-items: center; z-index: 10;}
         .speak-btn:hover { transform: scale(1.1); color: var(--primary-color); }
         .audio-only-btn { font-size: 3em; cursor: pointer; display: inline-block; padding: 20px; background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; transition: 0.2s; }
-        
         .option-btn { display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: 0.2s; line-height: 1.4; }
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
 
@@ -395,7 +400,6 @@
         let isReviewQuizMode = false; let autoAdvanceTimer = null; 
         let userFavoriteWords = new Set();
 
-        // 🎯 前端備用淨化器 
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
             return rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim(); 
@@ -442,7 +446,7 @@
             if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); }
         }
 
-        // 🎯 全新智慧拆字引擎 (完美處理 I (me, my) 這種括號與符號)
+        // 🎯 智慧填空
         let currentSpellTemplate = [];
         function initSpellTemplate(word) {
             const pureWord = getPureWord(word);
@@ -492,7 +496,9 @@
             document.getElementById('spellVisual').innerHTML = displayStr;
         }
 
-        function getSpellAnswer() { return document.getElementById('typingInput').value.trim(); }
+        function getSpellAnswer() {
+            return document.getElementById('typingInput').value.trim();
+        }
 
         function renderQuestion(index) {
             clearTimeout(autoAdvanceTimer); currentQuestionIndex = index; const q = quizData[index];
@@ -505,6 +511,8 @@
             const speakBtn = document.getElementById('qSpeakBtn');
             
             optContainer.style.display = 'none'; spellArea.style.display = 'none'; meaningDisplay.style.display = 'block'; 
+            
+            // 🔇 普通題目一律關閉喇叭
             speakBtn.style.display = 'none'; 
 
             if (q.qType === 'listen') { 
@@ -514,11 +522,11 @@
                 renderOptionsUI(q, optContainer); 
             } 
             else if (q.qType === 'spell') { 
-                meaningDisplay.textContent = q.questionText; // 卡片內只有乾淨中文
+                meaningDisplay.textContent = q.questionText; 
                 spellArea.style.display = 'flex'; 
                 
                 initSpellTemplate(q.correctWord);
-                typingInput.value = userAnswers[q.id] || ''; // 恢復作答紀錄
+                typingInput.value = userAnswers[q.id] || ''; 
                 updateSpellVisual();
                 
                 setTimeout(() => typingInput.focus(), 100); 
@@ -559,7 +567,6 @@
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id] || ''; let isCorr = false;
                 
-                // 🎯 答案核對邏輯：只抽出純英文字母進行比對，容錯率超高！
                 if (q.qType === 'spell') { 
                     const pureWord = getPureWord(q.correctAnswer);
                     let tempTypedIndex = 0;
@@ -585,7 +592,6 @@
                 }
                 
                 if (isCorr) correctCount++;
-                
                 submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
                 
                 detailDiv.innerHTML += `
@@ -609,7 +615,7 @@
         function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
 
         // ==========================================
-        // 📖 單字書 A-Z 與 AI 快取邏輯
+        // 📖 單字書
         // ==========================================
         let currentVocabList = []; let currentLetterList = []; let currentVocabCardIndex = 0; let currentLevel = 0;
 
@@ -663,7 +669,7 @@
         }
 
         function addCustomVocab() {
-            if (currentUser === '訪客') return Swal.fire('限制', '登入後才能建立自訂單字喔！', 'info');
+            if (currentUser === '訪客') return Swal.fire('限制', '登入後才能加入自訂單字', 'info');
             Swal.fire({ title: '✍️ 加入自訂單字', html: '<input id="swal-word" class="swal2-input" placeholder="英文單字">' + '<input id="swal-meaning" class="swal2-input" placeholder="中文意思 (選填)">', focusConfirm: false, showCancelButton: true, confirmButtonText: '加入我的不熟單字', preConfirm: () => { const w = document.getElementById('swal-word').value.trim(); if (!w) Swal.showValidationMessage('單字不能為空！'); return { word: w, meaning: document.getElementById('swal-meaning').value.trim() }; } }).then((result) => { if (result.isConfirmed) { const { word, meaning } = result.value; apiCall('toggleFavorite', { username: currentUser, word: word, meaning: meaning, isAdding: true }).then(() => { userFavoriteWords.add(word); Swal.fire('已加入', '', 'success'); }); } });
         }
 
@@ -725,7 +731,7 @@
         }
 
         // ==========================================
-        // 🤖 AI 作文與家教 (拔除範文版)
+        // 🤖 AI 作文與家教 (完美捕獲逾時)
         // ==========================================
         function gradeAiEssay() {
             const text = document.getElementById('essayInput').value.trim();
@@ -739,32 +745,32 @@
                 btn.disabled = false; 
                 document.getElementById('essayLoading').style.display = 'none';
                 
-                if (res.success && res.data && res.data.scores) {
-                    document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`;
+                if (res.success && res.data) {
+                    document.getElementById('resEssayScore').textContent = `${res.data.totalScore} / 20`;
                     document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`;
                     document.getElementById('resEssayOverall').textContent = res.data.overallComment;
-                    document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`;
-                    document.getElementById('a-content').textContent = res.data.scores.content.analysis;
-                    document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`;
-                    document.getElementById('a-org').textContent = res.data.scores.organization.analysis;
-                    document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`;
-                    document.getElementById('a-lang').textContent = res.data.scores.language.analysis;
-                    document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`;
-                    document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis;
-                    document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`;
-                    document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis;
+                    document.getElementById('s-content').textContent = `${res.data.s_content} / 5`;
+                    document.getElementById('a-content').textContent = res.data.a_content;
+                    document.getElementById('s-org').textContent = `${res.data.s_org} / 5`;
+                    document.getElementById('a-org').textContent = res.data.a_org;
+                    document.getElementById('s-lang').textContent = `${res.data.s_lang} / 4`;
+                    document.getElementById('a-lang').textContent = res.data.a_lang;
+                    document.getElementById('s-gram').textContent = `${res.data.s_gram} / 3`;
+                    document.getElementById('a-gram').textContent = res.data.a_gram;
+                    document.getElementById('s-spell').textContent = `${res.data.s_spell} / 3`;
+                    document.getElementById('a-spell').textContent = res.data.a_spell;
                     document.getElementById('resEssaySuggestions').textContent = res.data.suggestions;
-                    document.getElementById('resEssayKey').innerHTML = res.data.keyImprovements.replace(/\n/g, '<br>');
+                    document.getElementById('resEssayKey').innerHTML = (res.data.keyImprovements || "").replace(/\n/g, '<br>');
                     
                     document.getElementById('essayResult').style.display = 'block';
                     updateNavbarBadges(); 
                 } else {
-                    Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error');
+                    Swal.fire('批改失敗', res.message, 'error');
                 }
             }).catch(e => {
                 btn.disabled = false;
                 document.getElementById('essayLoading').style.display = 'none';
-                Swal.fire('網路錯誤', '無法連線到伺服器', 'error');
+                Swal.fire('網路錯誤', '無法連線到伺服器或連線逾時，請再試一次', 'error');
             });
         }
 
@@ -787,6 +793,10 @@
                 } else {
                     Swal.fire('呼叫老師失敗', res.message, 'error');
                 }
+            }).catch(e => {
+                btn.disabled = false;
+                document.getElementById('tutorLoading').style.display = 'none';
+                Swal.fire('網路錯誤', '無法連線到伺服器或連線逾時，請再試一次', 'error');
             });
         }
 
@@ -875,7 +885,7 @@
         }
 
         // ==========================================
-        // 個人資料更新與其他功能
+        // 個人資料更新與排行榜
         // ==========================================
         function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');}else Swal.fire('失敗',res.message,'error');}); }
