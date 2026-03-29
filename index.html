@@ -49,13 +49,6 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 120px; }
         
-        /* 🎯 完美的拼寫題填空樣式 */
-        .spell-input-wrapper { font-size: 2em; font-weight: 800; color: var(--primary-color); display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin: 30px 0; }
-        .spell-part { display: flex; align-items: flex-end; }
-        .spell-char { padding-bottom: 4px; }
-        .spell-input { border: none !important; border-bottom: 4px dashed var(--primary-hover) !important; background: transparent !important; color: var(--primary-color) !important; font-size: 1em !important; font-weight: 800 !important; text-align: center !important; outline: none !important; margin: 0 4px !important; padding: 0 !important; font-family: inherit !important; text-transform: lowercase !important; border-radius: 0 !important; }
-        .spell-input:focus { border-bottom-color: var(--secondary-color) !important; }
-
         .btn { padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active:not(:disabled) { transform: scale(0.98); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -74,12 +67,15 @@
         
         .speak-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.3em; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: flex; justify-content: center; align-items: center; z-index: 10;}
         .speak-btn:hover { transform: scale(1.1); color: var(--primary-color); }
-        
         .audio-only-btn { font-size: 3em; cursor: pointer; display: inline-block; padding: 20px; background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; transition: 0.2s; }
-        .audio-only-btn:active { transform: scale(0.9); }
-
         .option-btn { display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: 0.2s; line-height: 1.4; }
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
+
+        /* 🎯 完美版填字 UI */
+        .spell-input-wrapper { display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; margin: 30px 0; }
+        .spell-part { display: flex; align-items: baseline; margin: 0 8px; }
+        .spell-char { font-size: 1.5em; font-weight: 800; color: var(--primary-color); }
+        .spell-input { border: none !important; border-bottom: 3px solid var(--primary-color) !important; background: transparent !important; color: var(--primary-color) !important; font-size: 1.5em !important; font-weight: 800 !important; text-align: center !important; outline: none !important; padding: 0 5px !important; margin: 0 5px !important; letter-spacing: 5px !important; font-family: monospace !important; text-transform: lowercase !important; border-radius: 0 !important;}
 
         /* --- 🃏 閃卡 --- */
         .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none; }
@@ -140,6 +136,7 @@
             .vocab-cat-btn { padding: 15px 5px; font-size: 0.9em; }
             .az-grid { grid-template-columns: repeat(6, 1fr); }
             .fc-word { font-size: 1.8em; }
+            .spell-char, .spell-input { font-size: 1.2em !important; }
         }
     </style>
 </head>
@@ -234,7 +231,12 @@
         <div id="resultView" class="view-section view-container" style="max-width: 800px;">
             <h2>📊 測驗分析報告</h2>
             <p id="summary" style="font-size: 1.2em; font-weight: 800; color: var(--primary-color); margin-bottom: 20px;"></p>
-            <div style="width: 200px; height: 200px; margin: 0 auto 30px auto;"><canvas id="scoreChart"></canvas></div>
+            
+            <div style="position: relative; width: 200px; height: 200px; margin: 0 auto 30px auto;">
+                <canvas id="scoreChart"></canvas>
+                <div id="scorePercentage" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5em; font-weight: 800; color: var(--primary-color);"></div>
+            </div>
+            
             <div id="detailResults" style="text-align: left; max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
             <button class="btn btn-primary" onclick="showView('setupView')">返回主頁</button>
         </div>
@@ -284,7 +286,7 @@
 
         <div id="aiEssayView" class="view-section view-container" style="max-width: 800px;">
             <h2>✍️ AI 作文批改</h2>
-            <p class="subtitle">依據大考中心標準給予專業評分與建議。</p>
+            <p class="subtitle">大考中心鐵血模式：極少給滿分，嚴格挑剔。</p>
             <div class="input-group">
                 <label>作文題目 / 寫作情境</label>
                 <input type="text" id="essayTopicInput" placeholder="例如: 餐廳出現寵物... (選填)">
@@ -350,7 +352,7 @@
         let isReviewQuizMode = false; let autoAdvanceTimer = null; 
         let userFavoriteWords = new Set();
 
-        // 🎯 在前端也放一個淨化器，以防萬一
+        // 🎯 前端備用淨化器 
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
             return rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim(); 
@@ -397,7 +399,7 @@
             if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); }
         }
 
-        // 🎯 建立超美觀的「填空」UI
+        // 🎯 構建完美填字 UI
         function buildSpellUI(word) {
             const parts = word.split(' ');
             let html = '<div class="spell-input-wrapper">';
@@ -409,8 +411,9 @@
                     const pre = p[0];
                     const suf = p[p.length - 1];
                     const midLen = p.length - 2;
+                    const placeholders = Array(midLen).fill('_').join(' ');
                     html += `<span class="spell-char">${pre}</span>`;
-                    html += `<input type="text" class="spell-input" maxlength="${midLen}" style="width: ${midLen * 0.8}em;" autocomplete="off" />`;
+                    html += `<input type="text" class="spell-input" maxlength="${midLen}" placeholder="${placeholders}" style="width: ${midLen * 1.1}em;" autocomplete="off" />`;
                     html += `<span class="spell-char">${suf}</span>`;
                 }
                 html += '</div>&nbsp;&nbsp;';
@@ -418,8 +421,7 @@
             html += '</div>';
             return html;
         }
-        
-        // 取得填空答案
+
         function getSpellAnswer() {
             const container = document.getElementById('spellInputContainer');
             const parts = getPureWord(quizData[currentQuestionIndex].correctWord).split(' ');
@@ -449,7 +451,7 @@
             const speakBtn = document.getElementById('qSpeakBtn');
             
             optContainer.style.display = 'none'; spellContainer.style.display = 'none'; meaningDisplay.style.display = 'block'; 
-            speakBtn.style.display = 'none'; // 預設關閉喇叭
+            speakBtn.style.display = 'none'; 
 
             if (q.qType === 'listen') { 
                 meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>'; 
@@ -462,7 +464,6 @@
                 spellContainer.style.display = 'block'; 
                 spellContainer.innerHTML = buildSpellUI(getPureWord(q.correctWord));
                 
-                // 自動對焦第一個輸入框，綁定 Enter 跳下一格或下一題
                 const inputs = spellContainer.querySelectorAll('input');
                 if(inputs.length > 0) setTimeout(() => inputs[0].focus(), 100);
                 
@@ -522,7 +523,13 @@
             
             if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！獲得 🥇 榮譽金牌', 'success'); } else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); }
             
-            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; showView('resultView'); drawChart(correctCount, totalQuestions - correctCount);
+            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; 
+            showView('resultView'); 
+            
+            // 🎯 畫出有百分比的甜甜圈
+            document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%';
+            drawChart(correctCount, totalQuestions - correctCount);
+            
             if (currentUser !== '訪客') { apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); }
         }
 
@@ -649,7 +656,7 @@
         // ==========================================
         function gradeAiEssay() {
             const text = document.getElementById('essayInput').value.trim();
-            const topic = document.getElementById('essayTopicInput').value.trim(); // 抓取題目
+            const topic = document.getElementById('essayTopicInput').value.trim(); 
             if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning');
             
             const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; 
