@@ -49,12 +49,6 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 120px; }
 
-        /* 🎯 全新智慧拆字填空 UI */
-        .spell-input-wrapper { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin: 20px 0; gap: 5px;}
-        .spell-char { font-size: 1.8em; font-weight: 800; color: var(--primary-color); margin: 0 2px;}
-        .spell-input { border: none !important; border-bottom: 3px solid var(--primary-hover) !important; background: transparent !important; color: var(--danger-color) !important; font-size: 1.8em !important; font-weight: 800 !important; text-align: center !important; outline: none !important; padding: 0 !important; margin: 0 4px !important; font-family: monospace !important; border-radius: 0 !important;}
-        .spell-input:focus { border-bottom-color: var(--secondary-color) !important; }
-
         .btn { padding: 14px 24px; border: none; border-radius: var(--radius-md); font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active:not(:disabled) { transform: scale(0.98); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -226,7 +220,6 @@
             </div>
             
             <div class="question-card">
-                <button id="qSpeakBtn" class="speak-btn" style="display:none;" onclick="playCurrentWordAudio()">🔊</button>
                 <div id="meaningDisplay">載入中...</div>
             </div>
             
@@ -459,7 +452,6 @@
                 if (/[^a-zA-Z]/.test(char)) { 
                     currentSpellTemplate.push(char); // 符號直接顯示
                 } else {
-                    // 如果是英文，判斷它在哪個單字區塊裡
                     let isEdge = false;
                     let start = i, end = i;
                     while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--;
@@ -513,12 +505,8 @@
             const optContainer = document.getElementById('optionsContainer'); 
             const spellArea = document.getElementById('spellVisualArea');
             const typingInput = document.getElementById('typingInput');
-            const speakBtn = document.getElementById('qSpeakBtn');
             
             optContainer.style.display = 'none'; spellArea.style.display = 'none'; meaningDisplay.style.display = 'block'; 
-            
-            // 🔇 測驗中的一般題目絕對不顯示發音按鈕！
-            speakBtn.style.display = 'none'; 
 
             if (q.qType === 'listen') { 
                 meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>'; 
@@ -530,7 +518,6 @@
                 meaningDisplay.textContent = q.questionText; // 卡片內只有乾淨中文
                 spellArea.style.display = 'flex'; 
                 
-                // 初始化拆字引擎
                 initSpellTemplate(q.correctWord);
                 typingInput.value = userAnswers[q.id] || ''; // 恢復作答紀錄
                 updateSpellVisual();
@@ -745,7 +732,7 @@
         }
 
         // ==========================================
-        // 🤖 AI 作文與家教 (完美套用大考中心標準)
+        // 🤖 AI 作文與家教 (抓 Bug & 退還機制)
         // ==========================================
         function gradeAiEssay() {
             const text = document.getElementById('essayInput').value.trim();
@@ -759,28 +746,20 @@
                 btn.disabled = false; 
                 document.getElementById('essayLoading').style.display = 'none';
                 
-                if (res.success && res.data) {
-                    // 大考中心評分細項展開
+                if (res.success && res.data && res.data.scores) {
                     document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`;
                     document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`;
-                    
                     document.getElementById('resEssayOverall').textContent = res.data.overallComment;
-                    
                     document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`;
                     document.getElementById('a-content').textContent = res.data.scores.content.analysis;
-                    
                     document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`;
                     document.getElementById('a-org').textContent = res.data.scores.organization.analysis;
-                    
                     document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`;
                     document.getElementById('a-lang').textContent = res.data.scores.language.analysis;
-                    
                     document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`;
                     document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis;
-                    
                     document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`;
                     document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis;
-
                     document.getElementById('resEssaySuggestions').textContent = res.data.suggestions;
                     document.getElementById('resEssayKey').innerHTML = res.data.keyImprovements.replace(/\n/g, '<br>');
                     document.getElementById('resEssayRevised').innerHTML = res.data.revisedEssay.replace(/\n/g, '<br>');
@@ -788,8 +767,12 @@
                     document.getElementById('essayResult').style.display = 'block';
                     updateNavbarBadges(); 
                 } else {
-                    Swal.fire('批改失敗', res.message, 'error');
+                    Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error');
                 }
+            }).catch(e => {
+                btn.disabled = false;
+                document.getElementById('essayLoading').style.display = 'none';
+                Swal.fire('網路錯誤', '無法連線到伺服器', 'error');
             });
         }
 
