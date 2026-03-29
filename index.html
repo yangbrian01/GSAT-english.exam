@@ -43,7 +43,8 @@
 
         /* --- 表單/按鈕 --- */
         .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9em; color: var(--text-muted); }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: var(--text-main); }
+        .input-desc { font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
         input[type="text"], input[type="password"], input[type="number"], select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1em; background-color: #f8fafc; transition: 0.2s; font-family: inherit; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 120px; }
@@ -55,7 +56,7 @@
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-secondary { background-color: white; color: var(--text-main); border: 2px solid var(--border-color); }
         .btn-success { background-color: var(--secondary-color); color: white; }
-        .btn-outline { background: transparent; color: var(--text-muted); padding: 10px; }
+        .btn-outline { background: transparent; color: var(--text-muted); padding: 10px; border: 2px solid var(--border-color); }
 
         .spinner { width: 35px; height: 35px; border: 3px solid rgba(99, 102, 241, 0.2); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -77,7 +78,6 @@
         .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 2px solid var(--border-color); }
         .flashcard-front { background-color: white; color: var(--text-main); }
         .flashcard-back { background-color: #e0e7ff; color: var(--primary-color); transform: rotateY(180deg); border-color: #c7d2fe; overflow-y: auto;}
-        
         .fc-word { font-size: 2.2em; font-weight: 800; margin-bottom: 10px; word-break: break-word; line-height: 1.3;}
         .fc-hint { font-size: 0.9em; opacity: 0.6; position: absolute; bottom: 20px; }
         .fc-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -93,7 +93,6 @@
         .vocab-cat-btn { background: white; border: 2px solid var(--border-color); padding: 20px 10px; border-radius: var(--radius-md); text-align: center; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
         .vocab-cat-btn:hover, .vocab-cat-btn.active { border-color: var(--primary-color); background: #e0e7ff; color: var(--primary-color); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
         .cat-icon { font-size: 1.8em; }
-        
         .az-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 8px; margin-bottom: 20px; }
         .az-btn { background: white; border: 2px solid var(--border-color); border-radius: 8px; font-weight: bold; padding: 10px 0; cursor: pointer; transition: 0.2s; text-align: center;}
         .az-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
@@ -105,6 +104,11 @@
         .ai-field strong { display: block; color: var(--text-main); margin-bottom: 5px; }
         .ai-field p { color: var(--text-muted); line-height: 1.5; }
         .ai-score { font-size: 3em; font-weight: 800; color: var(--secondary-color); text-align: center; margin: 10px 0; }
+
+        /* 個人檔案專區 */
+        .profile-card { background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 25px; margin-bottom: 25px; }
+        .avatar-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #f1f5f9; display: flex; justify-content: center; align-items: center; font-size: 3em; border: 2px solid var(--border-color); margin: 0 auto 15px auto;}
+        .quota-box { display: flex; justify-content: space-between; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0;}
 
         .flex-row { display: flex; gap: 15px; }
         .view-section { display: none; }
@@ -144,7 +148,7 @@
             <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
             <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
             <button class="nav-btn" onclick="showView('leaderboardView')">🏆 排行榜</button>
-            <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">⚙️ 設定</button>
+            <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
             <button class="nav-btn" style="color: var(--danger-color);" onclick="handleLogout()">登出</button>
         </div>
     </nav>
@@ -277,6 +281,7 @@
 
         <div id="aiTutorView" class="view-section view-container">
             <h2>🤖 隨身解題家教</h2>
+            <p class="subtitle">遇到不懂的文法或題目？貼上來，AI 老師幫你解惑！</p>
             <div class="input-group"><label>題目或段落內容</label><textarea id="tutorContextInput" placeholder="例如: Having finished his homework..."></textarea></div>
             <div class="input-group"><label>你想問什麼？</label><input type="text" id="tutorDoubtInput" placeholder="例如: 為什麼是用 Having finished？"></div>
             <button id="btnAskTutor" class="btn btn-primary" onclick="askAiTutor()">🙋‍♂️ 舉手發問</button>
@@ -285,10 +290,49 @@
         </div>
 
         <div id="profileView" class="view-section view-container">
-            <h2>⚙️ 帳號設定</h2>
-            <div class="flex-row" style="align-items: center; margin-bottom: 30px;"><div style="font-size: 80px;" id="profileAvatarDisplay">👤</div><div><h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800; font-size: 1.5em; margin-bottom: 5px;"></h3></div></div>
-            <div class="input-group"><label>更新頭像 (輸入 Emoji 或圖片網址)</label><input type="text" id="newAvatarInput" placeholder="例如: 🚀 或 https://..."></div>
-            <button class="btn btn-success" onclick="handleAvatarUpdate()">儲存設定</button>
+            <h2>👤 個人檔案與設定</h2>
+            
+            <div class="profile-card" style="text-align: center;">
+                <div class="avatar-preview" id="profileAvatarPreview">👤</div>
+                <h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800; font-size: 1.8em; margin-bottom: 5px;"></h3>
+                <div id="profileBadgesDisplay" style="margin-bottom: 15px;"></div>
+                
+                <div class="input-group" style="text-align: left;">
+                    <label>更換大頭貼照</label>
+                    <input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: white;" onchange="handleAvatarFile(event)">
+                    <p class="input-desc">支援 JPG/PNG 圖片上傳，將自動壓縮。</p>
+                </div>
+            </div>
+
+            <div class="profile-card">
+                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">帳號安全</h3>
+                <div class="input-group">
+                    <label>修改使用者名稱</label>
+                    <input type="text" id="profNewUsername" placeholder="輸入新的名稱 (留空則不修改)">
+                </div>
+                <div class="input-group">
+                    <label>修改密碼</label>
+                    <input type="password" id="profNewPassword" placeholder="輸入新密碼 (留空則不修改)">
+                </div>
+                <button class="btn btn-secondary" onclick="handleCredentialUpdate()">儲存帳號設定</button>
+            </div>
+
+            <div class="profile-card">
+                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">🧠 AI 服務配額與金鑰</h3>
+                
+                <div id="quotaInfoBox">
+                    <div class="quota-box"><span>🤖 解題家教</span><strong id="qTutor">今日已用: 0 / 2 次</strong></div>
+                    <div class="quota-box"><span>✍️ 作文批改</span><strong id="qEssay">今日已用: 0 / 1 篇</strong></div>
+                    <p class="input-desc" style="color: #d97706; margin-bottom: 15px;">※ 系統配額為全免費提供，每日重置。字典查詢不扣配額。</p>
+                </div>
+
+                <div class="input-group" style="margin-top: 20px;">
+                    <label style="color: var(--primary-color);">綁定專屬 Gemini API Key 解鎖無限額度</label>
+                    <p class="input-desc">什麼是 API Key？它就像是你專屬的 AI 通行證。只要前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--primary-color); text-decoration:underline;">Google AI Studio</a> 免費申請一串金鑰並填入下方，你就能無限次數使用家教與改作文功能！</p>
+                    <input type="text" id="profApiKey" placeholder="輸入你的 API Key (以 AIza 開頭...)">
+                </div>
+                <button class="btn btn-outline" onclick="handleApiKeyUpdate()">綁定 API Key</button>
+            </div>
         </div>
 
         <div id="leaderboardView" class="view-section view-container" style="max-width: 800px;">
@@ -311,10 +355,10 @@
         let isReviewQuizMode = false; let autoAdvanceTimer = null; 
         let userFavoriteWords = new Set();
 
-        // 🎯 終極淨化器：把字典的 n. v. adj. phr. 徹底清光
+        // 🎯 只要呼叫這個函數，就能把字尾的 n. v. adj. 乾淨切掉
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
-            return rawWord.toString().replace(/(?:\s+)?(?:adj|adv|n|v|prep|conj|pron|phr|vi|vt)\..*$/i, '').trim(); 
+            return rawWord.toString().replace(/(?:\s+)?(?:adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\.?.*?$/i, '').trim(); 
         }
         
         function speakWord(text) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.speak(u); }
@@ -409,7 +453,7 @@
             document.getElementById('vbPrev').disabled = currentVocabCardIndex === 0; document.getElementById('vbNext').disabled = currentVocabCardIndex === currentLetterList.length - 1;
 
             const isFav = userFavoriteWords.has(q.word); 
-            // 🎯 確保卡片上的英文永遠乾淨無瑕
+            // 🎯 卡片英文確保無詞性
             const cleanWord = getPureWord(q.word);
             const safeEnWord = cleanWord.replace(/'/g, "\\'");
             
@@ -461,14 +505,14 @@
         }
 
         // ==========================================
-        // 🤖 AI 作文與家教 (防連點)
+        // 🤖 AI 作文與家教 (防連點與額度處理)
         // ==========================================
         function gradeAiEssay() {
             const text = document.getElementById('essayInput').value.trim();
             if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning');
             const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; 
             document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block';
-            apiCall('aiEssayGrading', { essayText: text }).then(res => {
+            apiCall('aiEssayGrading', { username: currentUser, essayText: text }).then(res => {
                 btn.disabled = false; 
                 document.getElementById('essayLoading').style.display = 'none';
                 if (res.success && res.data) {
@@ -479,6 +523,7 @@
                     document.getElementById('resEssayGrammar').textContent = res.data.grammar;
                     document.getElementById('resEssayGeneral').textContent = res.data.general;
                     document.getElementById('essayResult').style.display = 'block';
+                    updateNavbarBadges(); // 扣完額度刷新顯示
                 } else Swal.fire('批改失敗', res.message, 'error');
             });
         }
@@ -489,25 +534,107 @@
             if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning');
             const btn = document.getElementById('btnAskTutor'); btn.disabled = true; 
             document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block';
-            apiCall('aiTutor', { question: context, doubt: doubt }).then(res => {
+            apiCall('aiTutor', { username: currentUser, question: context, doubt: doubt }).then(res => {
                 btn.disabled = false; 
                 document.getElementById('tutorLoading').style.display = 'none';
                 if (res.success && res.data) {
                     document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>');
                     document.getElementById('tutorResult').style.display = 'block';
+                    updateNavbarBadges(); // 扣完額度刷新顯示
                 } else Swal.fire('呼叫老師失敗', res.message, 'error');
             });
         }
 
         // ==========================================
-        // 基礎測驗與其他邏輯
+        // 👤 個人檔案與圖片上傳處理
+        // ==========================================
+        function showProfileView() { 
+            document.getElementById('profileUsernameDisplay').textContent = currentUser; 
+            apiCall('getProfileData', { username: currentUser }).then(res => { 
+                if (res.success) { 
+                    const av = res.avatar || '👤'; const avDiv = document.getElementById('profileAvatarPreview'); 
+                    if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; } 
+                    else { avDiv.innerHTML = av; } 
+                    
+                    let badgesHtml = ''; 
+                    if (res.hasGoldMedal) badgesHtml += '<span title="滿分金牌" style="font-size:1.5em; margin-right:10px;">🥇</span> '; 
+                    if (res.streak > 0) badgesHtml += `<span class="badge" style="font-size:1em;">🔥 連勝 ${res.streak} 天</span>`; 
+                    document.getElementById('profileBadgesDisplay').innerHTML = badgesHtml; 
+                    
+                    // 顯示配額
+                    if (res.hasApiKey) {
+                        document.getElementById('quotaInfoBox').innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>';
+                    } else {
+                        document.getElementById('qTutor').textContent = `今日已用: ${res.tutorUsed} / 2 次`;
+                        document.getElementById('qEssay').textContent = `今日已用: ${res.essayUsed} / 1 篇`;
+                    }
+                } 
+            }); 
+        }
+
+        // 圖片壓縮為 Base64
+        function handleAvatarFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                    const MAX_SIZE = 150; let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    canvas.width = width; canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    document.getElementById('profileAvatarPreview').innerHTML = `<img src="${base64Data}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`;
+                    
+                    showLoading('上傳中...');
+                    apiCall('updateAvatarBase64', { username: currentUser, base64Img: base64Data }).then(r => {
+                        Swal.close(); if(r.success) Swal.fire('成功', '大頭貼已更新', 'success'); else Swal.fire('失敗', r.message, 'error');
+                    });
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleCredentialUpdate() {
+            const newU = document.getElementById('profNewUsername').value.trim();
+            const newP = document.getElementById('profNewPassword').value;
+            if (!newU && !newP) return;
+            if (newU && newU.length < 3) return Swal.fire('錯誤', '新帳號至少3碼', 'warning');
+            if (newP && newP.length < 4) return Swal.fire('錯誤', '新密碼至少4碼', 'warning');
+            
+            showLoading('更新中...');
+            apiCall('updateUserCredentials', { username: currentUser, newUsername: newU, newPassword: newP }).then(res => {
+                if(res.success) {
+                    Swal.fire('成功', '帳號資料已更新', 'success');
+                    currentUser = res.newUsername; localStorage.setItem('user', currentUser);
+                    document.getElementById('profNewUsername').value = ''; document.getElementById('profNewPassword').value = '';
+                    showProfileView();
+                } else Swal.fire('失敗', res.message, 'error');
+            });
+        }
+
+        function handleApiKeyUpdate() {
+            const k = document.getElementById('profApiKey').value.trim();
+            if (!k || !k.startsWith('AIza')) return Swal.fire('格式錯誤', '請輸入有效的 API Key (以 AIza 開頭)', 'warning');
+            showLoading('綁定中...');
+            apiCall('updateApiKey', { username: currentUser, apiKey: k }).then(res => {
+                if(res.success) { Swal.fire('成功', res.message, 'success'); showProfileView(); document.getElementById('profApiKey').value=''; }
+                else Swal.fire('失敗', '綁定失敗', 'error');
+            });
+        }
+
+        // ==========================================
+        // 基礎測驗邏輯
         // ==========================================
         function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號>3, 密碼>4','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
         
-        function maskWord(word) { let parts = word.split(' '); return parts.map(p => { if (p.includes('.') || p.includes('/') || p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; if (p.length <= 2) return p; return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1]; }).join('  '); }
-
         function startGame(isReview = false) {
             isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value;
             if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } 
@@ -520,6 +647,8 @@
             if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; document.getElementById('typingInput').value = ''; showView('quizView'); renderQuestion(0); }
         }
 
+        function maskWord(word) { let parts = word.split(' '); return parts.map(p => { if (p.includes('.') || p.includes('/') || p.includes('(') || /[\u4e00-\u9fa5]/.test(p)) return p; if (p.length <= 2) return p; return p[0] + ' _ '.repeat(p.length - 2) + p[p.length - 1]; }).join('  '); }
+
         function renderQuestion(index) {
             clearTimeout(autoAdvanceTimer); currentQuestionIndex = index; const q = quizData[index];
             document.getElementById('currentQNum').textContent = index + 1; document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction;
@@ -529,19 +658,18 @@
             
             hintDiv.style.display = 'none'; optContainer.style.display = 'none'; typeContainer.style.display = 'none'; meaningDisplay.style.display = 'block'; manualNextBtn.style.display = 'none'; prevButton.style.display = 'block'; nextButton.style.display = 'block'; speakBtn.style.display = 'none';
 
+            // 🎯 後端已經淨化過，所以前端直接用就好
             if (q.qType === 'listen') { 
                 meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>'; setTimeout(() => playCurrentWordAudio(), 400); optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); 
             } 
             else if (q.qType === 'spell') { 
                 meaningDisplay.textContent = q.questionText; hintDiv.style.display = 'block'; 
-                // 🎯 魔王模式提示遮罩，保證是純單字
-                hintDiv.textContent = maskWord(getPureWord(q.correctWord)); 
+                hintDiv.textContent = maskWord(q.correctWord); 
                 typeContainer.style.display = 'block'; typeInput.value = userAnswers[q.id] || ''; setTimeout(() => typeInput.focus(), 100); 
                 typeInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); userAnswers[q.id] = typeInput.value.trim(); handleNextQuestion(); } }; 
                 prevButton.style.display = 'none'; nextButton.style.display = 'none'; manualNextBtn.style.display = 'block'; manualNextBtn.textContent = (index === totalQuestions - 1) ? '交卷送出' : '下一題'; 
             } 
             else { 
-                // 🎯 經典選擇題：如果顯示的是英文，加上發音按鈕
                 meaningDisplay.textContent = q.questionText; 
                 if (q.qType === 'en2ch') speakBtn.style.display = 'flex';
                 optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); 
@@ -559,7 +687,7 @@
             let correctCount = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
             quizData.forEach((q, i) => {
                 const uAns = userAnswers[q.id] || ''; let isCorr = false;
-                if (q.qType === 'spell') { isCorr = (uAns.toLowerCase() === getPureWord(q.correctAnswer).toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); }
+                if (q.qType === 'spell') { isCorr = (uAns.toLowerCase() === q.correctAnswer.toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); }
                 if (isCorr) correctCount++;
                 submitData.push({ questionId: q.id, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
                 detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; background: #f8fafc; border-radius: 8px;"><h4 style="margin-bottom: 8px;">${i+1}. ${q.qType === 'listen' ? '🎧 純聽力題' : q.questionText} <span style="color:${isCorr?'#10b981':'#ef4444'}">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p></div>`;
@@ -575,15 +703,12 @@
         let reviewCardsData = []; let currentFlashcardIndex = 0;
         function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; renderSingleFlashcard(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } }); }
         function renderSingleFlashcard() { if (reviewCardsData.length === 0) return; const q = reviewCardsData[currentFlashcardIndex]; const area = document.getElementById('singleFlashcardArea'); document.getElementById('fcCounter').textContent = `${currentFlashcardIndex + 1} / ${reviewCardsData.length}`; document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0; document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1; const hasChinese = /[\u4E00-\u9FFF]/.test(q.question); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; 
-        // 🎯 這裡也套用純單字淨化器
         const cleanWord = getPureWord(enWord);
         const safeEnWord = cleanWord.replace(/'/g, "\\'"); 
         area.innerHTML = `<div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};"><div class="flashcard-inner"><div class="flashcard-front"><div class="fc-word" style="font-size: 1.8em;">${chWord}</div><div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div><div class="fc-hint">點擊卡片翻面看英文</div></div><div class="flashcard-back"><button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><div class="fc-word">${cleanWord}</div>${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}</div></div></div>`; const cardElement = document.getElementById('fcContainer'); cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40) { if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); } if (touchEndX > touchStartX + 40) { if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); } }, {passive: true}); }
         function changeFlashcard(delta) { const newIdx = currentFlashcardIndex + delta; if (newIdx >= 0 && newIdx < reviewCardsData.length) { currentFlashcardIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
 
         function updateNavbarBadges() { apiCall('getProfileData', { username: currentUser }).then(res => { if(res.success) { const st = document.getElementById('navStreak'); const dSt = document.getElementById('dashStreak'); if (res.streak > 0) { st.style.display = 'inline-block'; st.textContent = `🔥 ${res.streak}`; dSt.style.display = 'inline-block'; dSt.textContent = `🔥 連勝 ${res.streak} 天`; } const md = document.getElementById('navMedal'); const dMd = document.getElementById('dashMedal'); if(res.hasGoldMedal) { md.style.display = 'inline-block'; dMd.style.display = 'inline-block'; } } }); }
-        function showProfileView() { document.getElementById('profileUsernameDisplay').textContent = currentUser; apiCall('getProfileData', { username: currentUser }).then(res => { if (res.success) { const av = res.avatar || '👤'; const avDiv = document.getElementById('profileAvatarDisplay'); if(av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:90px; height:90px; border-radius:50%; object-fit:cover;">`; } else { avDiv.textContent = av; } document.getElementById('profileCorrectRate').textContent = res.correctRate; document.getElementById('profileTotalAnswered').textContent = res.totalAnswered; let badgesHtml = ''; if (res.hasGoldMedal) badgesHtml += '<span title="滿分金牌">🥇 金牌得主</span> '; if (res.streak > 0) badgesHtml += `<span class="badge" style="font-size:0.9em;">🔥 ${res.streak} 天連勝</span>`; document.getElementById('profileBadgesDisplay').innerHTML = badgesHtml; } }); }
-        function handleAvatarUpdate() { const newAvatar = document.getElementById('newAvatarInput').value.trim(); if(!newAvatar) return Swal.fire('請輸入資料', '', 'info'); showLoading('更新中...'); apiCall('updateAvatar', { username: currentUser, newAvatar }).then(res => { Swal.fire(res.success?'成功':'失敗', res.message, res.success?'success':'error'); if (res.success) showProfileView(); document.getElementById('newAvatarInput').value = ''; }); }
         function loadLeaderboardData() { const container = document.getElementById('leaderboardTableContainer'); container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; apiCall('getLeaderboardData').then(res => { if(res.data && res.data.length > 0) { let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>答對率</th><th>題數</th></tr>'; res.data.forEach((d, i) => { const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; const isMe = String(d.username).trim().toLowerCase() === String(currentUser).trim().toLowerCase(); const bgColor = isMe ? '#d1fae5' : (i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent'); const borderStyle = isMe ? 'border: 2px solid #10b981; box-shadow: inset 0 0 0 2px #10b981;' : ''; const medal = d.medal ? '🥇' : ''; const streak = d.streak > 0 ? `<span style="color:#d97706; font-size:0.8em; font-weight:bold; margin-left:5px;">🔥${d.streak}</span>` : ''; const nameDisplay = isMe ? `<span style="color:#047857;">${d.username} (你)</span>` : d.username; html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay} ${medal} ${streak}</td><td style="color:var(--primary-color); font-weight:800; text-align:center;">${d.rateDisplay}</td><td style="text-align:center;">${d.totalAns}</td></tr>`; }); container.innerHTML = html + '</table>'; } else { container.innerHTML = '<p style="text-align:center; padding:20px;">尚無資料</p>'; } }); }
 
         window.onload = () => { if (currentUser) showView('setupView'); else showView('loginView'); };
