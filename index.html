@@ -16,7 +16,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 
     <style>
-        /* ☀️ 預設亮色模式變數 */
         :root {
             --primary-color: #6366f1; --primary-hover: #4f46e5;
             --secondary-color: #10b981; --bg-color: #f8fafc;
@@ -27,7 +26,6 @@
             --nav-bg: rgba(255, 255, 255, 0.98);
         }
 
-        /* 🌙 高級深色模式變數 (點擊按鈕後切換) */
         body.dark-mode {
             --primary-color: #818cf8; --primary-hover: #6366f1;
             --secondary-color: #34d399; --bg-color: #0f172a;
@@ -40,7 +38,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; transition: background-color 0.3s, color 0.3s;}
 
-        /* --- 導覽列 --- */
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
         .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
         .hamburger-btn { display: none; background: none; border: none; font-size: 1.8em; color: var(--text-main); cursor: pointer; padding: 0 5px; }
@@ -50,7 +47,6 @@
         .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); }
         .badge { background: #fffbeb; color: #d97706; padding: 4px 10px; border-radius: 12px; font-size: 0.9em; font-weight: 700; white-space: nowrap; }
 
-        /* --- 基礎佈局 --- */
         .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; overflow: hidden; }
         .view-container { width: 100%; max-width: 650px; text-align: left; animation: fadeIn 0.3s ease-out; }
         .centered-view { text-align: center; max-width: 450px; margin: 0 auto; }
@@ -61,7 +57,6 @@
         .title-badge-wrapper { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;}
         .title-badge-wrapper h2 { margin-bottom: 0; }
 
-        /* --- 表單/按鈕/卡片 --- */
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: var(--text-main); }
         .input-desc { font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
@@ -81,7 +76,6 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-box { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 600; }
 
-        /* --- 測驗 UI --- */
         .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--border-color); }
         .question-card { position: relative; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 16px; padding: 40px 20px; margin-bottom: 30px; font-size: 2.2em; font-weight: 800; color: var(--primary-color); word-break: break-word; text-align: center; transition: 0.3s;}
         
@@ -91,11 +85,9 @@
         .option-btn { display: block; width: 100%; padding: 16px; margin-bottom: 12px; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1em; font-weight: 600; color: var(--text-main); cursor: pointer; transition: 0.2s; line-height: 1.4; }
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
 
-        /* 🎯 完美智慧填空 UI */
         .spell-input-area { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 30px; cursor: text; padding: 20px;}
         .spell-visual-text { font-family: monospace; font-size: 2.2em; font-weight: 800; color: var(--primary-color); letter-spacing: 0.2em; text-align: center; line-height: 1.5; word-break: break-all;}
 
-        /* --- 🃏 閃卡 --- */
         .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none; }
         .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
         .flashcard-container.flipped .flashcard-inner { transform: rotateY(180deg); }
@@ -106,11 +98,15 @@
         .fc-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .fc-nav-btn { background: var(--card-bg); color: var(--text-main); border: 2px solid var(--border-color); border-radius: 50%; width: 50px; height: 50px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: 0.2s;}
 
-        /* --- 📋 列表視圖 --- */
+        .slide-left { animation: slideLeftAnim 0.3s forwards ease-out; }
+        .slide-right { animation: slideRightAnim 0.3s forwards ease-out; }
+        @keyframes slideLeftAnim { 0% { transform: translateX(40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes slideRightAnim { 0% { transform: translateX(-40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+
         .review-list-item { background: var(--card-bg); border: 2px solid var(--border-color); padding: 15px; border-radius: var(--radius-md); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 15px;}
         .list-speak-btn { background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 50%; width: 45px; height: 45px; font-size: 1.3em; cursor: pointer; flex-shrink: 0; color: var(--primary-color); transition: 0.2s; display: flex; justify-content: center; align-items: center;}
+        .list-speak-btn:hover { background: #e2e8f0; transform: scale(1.1); }
 
-        /* --- 📖 單字書系統 --- */
         .vocab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .vocab-cat-btn { background: var(--card-bg); color: var(--text-main); border: 2px solid var(--border-color); padding: 20px 10px; border-radius: var(--radius-md); text-align: center; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
         .vocab-cat-btn:hover, .vocab-cat-btn.active { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px);}
@@ -119,17 +115,17 @@
         .az-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
         .az-btn.disabled { opacity: 0.2; cursor: not-allowed; }
 
-        /* AI 區塊 */
         .ai-result-box { background: var(--card-bg); border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 25px; margin-top: 20px; text-align: left; display: none;}
         .ai-title { color: var(--primary-color); font-weight: 800; font-size: 1.3em; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .ai-field { margin-bottom: 15px; }
+        .ai-field strong { display: block; color: var(--text-main); margin-bottom: 5px; }
+        .ai-field p { color: var(--text-muted); line-height: 1.5; }
         .ai-score { font-size: 3em; font-weight: 800; color: var(--secondary-color); text-align: center; margin: 10px 0; }
 
-        /* 個人檔案專區 */
         .profile-card { background: var(--card-bg); border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 25px; margin-bottom: 25px; }
         .avatar-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: var(--bg-color); display: flex; justify-content: center; align-items: center; font-size: 3em; border: 2px solid var(--border-color); margin: 0 auto 15px auto;}
         .quota-box { display: flex; justify-content: space-between; background: var(--bg-color); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border-color);}
 
-        /* 🌙 右下角深色模式切換浮動按鈕 */
         .theme-toggle-float {
             position: fixed; bottom: 30px; right: 30px; width: 55px; height: 55px;
             border-radius: 50%; background: var(--primary-color); color: white;
@@ -145,7 +141,6 @@
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95em;}
         .data-table th, .data-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: top;}
         
-        /* SweetAlert2 深色模式適配 */
         body.dark-mode .swal2-popup { background: var(--card-bg); color: var(--text-main); }
         body.dark-mode .swal2-title, body.dark-mode .swal2-html-container { color: var(--text-main); }
 
@@ -352,7 +347,7 @@
                 <div class="ai-field"><p id="resEssayOverall"></p></div>
 
                 <div class="ai-title">評分細項分析</div>
-                <table class="data-table" style="margin-bottom: 20px;">
+                <table class="data-table" style="margin-bottom: 20px; background: var(--card-bg);">
                     <tr><th>項目</th><th>分數</th><th>評分分析</th></tr>
                     <tr><td>內容</td><td id="s-content" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-content"></td></tr>
                     <tr><td>組織</td><td id="s-org" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-org"></td></tr>
@@ -383,7 +378,7 @@
                 <div class="avatar-preview" id="profileAvatarPreview">👤</div>
                 <h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800; font-size: 1.8em; margin-bottom: 5px;"></h3>
                 <div id="profileBadgesDisplay" style="margin-bottom: 15px;"></div>
-                <div class="input-group" style="text-align: left;"><label>更換大頭貼照</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">支援 JPG/PNG 圖片上傳，將自動壓縮。</p></div>
+                <div class="input-group" style="text-align: left;"><label>更換大頭貼照</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">上傳您的專屬大頭貼照。</p></div>
             </div>
             <div class="profile-card">
                 <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">帳號安全</h3>
@@ -406,6 +401,14 @@
     </main>
 
     <script>
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        function applyTheme() {
+            if (isDarkMode) { document.body.classList.add('dark-mode'); document.getElementById('themeToggleBtn').textContent = '☀️'; } 
+            else { document.body.classList.remove('dark-mode'); document.getElementById('themeToggleBtn').textContent = '🌙'; }
+        }
+        function toggleTheme() { isDarkMode = !isDarkMode; localStorage.setItem('darkMode', isDarkMode); applyTheme(); }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed: ', err)); }); }
+
         const API_URL = 'https://script.google.com/macros/s/AKfycbyXAx1jgdExUKrNHWpd4v8crV0KI4QXVMGr4Kzht8OG314UfxZKlPbLKlDYc_YqTVM2/exec';
         
         const showLoading = (text) => { Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); };
@@ -414,37 +417,12 @@
             catch (e) { return { success: false, message: "網路連線異常，請檢查網路狀態。" }; }
         }
 
-        // ==========================================
-        // 🌙 高級深色模式 (Dark Mode) 與 PWA 註冊
-        // ==========================================
-        let isDarkMode = localStorage.getItem('darkMode') === 'true';
-        function applyTheme() {
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-                document.getElementById('themeToggleBtn').textContent = '☀️';
-            } else {
-                document.body.classList.remove('dark-mode');
-                document.getElementById('themeToggleBtn').textContent = '🌙';
-            }
-        }
-        function toggleTheme() {
-            isDarkMode = !isDarkMode;
-            localStorage.setItem('darkMode', isDarkMode);
-            applyTheme();
-        }
-        // 註冊 PWA Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Registration failed: ', err));
-            });
-        }
-
         let quizData = [], currentQuestionIndex = 0, userAnswers = {}, totalQuestions = 0;
         let currentUser = localStorage.getItem('user'), sessionToken = localStorage.getItem('token');
         let isReviewQuizMode = false; let autoAdvanceTimer = null; 
         let userFavoriteWords = new Set();
 
-        // 🎯 淨化器 
+        // 🎯 確保純文字發音
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
             return rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim(); 
@@ -491,6 +469,7 @@
             if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); }
         }
 
+        // 🎯 全新智慧拆字引擎 
         let currentSpellTemplate = [];
         function initSpellTemplate(word) {
             const pureWord = getPureWord(word);
@@ -550,10 +529,8 @@
             const optContainer = document.getElementById('optionsContainer'); 
             const spellArea = document.getElementById('spellVisualArea');
             const typingInput = document.getElementById('typingInput');
-            const speakBtn = document.getElementById('qSpeakBtn');
             
             optContainer.style.display = 'none'; spellArea.style.display = 'none'; meaningDisplay.style.display = 'block'; 
-            speakBtn.style.display = 'none'; 
 
             if (q.qType === 'listen') { 
                 meaningDisplay.innerHTML = '<div class="audio-only-btn" onclick="playCurrentWordAudio()">🎧 <span style="font-size:0.3em; display:block; margin-top:5px; color:var(--text-muted);">點擊播放聽力</span></div>'; 
@@ -562,7 +539,7 @@
                 renderOptionsUI(q, optContainer); 
             } 
             else if (q.qType === 'spell') { 
-                meaningDisplay.textContent = q.questionText; 
+                meaningDisplay.textContent = q.questionText; // 只有中文
                 spellArea.style.display = 'flex'; 
                 
                 initSpellTemplate(q.correctWord);
@@ -655,7 +632,7 @@
         function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
 
         // ==========================================
-        // 📖 單字書
+        // 📖 單字書 A-Z 與 AI 快取邏輯
         // ==========================================
         let currentVocabList = []; let currentLetterList = []; let currentVocabCardIndex = 0; let currentLevel = 0;
 
@@ -685,14 +662,14 @@
         function showLetterCards(letter) { currentLetterList = currentVocabList.filter(w => w.firstLetter === letter); currentVocabCardIndex = 0; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').style.display = 'inline-block'; renderSingleVocabCard(); }
 
         function loadVocabFavorites() {
-            if (currentUser === '訪客') return Swal.fire('訪客限制', '登入後才能建立專屬的不熟單字本喔！', 'info');
+            if (currentUser === '訪客') return Swal.fire('訪客限制', '登入後才能使用不熟單字本喔！', 'info');
             currentLevel = 0; document.getElementById('vocabHomeGrid').style.display = 'none'; document.getElementById('vocabLoading').style.display = 'block';
             apiCall('getFavorites', { username: currentUser }).then(res => {
                 document.getElementById('vocabLoading').style.display = 'none';
                 if (res.success) {
                     userFavoriteWords.clear(); res.words.forEach(w => userFavoriteWords.add(w.word));
-                    if (res.words.length === 0) { Swal.fire('空空如也', '目前還沒有收藏任何不熟單字喔！', 'info'); backToVocabHome(); } 
-                    else { currentLetterList = res.words; currentVocabCardIndex = 0; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').style.display = 'inline-block'; document.getElementById('vbBackToAzBtn').textContent = '返回單字書首頁'; renderSingleVocabCard(); }
+                    if (res.words.length === 0) { Swal.fire('空空如也', '目前還沒有收藏任何單字喔！', 'info'); backToVocabHome(); } 
+                    else { currentLetterList = res.words; currentVocabCardIndex = 0; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').style.display = 'inline-block'; document.getElementById('vbBackToAzBtn').textContent = '返回首頁'; renderSingleVocabCard(); }
                 }
             });
         }
@@ -732,7 +709,7 @@
                             <div class="fc-word">${cleanWord}</div>
                             <div class="fc-hint">點擊翻面</div>
                         </div>
-                        <div class="flashcard-back">
+                        <div class="flashcard-back" style="overflow-y: auto;">
                             <div class="fc-word" style="font-size:1.5em; margin-bottom:5px;">${q.meaning}</div>
                             <div id="aiBlock-${q.pureWord}" style="margin-top:15px; width:100%; text-align:left; font-size:0.9em; line-height:1.5; display:none;">
                                 <div id="aiSpinner-${q.pureWord}" style="text-align:center;"><div class="spinner" style="width:25px;height:25px;border-width:2px;"></div></div>
@@ -810,7 +787,7 @@
             }).catch(e => {
                 btn.disabled = false;
                 document.getElementById('essayLoading').style.display = 'none';
-                Swal.fire('網路錯誤', '無法連線到伺服器或連線逾時，請再試一次', 'error');
+                Swal.fire('網路錯誤', '無法連線到伺服器', 'error');
             });
         }
 
@@ -836,7 +813,7 @@
             }).catch(e => {
                 btn.disabled = false;
                 document.getElementById('tutorLoading').style.display = 'none';
-                Swal.fire('網路錯誤', '無法連線到伺服器或連線逾時，請再試一次', 'error');
+                Swal.fire('網路錯誤', '無法連線到伺服器', 'error');
             });
         }
 
@@ -915,7 +892,7 @@
         }
 
         // ==========================================
-        // 👤 個人檔案更新與其他功能
+        // 👤 個人檔案與設定
         // ==========================================
         function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
@@ -929,12 +906,12 @@
             reader.onload = function(e) {
                 const img = new Image(); img.onload = function() {
                     const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                    const MAX_SIZE = 150; let width = img.width; let height = img.height;
+                    const MAX_SIZE = 400; let width = img.width; let height = img.height;
                     if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
                     canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
-                    const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.9);
                     document.getElementById('profileAvatarPreview').innerHTML = `<img src="${base64Data}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`;
-                    showLoading('上傳中...'); apiCall('updateAvatarBase64', { username: currentUser, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) Swal.fire('成功', '大頭貼已更新', 'success'); else Swal.fire('失敗', r.message, 'error'); });
+                    showLoading('上傳至雲端空間中...'); apiCall('uploadAvatarToDrive', { username: currentUser, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) Swal.fire('成功', '大頭貼已上傳並產生網址！', 'success'); else Swal.fire('失敗', r.message, 'error'); });
                 }; img.src = e.target.result;
             }; reader.readAsDataURL(file);
         }
