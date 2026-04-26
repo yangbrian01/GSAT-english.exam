@@ -54,8 +54,8 @@
         .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; padding: 14px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
         .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); }
 
-        /* 🎯 這裡修正了 overflow 導致 sticky 失效的 Bug */
-        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; overflow-x: hidden; overflow-y: visible; }
+        /* 🎯 關鍵修復：移除所有 overflow 屬性，讓 sticky 能完美運作 */
+        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; }
         
         .view-container { width: 100%; max-width: 650px; text-align: left; animation: fadeIn 0.3s ease-out; }
         .centered-view { text-align: center; max-width: 450px; margin: 0 auto; }
@@ -98,14 +98,21 @@
         .spell-cursor { display: inline-block; width: 3px; height: 1.1em; background-color: var(--primary-color); vertical-align: text-bottom; animation: blink 1s step-end infinite; margin: 0 -1.5px; position: relative; z-index: 10; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* 🎯 歷屆試題計時器，加入 -webkit-sticky 支援舊版 Safari */
+        /* 🎯 歷屆試題專屬 UI (升級版懸浮計時器) */
         .exam-timer-bar {
-            position: -webkit-sticky; position: sticky; top: 15px; 
-            background: var(--card-bg); padding: 15px 25px; 
+            position: -webkit-sticky; position: sticky; 
+            top: 15px; 
+            background: rgba(255, 255, 255, 0.95); /* 蘋果風半透明 */
+            backdrop-filter: blur(10px);
+            padding: 15px 25px; 
             border-radius: var(--radius-md); border: 3px solid var(--danger-color); 
             display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 25px; z-index: 50; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15);
+            margin-bottom: 25px; 
+            z-index: 9999; /* 確保永遠在最上層 */
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15);
         }
+        body.dark-mode .exam-timer-bar { background: rgba(30, 41, 59, 0.95); }
+
         .exam-timer-text { color: var(--danger-color); font-weight: 900; font-size: 2em; font-family: monospace; letter-spacing: 2px;}
         .exam-section-title { color: var(--primary-color); font-size: 1.6em; font-weight: 800; border-bottom: 3px solid var(--border-color); padding-bottom: 10px; margin: 40px 0 20px 0; }
         .exam-topic-split { display: flex; gap: 30px; margin-bottom: 40px; background: var(--card-bg); padding: 25px; border-radius: var(--radius-md); border: 2px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.02);}
@@ -191,7 +198,7 @@
             .fc-word { font-size: 1.8em; }
             .spell-visual-text { font-size: 1.6em; }
             .theme-toggle-float { bottom: 20px; right: 20px; width: 50px; height: 50px; }
-            .exam-timer-bar { padding: 12px 15px; }
+            .exam-timer-bar { padding: 12px 15px; top: 0; }
             .exam-timer-text { font-size: 1.5em; }
         }
     </style>
@@ -528,7 +535,6 @@
             }
         }
 
-        // 🎯 核心渲染引擎：支援「共用下拉選單」防呆連動
         function renderExamPaper() {
             const container = document.getElementById('examPaperContent');
             let html = '';
@@ -537,12 +543,10 @@
                 currentExamData.examData.forEach(part => {
                     html += `<h2 class="exam-section-title">${part.section}</h2>`;
 
-                    // 1. 單一題目 (如字彙題)
                     if(part.questions && !part.topics && !part.article) {
                         part.questions.forEach(q => { html += buildExamQuestionHtml(q); });
                     }
 
-                    // 2. 題組 (如克漏字、閱讀測驗)
                     if(part.topics) {
                         part.topics.forEach(topic => {
                             let sharedOpts = topic.options || null;
@@ -553,7 +557,6 @@
                             if(topic.article) html += `<p style="line-height:1.8; font-size:1.05em; color:var(--text-main);">${topic.article.replace(/\n/g, '<br>')}</p>`;
                             if(topic.articleImageUrl) html += `<img src="${topic.articleImageUrl}" style="max-width:100%; border-radius:8px; margin-top:15px;">`;
                             
-                            // 渲染共用選項清單
                             if(sharedOpts) {
                                 html += `<div style="background:var(--bg-color); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid var(--border-color);">`;
                                 html += `<strong style="color:var(--primary-color);">【選項區】</strong><br>`;
@@ -569,7 +572,6 @@
                         });
                     }
 
-                    // 3. 混合題或篇章結構 (有文章但沒有 topics)
                     if(part.article && !part.topics) {
                         let sharedOpts = part.options || null;
                         let groupId = 'part_' + Math.floor(Math.random()*1000);
@@ -593,7 +595,6 @@
                         html += `</div></div>`;
                     }
 
-                    // 4. 非選擇題
                     if(part.translation) {
                         html += `<div class="exam-topic-split"><div class="exam-topic-left" style="border:none;">`;
                         html += `<h3 style="margin-bottom:15px;">中譯英</h3>`;
@@ -620,15 +621,13 @@
             container.innerHTML = html;
         }
 
-        // 🎯 渲染單一題目 (加入下拉式選單支援)
         function buildExamQuestionHtml(q, sharedOptions, groupId) {
-            let qTitleText = q.question ? q.question : '請依據左文選出 / 填寫最適當的答案：';
+            let qTitleText = q.question ? q.question : '請依據左文選出最適當的答案：';
             let qHtml = `<div class="exam-q-block"><div class="exam-q-title">${q.id}. ${qTitleText}</div>`;
             
             if(q.questionImageUrl) qHtml += `<img src="${q.questionImageUrl}" style="max-width:100%; border-radius:8px; margin-bottom:10px;">`;
             
             if (q.options) {
-                // 標準單選題 (Radio)
                 q.options.forEach((opt, idx) => {
                     let optContent = opt;
                     if(q.optionImageUrls && q.optionImageUrls[idx]) {
@@ -638,7 +637,6 @@
                     qHtml += `<label class="exam-radio-label"><input type="radio" name="exam_q_${q.id}" value="${val}" onchange="examAnswersStorage['${q.id}'] = this.value"> <span>${optContent}</span></label>`;
                 });
             } else if (sharedOptions && sharedOptions.length > 0) {
-                // 🎯 下拉式選單 (連動防呆)
                 qHtml += `<select class="exam-text-input shared-dropdown-${groupId}" onchange="handleSharedDropdownChange('${groupId}', '${q.id}', this)" style="cursor:pointer; background-color: var(--card-bg);">`;
                 qHtml += `<option value="">請選擇...</option>`;
                 sharedOptions.forEach(opt => {
@@ -647,39 +645,29 @@
                 });
                 qHtml += `</select>`;
             } else {
-                // 標準填空題
                 qHtml += `<input type="text" class="exam-text-input" placeholder="輸入答案" onchange="examAnswersStorage['${q.id}'] = this.value">`;
             }
             qHtml += `</div>`;
             return qHtml;
         }
 
-        // 🎯 處理下拉選單連動邏輯 (已選選項變灰並禁用)
         function handleSharedDropdownChange(groupId, qId, selectElem) {
             examAnswersStorage[qId] = selectElem.value;
-
-            // 取得同一個題組內所有的下拉選單
             let selects = document.querySelectorAll(`.shared-dropdown-${groupId}`);
             let selectedValues = [];
             
-            // 收集目前已經被選走的所有答案
-            selects.forEach(s => {
-                if(s.value) selectedValues.push(s.value);
-            });
+            selects.forEach(s => { if(s.value) selectedValues.push(s.value); });
 
-            // 更新每一個選單裡面的選項狀態
             selects.forEach(s => {
                 let options = s.querySelectorAll('option');
                 options.forEach(opt => {
-                    if (opt.value === "") return; // 忽略「請選擇...」
-                    
-                    // 如果這個選項被別人選走了（在陣列裡），且不是自己當前選的，就禁用
+                    if (opt.value === "") return;
                     if (selectedValues.includes(opt.value) && s.value !== opt.value) {
                         opt.disabled = true;
-                        opt.style.color = '#94a3b8'; // 變成灰色
+                        opt.style.color = '#94a3b8'; 
                     } else {
                         opt.disabled = false;
-                        opt.style.color = ''; // 恢復正常顏色
+                        opt.style.color = ''; 
                     }
                 });
             });
