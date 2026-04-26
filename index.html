@@ -86,9 +86,9 @@
         .option-btn.selected { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
 
         .spell-input-area { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 30px; cursor: text; padding: 20px;}
-        .spell-visual-text { font-family: monospace; font-size: 2.2em; font-weight: 800; color: var(--primary-color); letter-spacing: 0.2em; text-align: center; line-height: 1.5; word-break: break-all;}
+        .spell-visual-text { font-family: monospace; font-size: 2.2em; font-weight: 800; color: var(--primary-color); letter-spacing: 0.2em; text-align: center; line-height: 1.5; word-break: break-all; position: relative; z-index: 1; pointer-events: none;}
         
-        /* 🎯 新增：閃爍游標的專屬樣式 */
+        /* 🎯 閃爍游標的專屬樣式 */
         .spell-cursor {
             display: inline-block;
             width: 3px;
@@ -260,9 +260,9 @@
             
             <div id="optionsContainer"></div>
             
-            <div id="spellVisualArea" class="spell-input-area" style="display:none;" onclick="document.getElementById('typingInput').focus()">
+            <div id="spellVisualArea" class="spell-input-area" style="display:none; position: relative;" onclick="focusTypingInput(event)">
                 <div id="spellVisual" class="spell-visual-text"></div>
-                <input type="text" id="typingInput" style="position: absolute; opacity: 0; width: 1px; height: 1px; left: 0; top: 0;" oninput="updateSpellVisual()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <input type="text" id="typingInput" style="position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; z-index: -1;" oninput="updateSpellVisual()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-gramm="false" inputmode="email">
             </div>
             
             <div class="flex-row" style="margin-top: 30px;" id="navButtonsArea">
@@ -378,7 +378,7 @@
 
         <div id="aiTutorView" class="view-section view-container">
             <h2>🤖 隨身解題家教</h2>
-            <p class="subtitle">遇到不懂的文法或題目？貼上來，AI 老師幫你解惑！</p>
+            <p class="subtitle">遇到不懂的文法或題目？貼上來，AI 老師幫這個解惑！</p>
             <div class="input-group"><label>題目或段落內容</label><textarea id="tutorContextInput" placeholder="例如: Having finished his homework..."></textarea></div>
             <div class="input-group"><label>你想問什麼？</label><input type="text" id="tutorDoubtInput" placeholder="例如: 為什麼是用 Having finished？"></div>
             <button id="btnAskTutor" class="btn btn-primary" onclick="askAiTutor()">🙋‍♂️ 舉手發問</button>
@@ -483,10 +483,8 @@
             if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); }
         }
 
-        // 🎯 全新智慧拆字引擎 
         let currentSpellTemplate = [];
         
-        // 🎯 新增：監聽手機版拖曳游標或鍵盤移動游標的事件
         document.addEventListener('selectionchange', () => {
             if (document.activeElement && document.activeElement.id === 'typingInput') {
                 updateSpellVisual();
@@ -516,11 +514,10 @@
             }
         }
 
-        // 🎯 全新升級：帶有實體閃爍游標與點擊定位的視覺更新函數
         function updateSpellVisual() {
             const input = document.getElementById('typingInput');
             const val = input.value.toLowerCase();
-            const cursorPos = input.selectionStart || 0; // 取得原生游標位置
+            const cursorPos = input.selectionStart || 0; 
 
             let displayStr = "";
             let typedIndex = 0;
@@ -535,21 +532,19 @@
                     continue;
                 }
                 
-                // 如果目前的輸入索引等於游標位置，就在這裡插入閃爍游標
+                // 只有遇到輸入格時才判斷游標位置，精準追蹤
                 if (typedIndex === cursorPos) {
                     displayStr += `<span class="spell-cursor"></span>`;
                 }
                 
                 if (typedIndex < val.length) {
-                    // 加入 onclick 事件，讓使用者可以直接點擊字母移動游標到該位置修改
-                    displayStr += `<span style="color:var(--danger-color); cursor:pointer;" onclick="setSpellCursor(${typedIndex}, event)">${val[typedIndex]}</span> `;
+                    displayStr += `<span style="color:var(--danger-color); pointer-events: auto; cursor:pointer;" onclick="setSpellCursor(${typedIndex}, event)">${val[typedIndex]}</span> `;
                 } else {
-                    displayStr += `<span style="color:var(--text-muted); opacity: 0.5; cursor:pointer;" onclick="setSpellCursor(${val.length}, event)">_</span> `;
+                    displayStr += `<span style="color:var(--text-muted); opacity: 0.5; pointer-events: auto; cursor:pointer;" onclick="setSpellCursor(${val.length}, event)">_</span> `;
                 }
                 typedIndex++;
             }
 
-            // 如果游標剛好在所有可輸入欄位的最末端
             if (cursorPos === typedIndex) {
                 displayStr += `<span class="spell-cursor"></span>`;
             }
@@ -557,12 +552,25 @@
             document.getElementById('spellVisual').innerHTML = displayStr;
         }
 
-        // 🎯 新增：點擊特定字母時，精準移動隱藏 input 游標的函數
-        function setSpellCursor(index, event) {
-            if (event) event.stopPropagation();
+        // 🎯 點擊空白處統一聚焦到最後
+        function focusTypingInput(e) {
             const input = document.getElementById('typingInput');
             input.focus();
-            // 需要微小的延遲確保手機瀏覽器的 focus 行為不會覆蓋我們的 selection
+            setTimeout(() => {
+                const len = input.value.length;
+                input.setSelectionRange(len, len);
+                updateSpellVisual();
+            }, 10);
+        }
+
+        // 🎯 精準點擊字母定位
+        function setSpellCursor(index, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation(); // 阻止事件冒泡到外層容器
+            }
+            const input = document.getElementById('typingInput');
+            input.focus();
             setTimeout(() => {
                 input.setSelectionRange(index, index);
                 updateSpellVisual();
@@ -589,20 +597,17 @@
                 renderOptionsUI(q, optContainer); 
             } 
             else if (q.qType === 'spell') { 
-                meaningDisplay.textContent = q.questionText; // 只有中文
+                meaningDisplay.textContent = q.questionText; 
                 spellArea.style.display = 'flex'; 
                 
                 initSpellTemplate(q.correctWord);
                 typingInput.value = userAnswers[q.id] || ''; 
-                
-                // 🎯 新增：動態設定最大輸入長度，鎖死在需要輸入的底線數量上，防止游標跑出界
                 typingInput.maxLength = currentSpellTemplate.filter(c => c === '_').length;
                 
                 updateSpellVisual();
                 
                 setTimeout(() => { 
                     typingInput.focus();
-                    // 🎯 新增：確保一開始載入或切換題目時，游標自動跑到文字最後方
                     const len = typingInput.value.length;
                     typingInput.setSelectionRange(len, len);
                     updateSpellVisual();
@@ -611,7 +616,6 @@
                 typingInput.onkeydown = function(e) { 
                     if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } 
                 }; 
-                // 🎯 新增：綁定鍵盤與點擊事件即時更新游標 UI
                 typingInput.onkeyup = updateSpellVisual;
                 typingInput.onclick = updateSpellVisual;
             } 
