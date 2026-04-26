@@ -235,7 +235,7 @@
         { "id": "T1", "chinese": "現在越來越多高中英文老師已經增加在課堂上使用英文的百分比。", "answer": "Now, more and more senior high school English teachers have increased the percentage of English use in class." },
         { "id": "T2", "chinese": "他們將學生依英語能力分成不同組別，進行多樣的聽、說活動。", "answer": "They divide students into different groups based on their English proficiency and conduct various listening and speaking activities." }
       ],
-      "topic": "二、英文作文",
+        "topic": "二、中譯英",
       "essay": {
         "topic": "二、英文作文",
         "imageUrls": [
