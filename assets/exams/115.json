@@ -183,10 +183,10 @@
               "question": "Which of the following shows the correct route of the Endurance after leaving South Georgia?", 
               "options": ["(A)", "(B)", "(C)", "(D)"], 
               "optionImageUrls": [
-                "assets/exams/115/q38_a.jpg",
-                "assets/exams/115/q38_b.jpg",
-                "assets/exams/115/q38_c.jpg",
-                "assets/exams/115/q38_d.jpg"
+                "assets/exams/115/q38_a.png",
+                "assets/exams/115/q38_b.png",
+                "assets/exams/115/q38_c.png",
+                "assets/exams/115/q38_d.png"
               ],
               "answer": "C", 
               "explanation": "路徑為向南進入 Weddell Sea 漂流，再向北前往 Elephant Island。" 
@@ -222,7 +222,7 @@
       "id": "47-50",
       "topic": "第 47 至 50 題為題組",
       "article": "Located along the sparkling coastline of the Pacific Ocean, Wonder Village is a famous indigenous district in eastern Taiwan. The historic village exhibits the traditional way of life of the tribe there. However, it does not live in the past. As numerous new restaurants and shops have sprung up in recent years, it has become not only a cultural center but also a unique commercial zone. The following six shops are examples of some of the specialty stores there.\n\nA. Oh Eco\nGreatly concerned about the presence of fake “green” products on the market, Alice Bao decided to open this shop. She sells environmentally friendly items such as reusable bottles, bamboo toothbrushes, and soy candles. “Here everyone looks out for each other and the neighborhood,” she says. “There’s a sense of community in the area.”\n\nB. After Work\nNeighborhood beer lovers rejoiced when After Work moved in last summer. “We knew we were coming into a really cool neighborhood,” says co-owner Joey Ma. Aside from handcrafted beer, the menu boasts hand-made gourmet pizzas such as the Yummy Duck n’ Cheese, loaded with roast duck and, yes, creamy delicious cheese. A truly unique blend!\n\nC. Aroma Paradise\nThe fragrances at this scent shop are largely customized to meet the individual shopper’s taste. Owner Joseph Tang says he knew the idea would work well in this unique district: “Each store is one of a kind in Wonder Village,” he states. “Aroma Paradise wants to create a paradise for those who are looking for fragrance made for their special preferences.”\n\nD. Something Different\nLooking for something unique? Yes, at this tiny antique store you can always find, as promised, something different. Open since 1996, the store features traditional-style home accessories, ranging from cabinets and chairs to picture frames and decorative mirrors.\n\nE. Beyond World\nOwner Foting Mayaw opened this boutique in what he calls “the most fascinating area in Taiwan.” The shop focuses on selling various “good goods” that showcase the skill and spirit of neighborhood artisans. From fashion items to rice snacks, it carries products only from local makers and small businesses owned by indigenous people.\n\nF. The Pinery\nThis restaurant got its name from the pineapple farms that once populated the area. Indeed, the fruit appears in some innovative menu items (e.g., pineapple jam on the burger). “Wonder Village is much more than just a tourist destination,” says owner Carol Hon. “It is a place where the old meets the new: diverse, unique, and always full of surprises.”",
-      "articleImageUrl": "assets/exams/115/wonder_village_map.jpg",
+      "articleImageUrl": "assets/exams/115/wonder_village_map.png",
       "questions": [
         { "id": "47-48", "type": "fill_in_blanks", "question": "tradition coexists harmoniously with [47] and local features are perfectly [48] with foreign elements.", "answers": { "47": "innovation", "48": "blended" }, "explanation": "根據 Pinery 的描述填入 innovation；根據 After Work 的描述填入 blended。" },
         { "id": "49", "type": "multiple_choice", "question": "Which stores should they go to for: (1) 19th c. lamp, (2) recycled plastic sunglasses, (3) aboriginal necklace?", "answer": "ADE", "explanation": "(D) 古董、(A) 環保物品、(E) 原住民工藝。" },
@@ -238,7 +238,7 @@
       "essay": {
         "topic": "Pets' Role in Modern Taiwan",
         "imageUrls": [
-          "assets/exams/115/115-essay.jpg"
+          "assets/exams/115/115-essay.png"
         ],
         "description": "第一段描述圖中現象（推車、餵奶、寵物聚餐）；第二段說明原因與影響。"
       }
