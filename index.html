@@ -705,7 +705,9 @@
             const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = '';
             
             quizData.forEach((q, i) => {
-                const uAns = userAnswers[q.id] || ''; let isCorr = false;
+                let uAns = userAnswers[q.id] || ''; 
+                let isCorr = false;
+                let displayUAns = uAns; // 🎯 建立專門顯示用的答案變數
                 
                 if (q.qType === 'spell') { 
                     const pureWord = getPureWord(q.correctAnswer);
@@ -713,19 +715,23 @@
                     let reconstructedAnswer = "";
                     for(let j=0; j<pureWord.length; j++) {
                         let c = pureWord[j];
-                        if (/[^a-zA-Z]/.test(c)) { reconstructedAnswer += c; }
-                        else {
+                        if (/[^a-zA-Z]/.test(c)) { 
+                            reconstructedAnswer += c; 
+                        } else {
                             let start = j, end = j;
                             while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--;
                             while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++;
                             const wordLen = end - start + 1;
-                            if (wordLen <= 2 || j === start || j === end) { reconstructedAnswer += c; }
-                            else {
-                                reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "";
+                            if (wordLen <= 2 || j === start || j === end) { 
+                                reconstructedAnswer += c; 
+                            } else {
+                                // 🎯 拼寫題還原邏輯：如果有打字就拼進去，沒打滿就補上底線讓玩家知道哪裡漏填
+                                reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_";
                                 tempTypedIndex++;
                             }
                         }
                     }
+                    displayUAns = reconstructedAnswer; // 🎯 讓結算畫面顯示完整還原後的字
                     isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); 
                 } else { 
                     isCorr = (uAns === q.correctAnswer); 
@@ -738,18 +744,19 @@
                     gainedXP += (base + bonus);
                 }
                 
-                submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: uAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
+                // 🎯 紀錄到資料庫的也是完整還原的 displayUAns
+                submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
                 
-                // 🎯 針對聽力題，在結算畫面顯示真正的單字與重聽按鈕
                 const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'");
                 const displayTitle = q.qType === 'listen' 
                     ? `🎧 聽力題：<span style="color:var(--primary-color);">${q.correctWord}</span> <button onclick="speakWord('${safeEnWord}')" style="background:none;border:none;cursor:pointer;font-size:1.1em;vertical-align:middle;padding:0 5px;" title="重新聽一次">🔊</button>` 
                     : q.questionText;
 
+                // 🎯 結算畫面的「你答」現在會顯示完整的 displayUAns
                 detailDiv.innerHTML += `
                     <div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;">
                         <h4 style="margin-bottom: 8px; color: var(--text-main); line-height: 1.4;">${i+1}. ${displayTitle} <span style="color:${isCorr?'#10b981':'#ef4444'}; margin-left:5px;">${isCorr?'✔':'✘'}</span></h4>
-                        <p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && uAns ? ` | 你答: <span style="color:#ef4444;">${uAns}</span>` : ''}</p>
+                        <p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && displayUAns ? ` | 你答: <span style="color:#ef4444;">${displayUAns}</span>` : ''}</p>
                     </div>`;
             });
             
@@ -1130,16 +1137,4 @@
                         const borderStyle = isMe ? 'border: 2px solid var(--secondary-color);' : ''; 
                         const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>` : d.username; 
                         
-                        html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`; 
-                    }); 
-                    container.innerHTML = html + '</table>'; 
-                } else { 
-                    container.innerHTML = '<p style="text-align:center; padding:20px;">尚無資料</p>'; 
-                } 
-            }); 
-        }
-
-        window.onload = () => { applyTheme(); if (currentUser) showView('setupView'); else showView('loginView'); };
-    </script>
-</body>
-</html>
+                        html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color
