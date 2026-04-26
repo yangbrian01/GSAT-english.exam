@@ -41,7 +41,6 @@
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
         .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
         
-        /* 🎯 右上角快捷列：升級成膠囊狀儀表板 */
         .nav-right-group { display: flex; align-items: center; gap: 15px; }
         .nav-quick-info { 
             display: flex; 
@@ -248,7 +247,7 @@
         <div id="setupView" class="view-section view-container">
             <div class="title-badge-wrapper">
                 <h2>準備開始挑戰</h2>
-                </div>
+            </div>
             <p class="subtitle">模式越高階，混合的題型越豐富！</p>
             <div class="input-group">
                 <label>測驗模式 🎮</label>
@@ -733,15 +732,21 @@
                     </div>`;
             });
             
+            let hasBonus = false;
             if (correctCount === totalQuestions && totalQuestions >= 10 && !isReviewQuizMode) {
-                gainedXP += 20;
+                hasBonus = true;
             }
 
             if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); }
             
+            // 🎯 重新設計的結算 XP 顯示邏輯
             const xpDisplay = document.getElementById('xpGainedDisplay');
-            if (!isReviewQuizMode && currentUser !== '訪客' && gainedXP > 0) {
-                xpDisplay.textContent = `⚡ 狂賺 +${gainedXP} XP`;
+            if (!isReviewQuizMode && currentUser !== '訪客' && (gainedXP > 0 || hasBonus)) {
+                if (hasBonus) {
+                    xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`;
+                } else {
+                    xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`;
+                }
                 xpDisplay.style.display = 'block';
             } else {
                 xpDisplay.style.display = 'none';
@@ -1105,7 +1110,6 @@
                         const borderStyle = isMe ? 'border: 2px solid var(--secondary-color);' : ''; 
                         const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>` : d.username; 
                         
-                        // 🎯 連勝與金牌徽章 UI 已拔除
                         html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`; 
                     }); 
                     container.innerHTML = html + '</table>'; 
