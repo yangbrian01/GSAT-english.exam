@@ -54,7 +54,9 @@
         .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; padding: 14px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
         .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); }
 
-        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; overflow: hidden; }
+        /* 🎯 這裡修正了 overflow 導致 sticky 失效的 Bug */
+        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; overflow-x: hidden; overflow-y: visible; }
+        
         .view-container { width: 100%; max-width: 650px; text-align: left; animation: fadeIn 0.3s ease-out; }
         .centered-view { text-align: center; max-width: 450px; margin: 0 auto; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -96,8 +98,10 @@
         .spell-cursor { display: inline-block; width: 3px; height: 1.1em; background-color: var(--primary-color); vertical-align: text-bottom; animation: blink 1s step-end infinite; margin: 0 -1.5px; position: relative; z-index: 10; }
         @keyframes blink { 50% { opacity: 0; } }
 
+        /* 🎯 歷屆試題計時器，加入 -webkit-sticky 支援舊版 Safari */
         .exam-timer-bar {
-            position: sticky; top: 0; background: var(--card-bg); padding: 15px 25px; 
+            position: -webkit-sticky; position: sticky; top: 15px; 
+            background: var(--card-bg); padding: 15px 25px; 
             border-radius: var(--radius-md); border: 3px solid var(--danger-color); 
             display: flex; justify-content: space-between; align-items: center; 
             margin-bottom: 25px; z-index: 50; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15);
@@ -425,13 +429,19 @@
                 document.getElementById('topNavbar').style.display = 'flex';
                 document.getElementById('navWelcome').textContent = currentUser === '訪客' ? '👋 訪客' : `👋 ${currentUser}`;
                 const isGuest = currentUser === '訪客';
-                if(viewId === 'quizView' || viewId === 'examTakingView') document.getElementById('topNavbar').style.display = 'none';
+                
+                if(viewId === 'quizView' || viewId === 'examTakingView') {
+                    document.getElementById('topNavbar').style.display = 'none';
+                }
 
                 if (isGuest) {
                     document.getElementById('quickName').textContent = '訪客';
                     document.getElementById('quickLevel').textContent = 'Lv. 1';
                     document.getElementById('quickXP').textContent = '0 XP';
-                } else { document.getElementById('quickName').textContent = currentUser; }
+                } else {
+                    document.getElementById('quickName').textContent = currentUser;
+                }
+
                 if (!isGuest && viewId !== 'quizView' && viewId !== 'examTakingView') updateNavbarBadges();
             } else { document.getElementById('topNavbar').style.display = 'none'; }
 
@@ -439,7 +449,9 @@
             if (viewId === 'profileView') showProfileView();
             if (viewId === 'leaderboardView') loadLeaderboardData();
             if (viewId === 'vocabBookView' && currentUser !== '訪客') syncFavorites(); 
+            
             if (viewId === 'pastExamsView') backToExamLobby();
+            
             window.scrollTo(0, 0);
         }
 
@@ -455,14 +467,19 @@
             document.getElementById('examLobby').style.display = 'none';
             document.getElementById('examPreRoom').style.display = 'none';
             document.getElementById('examLoading').style.display = 'block';
+
             try {
                 const url = `https://yangbrian01.github.io/GSAT-english.exam/assets/exams/${year}.json`;
                 const response = await fetch(url + '?t=' + new Date().getTime());
+                
                 if (!response.ok) throw new Error(`考卷 (${year}.json) 還沒準備好喔！請確認檔案是否有上傳至 GitHub 的 assets/exams/ 資料夾內。`);
+                
                 currentExamData = await response.json();
+                
                 document.getElementById('examLoading').style.display = 'none';
                 document.getElementById('examTitle').textContent = currentExamData.title || `${year} 學年度 英文考科`;
                 document.getElementById('examPreRoom').style.display = 'block';
+                
             } catch (e) {
                 document.getElementById('examLoading').style.display = 'none';
                 document.getElementById('examLobby').style.display = 'grid'; 
@@ -471,7 +488,8 @@
         }
 
         function backToExamLobby() {
-            currentExamData = null; clearInterval(examTimer);
+            currentExamData = null;
+            clearInterval(examTimer);
             if(document.getElementById('examPreRoom')) document.getElementById('examPreRoom').style.display = 'none';
             if(document.getElementById('examLobby')) document.getElementById('examLobby').style.display = 'grid';
             if(document.getElementById('examLoading')) document.getElementById('examLoading').style.display = 'none';
@@ -479,26 +497,38 @@
 
         function startFullExam() {
             if (!currentExamData) return Swal.fire('錯誤', '沒有考卷資料！', 'error');
+            
             document.getElementById('inExamTitleDisplay').textContent = currentExamData.title;
-            examAnswersStorage = {}; examTimeRemaining = 100 * 60; 
-            renderExamPaper(); showView('examTakingView');
-            clearInterval(examTimer); updateTimerDisplay();
+            examAnswersStorage = {};
+            examTimeRemaining = 100 * 60; 
+            
+            renderExamPaper();
+            showView('examTakingView');
+            
+            clearInterval(examTimer);
+            updateTimerDisplay();
             examTimer = setInterval(() => {
-                examTimeRemaining--; updateTimerDisplay();
+                examTimeRemaining--;
+                updateTimerDisplay();
                 if (examTimeRemaining <= 0) {
                     clearInterval(examTimer);
-                    Swal.fire('時間到！', '考試結束，系統將自動交卷', 'warning').then(() => { processExamSubmission(); });
+                    Swal.fire('時間到！', '考試結束，系統將自動交卷', 'warning').then(() => {
+                        processExamSubmission();
+                    });
                 }
             }, 1000);
         }
 
         function updateTimerDisplay() {
-            let m = Math.floor(examTimeRemaining / 60); let s = examTimeRemaining % 60;
+            let m = Math.floor(examTimeRemaining / 60);
+            let s = examTimeRemaining % 60;
             document.getElementById('examCountdownText').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-            if(examTimeRemaining < 600) document.getElementById('examCountdownText').style.color = '#991b1b';
+            if(examTimeRemaining < 600) {
+                document.getElementById('examCountdownText').style.color = '#991b1b';
+            }
         }
 
-        // 🎯 核心渲染引擎：修復了 undefined 與共用選項的問題
+        // 🎯 核心渲染引擎：支援「共用下拉選單」防呆連動
         function renderExamPaper() {
             const container = document.getElementById('examPaperContent');
             let html = '';
@@ -507,54 +537,63 @@
                 currentExamData.examData.forEach(part => {
                     html += `<h2 class="exam-section-title">${part.section}</h2>`;
 
+                    // 1. 單一題目 (如字彙題)
                     if(part.questions && !part.topics && !part.article) {
                         part.questions.forEach(q => { html += buildExamQuestionHtml(q); });
                     }
 
+                    // 2. 題組 (如克漏字、閱讀測驗)
                     if(part.topics) {
                         part.topics.forEach(topic => {
+                            let sharedOpts = topic.options || null;
+                            let groupId = 'topic_' + (topic.id ? topic.id.replace(/\W/g, '_') : Math.floor(Math.random()*1000));
+
                             html += `<div class="exam-topic-split"><div class="exam-topic-left">`;
                             if(topic.title) html += `<h3 style="margin-bottom:10px;">${topic.title}</h3>`;
                             if(topic.article) html += `<p style="line-height:1.8; font-size:1.05em; color:var(--text-main);">${topic.article.replace(/\n/g, '<br>')}</p>`;
                             if(topic.articleImageUrl) html += `<img src="${topic.articleImageUrl}" style="max-width:100%; border-radius:8px; margin-top:15px;">`;
                             
-                            // 🎯 渲染題組共用選項 (例如：文意選填 A~J)
-                            if(topic.options) {
+                            // 渲染共用選項清單
+                            if(sharedOpts) {
                                 html += `<div style="background:var(--bg-color); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid var(--border-color);">`;
                                 html += `<strong style="color:var(--primary-color);">【選項區】</strong><br>`;
-                                topic.options.forEach(opt => { html += `<span style="display:inline-block; margin-right: 15px; margin-top: 5px; font-weight:600;">${opt}</span>`; });
+                                sharedOpts.forEach(opt => { html += `<span style="display:inline-block; margin-right: 15px; margin-top: 5px; font-weight:600;">${opt}</span>`; });
                                 html += `</div>`;
                             }
 
                             html += `</div><div class="exam-topic-right">`;
                             if(topic.questions) {
-                                topic.questions.forEach(q => { html += buildExamQuestionHtml(q); });
+                                topic.questions.forEach(q => { html += buildExamQuestionHtml(q, sharedOpts, groupId); });
                             }
                             html += `</div></div>`;
                         });
                     }
 
+                    // 3. 混合題或篇章結構 (有文章但沒有 topics)
                     if(part.article && !part.topics) {
+                        let sharedOpts = part.options || null;
+                        let groupId = 'part_' + Math.floor(Math.random()*1000);
+
                         html += `<div class="exam-topic-split"><div class="exam-topic-left">`;
                         if(part.topic) html += `<h3 style="margin-bottom:10px;">${part.topic}</h3>`;
                         html += `<p style="line-height:1.8; font-size:1.05em;">${part.article.replace(/\n/g, '<br>')}</p>`;
                         if(part.articleImageUrl) html += `<img src="${part.articleImageUrl}" style="max-width:100%; border-radius:8px; margin-top:15px;">`;
                         
-                        // 🎯 渲染大題共用選項 (例如：篇章結構 A~F)
-                        if(part.options) {
+                        if(sharedOpts) {
                             html += `<div style="background:var(--bg-color); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid var(--border-color);">`;
                             html += `<strong style="color:var(--primary-color);">【選項區】</strong><br>`;
-                            part.options.forEach(opt => { html += `<div style="margin-top: 8px; font-weight:600; line-height: 1.4;">${opt}</div>`; });
+                            sharedOpts.forEach(opt => { html += `<div style="margin-top: 8px; font-weight:600; line-height: 1.4;">${opt}</div>`; });
                             html += `</div>`;
                         }
 
                         html += `</div><div class="exam-topic-right">`;
                         if(part.questions) {
-                            part.questions.forEach(q => { html += buildExamQuestionHtml(q); });
+                            part.questions.forEach(q => { html += buildExamQuestionHtml(q, sharedOpts, groupId); });
                         }
                         html += `</div></div>`;
                     }
 
+                    // 4. 非選擇題
                     if(part.translation) {
                         html += `<div class="exam-topic-split"><div class="exam-topic-left" style="border:none;">`;
                         html += `<h3 style="margin-bottom:15px;">中譯英</h3>`;
@@ -581,14 +620,15 @@
             container.innerHTML = html;
         }
 
-        function buildExamQuestionHtml(q) {
-            // 🎯 防呆機制：如果沒有 question 屬性 (如克漏字)，給予預設提示文字
+        // 🎯 渲染單一題目 (加入下拉式選單支援)
+        function buildExamQuestionHtml(q, sharedOptions, groupId) {
             let qTitleText = q.question ? q.question : '請依據左文選出 / 填寫最適當的答案：';
             let qHtml = `<div class="exam-q-block"><div class="exam-q-title">${q.id}. ${qTitleText}</div>`;
             
             if(q.questionImageUrl) qHtml += `<img src="${q.questionImageUrl}" style="max-width:100%; border-radius:8px; margin-bottom:10px;">`;
             
-            if(q.options) {
+            if (q.options) {
+                // 標準單選題 (Radio)
                 q.options.forEach((opt, idx) => {
                     let optContent = opt;
                     if(q.optionImageUrls && q.optionImageUrls[idx]) {
@@ -597,12 +637,52 @@
                     let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt;
                     qHtml += `<label class="exam-radio-label"><input type="radio" name="exam_q_${q.id}" value="${val}" onchange="examAnswersStorage['${q.id}'] = this.value"> <span>${optContent}</span></label>`;
                 });
+            } else if (sharedOptions && sharedOptions.length > 0) {
+                // 🎯 下拉式選單 (連動防呆)
+                qHtml += `<select class="exam-text-input shared-dropdown-${groupId}" onchange="handleSharedDropdownChange('${groupId}', '${q.id}', this)" style="cursor:pointer; background-color: var(--card-bg);">`;
+                qHtml += `<option value="">請選擇...</option>`;
+                sharedOptions.forEach(opt => {
+                    let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt.split(' ')[0];
+                    qHtml += `<option value="${val}">${opt}</option>`;
+                });
+                qHtml += `</select>`;
             } else {
-                // 🎯 如果沒有 options (例如填空題)，就給一個輸入框
-                qHtml += `<input type="text" class="exam-text-input" placeholder="輸入答案 (如 A, B 或單字)" onchange="examAnswersStorage['${q.id}'] = this.value">`;
+                // 標準填空題
+                qHtml += `<input type="text" class="exam-text-input" placeholder="輸入答案" onchange="examAnswersStorage['${q.id}'] = this.value">`;
             }
             qHtml += `</div>`;
             return qHtml;
+        }
+
+        // 🎯 處理下拉選單連動邏輯 (已選選項變灰並禁用)
+        function handleSharedDropdownChange(groupId, qId, selectElem) {
+            examAnswersStorage[qId] = selectElem.value;
+
+            // 取得同一個題組內所有的下拉選單
+            let selects = document.querySelectorAll(`.shared-dropdown-${groupId}`);
+            let selectedValues = [];
+            
+            // 收集目前已經被選走的所有答案
+            selects.forEach(s => {
+                if(s.value) selectedValues.push(s.value);
+            });
+
+            // 更新每一個選單裡面的選項狀態
+            selects.forEach(s => {
+                let options = s.querySelectorAll('option');
+                options.forEach(opt => {
+                    if (opt.value === "") return; // 忽略「請選擇...」
+                    
+                    // 如果這個選項被別人選走了（在陣列裡），且不是自己當前選的，就禁用
+                    if (selectedValues.includes(opt.value) && s.value !== opt.value) {
+                        opt.disabled = true;
+                        opt.style.color = '#94a3b8'; // 變成灰色
+                    } else {
+                        opt.disabled = false;
+                        opt.style.color = ''; // 恢復正常顏色
+                    }
+                });
+            });
         }
 
         function forceSubmitExam() {
@@ -721,12 +801,57 @@
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
-        function updateNavbarBadges() { apiCall('getProfileData', { username: currentUser }).then(res => { if(res.success) { const xp = parseInt(res.totalXP) || 0; const level = Math.floor(Math.sqrt(xp / 10)) + 1; document.getElementById('quickLevel').textContent = `Lv. ${level}`; document.getElementById('quickXP').textContent = `${xp} XP`; } }); }
-        function showProfileView() { document.getElementById('profileUsernameDisplay').textContent = currentUser; apiCall('getProfileData', { username: currentUser }).then(res => { if (res.success) { const av = res.avatar || '👤'; const avDiv = document.getElementById('profileAvatarPreview'); if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; } else { avDiv.innerHTML = av; } const xp = parseInt(res.totalXP) || 0; const level = Math.floor(Math.sqrt(xp / 10)) + 1; const currentLevelBaseXP = Math.pow(level - 1, 2) * 10; const nextLevelXP = Math.pow(level, 2) * 10; const xpProgress = ((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100; document.getElementById('profileLevelDisplay').innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`; document.getElementById('profileStatsDisplay').innerHTML = `<div style="display:flex; justify-content:center; gap: 40px; margin-bottom: 15px;"><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.totalAnswered}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">總答題數</div></div><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.correctRate}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">答對率</div></div></div>`; if (res.hasApiKey) { document.getElementById('quotaInfoBox').innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${res.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${res.essayUsed} / 1 篇`; } } }); }
+        function updateNavbarBadges() { 
+            apiCall('getProfileData', { username: currentUser }).then(res => { 
+                if(res.success) { 
+                    const xp = parseInt(res.totalXP) || 0;
+                    const level = Math.floor(Math.sqrt(xp / 10)) + 1;
+                    document.getElementById('quickLevel').textContent = `Lv. ${level}`;
+                    document.getElementById('quickXP').textContent = `${xp} XP`;
+                } 
+            }); 
+        }
+        
+        function showProfileView() { 
+            document.getElementById('profileUsernameDisplay').textContent = currentUser; 
+            apiCall('getProfileData', { username: currentUser }).then(res => { 
+                if (res.success) { 
+                    const av = res.avatar || '👤'; 
+                    const avDiv = document.getElementById('profileAvatarPreview'); 
+                    if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; } else { avDiv.innerHTML = av; } 
+                    
+                    const xp = parseInt(res.totalXP) || 0;
+                    const level = Math.floor(Math.sqrt(xp / 10)) + 1;
+                    const currentLevelBaseXP = Math.pow(level - 1, 2) * 10;
+                    const nextLevelXP = Math.pow(level, 2) * 10;
+                    const xpProgress = ((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100;
+
+                    document.getElementById('profileLevelDisplay').innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`;
+                    document.getElementById('profileStatsDisplay').innerHTML = `<div style="display:flex; justify-content:center; gap: 40px; margin-bottom: 15px;"><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.totalAnswered}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">總答題數</div></div><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.correctRate}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">答對率</div></div></div>`;
+
+                    if (res.hasApiKey) { document.getElementById('quotaInfoBox').innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } 
+                    else { document.getElementById('qTutor').textContent = `今日已用: ${res.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${res.essayUsed} / 1 篇`; } 
+                } 
+            }); 
+        }
+        
         function handleAvatarFile(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); const MAX_SIZE = 400; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height); const base64Data = canvas.toDataURL('image/jpeg', 0.9); document.getElementById('profileAvatarPreview').innerHTML = `<img src="${base64Data}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; showLoading('上傳至雲端空間中...'); apiCall('uploadAvatarToDrive', { username: currentUser, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) Swal.fire('成功', '大頭貼已上傳並產生網址！', 'success'); else Swal.fire('失敗', r.message, 'error'); }); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
         function handleCredentialUpdate() { const newU = document.getElementById('profNewUsername').value.trim(); const newP = document.getElementById('profNewPassword').value; if (!newU && !newP) return; if (newU && newU.length < 3) return Swal.fire('錯誤', '新帳號至少3碼', 'warning'); if (newP && newP.length < 4) return Swal.fire('錯誤', '新密碼至少4碼', 'warning'); showLoading('更新中...'); apiCall('updateUserCredentials', { username: currentUser, newUsername: newU, newPassword: newP }).then(res => { if(res.success) { Swal.fire('成功', '帳號資料已更新', 'success'); currentUser = res.newUsername; localStorage.setItem('user', currentUser); document.getElementById('profNewUsername').value = ''; document.getElementById('profNewPassword').value = ''; showProfileView(); } else Swal.fire('失敗', res.message, 'error'); }); }
         function handleApiKeyUpdate() { const k = document.getElementById('profApiKey').value.trim(); if (!k || !k.startsWith('AIza')) return Swal.fire('格式錯誤', '請輸入有效的 API Key (以 AIza 開頭)', 'warning'); showLoading('綁定中...'); apiCall('updateApiKey', { username: currentUser, apiKey: k }).then(res => { if(res.success) { Swal.fire('成功', res.message, 'success'); showProfileView(); document.getElementById('profApiKey').value=''; } else Swal.fire('失敗', '綁定失敗', 'error'); }); }
-        function loadLeaderboardData() { const container = document.getElementById('leaderboardTableContainer'); container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; apiCall('getLeaderboardData').then(res => { if(res.data && res.data.length > 0) { let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>Level</th><th>經驗值 (XP)</th></tr>'; res.data.forEach((d, i) => { const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; const isMe = String(d.username).trim().toLowerCase() === String(currentUser).trim().toLowerCase(); const bgColor = isMe ? (isDarkMode ? 'rgba(16,185,129,0.1)' : '#d1fae5') : (isDarkMode ? 'transparent' : (i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent')); const borderStyle = isMe ? 'border: 2px solid var(--secondary-color);' : ''; const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>` : d.username; html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`; }); container.innerHTML = html + '</table>'; } else { container.innerHTML = '<p style="text-align:center; padding:20px;">尚無資料</p>'; } }); }
+
+        function loadLeaderboardData() { 
+            const container = document.getElementById('leaderboardTableContainer'); container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; 
+            apiCall('getLeaderboardData').then(res => { 
+                if(res.data && res.data.length > 0) { 
+                    let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>Level</th><th>經驗值 (XP)</th></tr>'; 
+                    res.data.forEach((d, i) => { 
+                        const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; const isMe = String(d.username).trim().toLowerCase() === String(currentUser).trim().toLowerCase(); const bgColor = isMe ? (isDarkMode ? 'rgba(16,185,129,0.1)' : '#d1fae5') : (isDarkMode ? 'transparent' : (i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent')); const borderStyle = isMe ? 'border: 2px solid var(--secondary-color);' : ''; const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>` : d.username; 
+                        html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`; 
+                    }); container.innerHTML = html + '</table>'; 
+                } else { container.innerHTML = '<p style="text-align:center; padding:20px;">尚無資料</p>'; } 
+            }); 
+        }
+
         window.onload = () => { applyTheme(); if (currentUser) showView('setupView'); else showView('loginView'); };
     </script>
 </body>
