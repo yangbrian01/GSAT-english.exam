@@ -87,6 +87,20 @@
 
         .spell-input-area { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 30px; cursor: text; padding: 20px;}
         .spell-visual-text { font-family: monospace; font-size: 2.2em; font-weight: 800; color: var(--primary-color); letter-spacing: 0.2em; text-align: center; line-height: 1.5; word-break: break-all;}
+        
+        /* 🎯 新增：閃爍游標的專屬樣式 */
+        .spell-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.1em;
+            background-color: var(--primary-color);
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+            margin: 0 -1.5px;
+            position: relative;
+            z-index: 10;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
 
         .flashcard-container { width: 100%; height: 300px; perspective: 1000px; cursor: pointer; margin: 20px 0; user-select: none; }
         .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
@@ -471,6 +485,14 @@
 
         // 🎯 全新智慧拆字引擎 
         let currentSpellTemplate = [];
+        
+        // 🎯 新增：監聽手機版拖曳游標或鍵盤移動游標的事件
+        document.addEventListener('selectionchange', () => {
+            if (document.activeElement && document.activeElement.id === 'typingInput') {
+                updateSpellVisual();
+            }
+        });
+
         function initSpellTemplate(word) {
             const pureWord = getPureWord(word);
             currentSpellTemplate = [];
@@ -494,8 +516,12 @@
             }
         }
 
+        // 🎯 全新升級：帶有實體閃爍游標與點擊定位的視覺更新函數
         function updateSpellVisual() {
-            const val = document.getElementById('typingInput').value.toLowerCase();
+            const input = document.getElementById('typingInput');
+            const val = input.value.toLowerCase();
+            const cursorPos = input.selectionStart || 0; // 取得原生游標位置
+
             let displayStr = "";
             let typedIndex = 0;
             
@@ -509,14 +535,38 @@
                     continue;
                 }
                 
+                // 如果目前的輸入索引等於游標位置，就在這裡插入閃爍游標
+                if (typedIndex === cursorPos) {
+                    displayStr += `<span class="spell-cursor"></span>`;
+                }
+                
                 if (typedIndex < val.length) {
-                    displayStr += `<span style="color:var(--danger-color);">${val[typedIndex]}</span> `;
+                    // 加入 onclick 事件，讓使用者可以直接點擊字母移動游標到該位置修改
+                    displayStr += `<span style="color:var(--danger-color); cursor:pointer;" onclick="setSpellCursor(${typedIndex}, event)">${val[typedIndex]}</span> `;
                 } else {
-                    displayStr += `<span style="color:var(--text-muted); opacity: 0.5;">_</span> `;
+                    displayStr += `<span style="color:var(--text-muted); opacity: 0.5; cursor:pointer;" onclick="setSpellCursor(${val.length}, event)">_</span> `;
                 }
                 typedIndex++;
             }
+
+            // 如果游標剛好在所有可輸入欄位的最末端
+            if (cursorPos === typedIndex) {
+                displayStr += `<span class="spell-cursor"></span>`;
+            }
+
             document.getElementById('spellVisual').innerHTML = displayStr;
+        }
+
+        // 🎯 新增：點擊特定字母時，精準移動隱藏 input 游標的函數
+        function setSpellCursor(index, event) {
+            if (event) event.stopPropagation();
+            const input = document.getElementById('typingInput');
+            input.focus();
+            // 需要微小的延遲確保手機瀏覽器的 focus 行為不會覆蓋我們的 selection
+            setTimeout(() => {
+                input.setSelectionRange(index, index);
+                updateSpellVisual();
+            }, 10);
         }
 
         function getSpellAnswer() { return document.getElementById('typingInput').value.trim(); }
@@ -544,12 +594,26 @@
                 
                 initSpellTemplate(q.correctWord);
                 typingInput.value = userAnswers[q.id] || ''; 
+                
+                // 🎯 新增：動態設定最大輸入長度，鎖死在需要輸入的底線數量上，防止游標跑出界
+                typingInput.maxLength = currentSpellTemplate.filter(c => c === '_').length;
+                
                 updateSpellVisual();
                 
-                setTimeout(() => typingInput.focus(), 100); 
+                setTimeout(() => { 
+                    typingInput.focus();
+                    // 🎯 新增：確保一開始載入或切換題目時，游標自動跑到文字最後方
+                    const len = typingInput.value.length;
+                    typingInput.setSelectionRange(len, len);
+                    updateSpellVisual();
+                }, 100); 
+                
                 typingInput.onkeydown = function(e) { 
                     if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } 
                 }; 
+                // 🎯 新增：綁定鍵盤與點擊事件即時更新游標 UI
+                typingInput.onkeyup = updateSpellVisual;
+                typingInput.onclick = updateSpellVisual;
             } 
             else { 
                 meaningDisplay.textContent = q.questionText; 
