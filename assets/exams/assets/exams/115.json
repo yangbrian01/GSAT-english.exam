@@ -1,0 +1,247 @@
+{
+  "year": "115",
+  "title": "115學年度學科能力測驗 英文考科",
+  "gradingCurve": {
+    "level15": "85.36 < X ≤ 100.00",
+    "level14": "79.27 < X ≤ 85.36",
+    "level13": "73.17 < X ≤ 79.27",
+    "level12": "67.07 < X ≤ 73.17",
+    "level11": "60.97 < X ≤ 67.07",
+    "level10": "54.88 < X ≤ 60.97",
+    "level9": "48.78 < X ≤ 54.88",
+    "level8": "42.68 < X ≤ 48.78",
+    "level7": "36.58 < X ≤ 42.68",
+    "level6": "30.49 < X ≤ 36.58",
+    "level5": "24.39 < X ≤ 30.49",
+    "level4": "18.29 < X ≤ 24.39",
+    "level3": "12.19 < X ≤ 18.29",
+    "level2": "6.10 < X ≤ 12.19",
+    "level1": "0.00 < X ≤ 6.10",
+    "level0": "X = 0.00"
+  },
+  "examData": [
+    {
+      "section": "一、詞彙題",
+      "questions": [
+        {
+          "id": "1",
+          "type": "vocabulary",
+          "question": "The mayor has such a ________ schedule that it takes weeks to arrange an interview with her.",
+          "options": ["(A) hasty", "(B) tight", "(C) diligent", "(D) routine"],
+          "answer": "B",
+          "explanation": "【句意解析】：市長的行程如此「緊湊」，以至於需要花上好幾週才能安排到與她的訪談。\\n【選項分析】：(B) tight (緊湊的) 常用於形容 schedule。\\n【解題關鍵】：關鍵字「takes weeks to arrange」暗示行程爆滿。"
+        },
+        {
+          "id": "2",
+          "type": "vocabulary",
+          "question": "Jane started as an ________ art designer, but now she has a professional studio of her own.",
+          "options": ["(A) official", "(B) instant", "(C) amateur", "(D) elementary"],
+          "answer": "C",
+          "explanation": "【句意解析】：Jane 最初是「業餘」設計師，現在有了「專業」工作室。\\n【解題關鍵】：but now... professional 形成對比。"
+        },
+        {
+          "id": "3",
+          "type": "vocabulary",
+          "question": "The teaching ________ at the famous high school soon attracted more than a dozen well-qualified applicants.",
+          "options": ["(A) career", "(B) vacancy", "(C) expectation", "(D) inspiration"],
+          "answer": "B",
+          "explanation": "【句意解析】：名校的教學「職缺」吸引了合格的「申請者」。"
+        },
+        {
+          "id": "4",
+          "type": "vocabulary",
+          "question": "Designed by a young engineer, the new product has created far more profit than ________ expected.",
+          "options": ["(A) initially", "(B) genuinely", "(C) alternatively", "(D) fundamentally"],
+          "answer": "A",
+          "explanation": "【句意解析】：利潤比「最初」預期的還要多。"
+        },
+        {
+          "id": "5",
+          "type": "vocabulary",
+          "question": "It has been confirmed that a balanced ________ of fruit and vegetables is a key element to good health.",
+          "options": ["(A) dimension", "(B) integration", "(C) provision", "(D) consumption"],
+          "answer": "D",
+          "explanation": "【句意解析】：均衡「攝取」蔬果是健康的關鍵。"
+        },
+        {
+          "id": "6",
+          "type": "vocabulary",
+          "question": "As a shy boy afraid of making public appearances, Timmy ________ the thought of speaking before large audiences.",
+          "options": ["(A) dreads", "(B) stresses", "(C) wanders", "(D) escapes"],
+          "answer": "A",
+          "explanation": "【句意解析】：作為一個害怕公開露面的男孩，提米「恐懼」在眾人面前演講。"
+        },
+        {
+          "id": "7",
+          "type": "vocabulary",
+          "question": "To the newly-crowned winner of the piano competition, music is his life’s ________, which he has devoted himself to whole-heartedly.",
+          "options": ["(A) resource", "(B) impact", "(C) passion", "(D) emphasis"],
+          "answer": "C",
+          "explanation": "【句意解析】：對冠軍來說，音樂是他生命的「熱情」。"
+        },
+        {
+          "id": "8",
+          "type": "vocabulary",
+          "question": "The drunk driver who shouted at passers-by and ________ them with glass bottles was quickly arrested by the police.",
+          "options": ["(A) shattered", "(B) assaulted", "(C) overturned", "(D) condemned"],
+          "answer": "B",
+          "explanation": "【句意解析】：醉漢用玻璃瓶「攻擊」路人。"
+        },
+        {
+          "id": "9",
+          "type": "vocabulary",
+          "question": "There were so many people at the bus station that I had to ________ my way through the crowd to board the bus in time.",
+          "options": ["(A) crash", "(B) tumble", "(C) elbow", "(D) struggle"],
+          "answer": "C",
+          "explanation": "【片語】：elbow one's way through 擠出一條路。"
+        },
+        {
+          "id": "10",
+          "type": "vocabulary",
+          "question": "Deadly shootings on US campuses have raised ________ concerns about how to prevent such tragic incidents from happening again.",
+          "options": ["(A) swift", "(B) brutal", "(C) harsh", "(D) grave"],
+          "answer": "D",
+          "explanation": "【搭配詞】：grave concerns 嚴重的關切。"
+        }
+      ]
+    },
+    {
+      "section": "二、綜合測驗",
+      "topics": [
+        {
+          "id": "11-15",
+          "article": "From the campfire to the café, people have always gathered together to share the latest news... White rhinoceroses, __11__, do the same thing... A new study indicates that rhinos have a smelly way to __12__... Scientists ... have found that these animals leave messages in their poop... different rhinos leave different chemicals in their poop, which provide important __13__ about the age, sex, general health... When all members in a group know what's going on ... it is __14__ that they will fight... dominant males are particularly __15__ the 'fake poop' that carries chemicals from females ready to mate...",
+          "questions": [
+            { "id": "11", "options": ["(A) what is more", "(B) it turns out", "(C) in other words", "(D) all in all"], "answer": "C", "explanation": "「換句話說」，犀牛也會做同樣的事。" },
+            { "id": "12", "options": ["(A) demonstrate", "(B) immigrate", "(C) communicate", "(D) manipulate"], "answer": "C", "explanation": "犀牛透過氣味「溝通」。" },
+            { "id": "13", "options": ["(A) doubts", "(B) icons", "(C) matches", "(D) clues"], "answer": "D", "explanation": "氣味提供身分「線索」。" },
+            { "id": "14", "options": ["(A) hardly surprising", "(B) more acceptable", "(C) truly important", "(D) less likely"], "answer": "D", "explanation": "彼此了解後「較不可能」發生爭鬥。" },
+            { "id": "15", "options": ["(A) responsive to", "(B) annoyed at", "(C) considerate of", "(D) tolerant with"], "answer": "A", "explanation": "公犀牛對帶有發情母犀牛氣味的糞便會有「反應」。" }
+          ]
+        },
+        {
+          "id": "16-20",
+          "article": "The history of dim sum stretches back to the early days of the Silk Road... Teahouses thus sprang up to __16__ the weary travelers... But the culinary art of dim sum __17__, for it was considered inappropriate to pair tea with food... Teahouse owners therefore began providing bite-sized snacks... It is __18__ an enjoyable dining experience... __19__ were first enjoyed as snacks... It is customary for big groups to enjoy simple dishes together as __20__.",
+          "questions": [
+            { "id": "16", "options": ["(A) accommodate", "(B) compensate", "(C) anticipate", "(D) reinforce"], "answer": "A", "explanation": "茶館「容納」疲憊的旅人。" },
+            { "id": "17", "options": ["(A) would hardly develop", "(B) had yet to develop", "(C) was fast developing", "(D) had almost developed"], "answer": "B", "explanation": "在早期，點心藝術「尚未發展」。" },
+            { "id": "18", "options": ["(A) passed on to", "(B) brought up as", "(C) thought to have", "(D) meant to be"], "answer": "D", "explanation": "點心「本意是」愉快的用餐體驗。" },
+            { "id": "19", "options": ["(A) if so", "(B) as such", "(C) by then", "(D) in that"], "answer": "B", "explanation": "「點心」意為觸動心弦，(as such) 最初是被當作點心享用。" },
+            { "id": "20", "options": ["(A) a widely known delicacy", "(B) an intimate romantic dinner", "(C) a joyful social activity", "(D) an amazing local cuisine"], "answer": "C", "explanation": "大群人一起分享點心是一種「社交活動」。" }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "三、文意選填",
+      "article": "Are you feeling a little guilty about your daily mid-afternoon snooze?... Taking a nap in the middle of the day is by no means __21__. In fact, you are giving your brain ... some time to recharge... Research has shown that napping is linked with brain size and __22__... dementia __23__ in later life... napping may significantly __24__ age-related brain shrinkage... napping will help __25__ acquired knowledge and learned skills... others __26__ shorter naps... may __27__ a person's physical condition... surprisingly __28__ benefits... quiet place with __29__ light... relaxing __30__.",
+      "options": ["(A) retain", "(B) depend on", "(C) atmosphere", "(D) delay", "(E) unproductive", "(F) risk", "(G) function", "(H) minimal", "(I) dramatic", "(J) point to"],
+      "questions": [
+        { "id": "21", "answer": "E", "explanation": "午睡絕非「無生產力的」。" },
+        { "id": "22", "answer": "G", "explanation": "與大腦「功能」有關。" },
+        { "id": "23", "answer": "F", "explanation": "增加失智「風險」。" },
+        { "id": "24", "answer": "D", "explanation": "「延緩」大腦萎縮。" },
+        { "id": "25", "answer": "A", "explanation": "「保留」學到的知識。" },
+        { "id": "26", "answer": "J", "explanation": "研究「指出」更短的午睡。" },
+        { "id": "27", "answer": "B", "explanation": "「取決於」體能。" },
+        { "id": "28", "answer": "I", "explanation": "「顯著的」效益。" },
+        { "id": "29", "answer": "H", "explanation": "「極少量的」光線。" },
+        { "id": "30", "answer": "C", "explanation": "放鬆的「氛圍」。" }
+      ]
+    },
+    {
+      "section": "四、篇章結構",
+      "article": "Smiling is a gesture that many people engage in dozens of times a day... [31] In the West... More importantly, smiling and laughter had long been perceived in the society as manifestations of a lack of self-control and good manners... [32] The amount people smile is culturally influenced as well... [33] Newcomers from different parts of the world are found to smile more... [34] As many psychologists now point out, this simple gesture is in fact far more complicated than it may appear.",
+      "options": [
+        "(A) Another crucial factor is a society's immigration diversity.",
+        "(B) Various factors have thus contributed to the phenomenon of smiling.",
+        "(C) For most of recorded human history, the open smile has been deeply unfashionable.",
+        "(D) A genuine smile indicates contentment, while a forced smile suggests underlying distress.",
+        "(E) In fact, there is a well-known Russian proverb that goes, 'Smiling with no reason is a sign of stupidity.'"
+      ],
+      "questions": [
+        { "id": "31", "answer": "C", "explanation": "呼應下文描述1700年前嚴肅的畫像。" },
+        { "id": "32", "answer": "E", "explanation": "補充某些文化認為笑代表不聰明的論點。" },
+        { "id": "33", "answer": "A", "explanation": "引出下文對移民 (Newcomers) 的討論。" },
+        { "id": "34", "answer": "B", "explanation": "總結全文各項因素。" }
+      ]
+    },
+    {
+      "section": "五、閱讀測驗",
+      "topics": [
+        {
+          "id": "35-38",
+          "title": "The Endurance Expedition",
+          "article": "In March 2022, the Endurance... was found in Antarctica... On August 4, 1914... hoping to make the first land crossing over Antarctica... trapped in pack ice... watches the Endurance sink... camped out on the pack ice... sailed 800 miles... hiked for 36 hours... On August 30, 1916, Shackleton finally got back to Elephant Island... All the members survived...",
+          "questions": [
+            { "id": "35", "type": "reading", "question": "What is this passage mainly about?", "options": ["(A) A renowned Antarctic explorer.", "(B) The extreme weather in Antarctica.", "(C) A challenging voyage to Antarctica.", "(D) The amazing discovery of a sunken ship."], "answer": "C", "explanation": "描述沙克爾頓探險隊驚險的航行與求生歷程。" },
+            { "id": "36", "type": "reading", "question": "Closest in meaning to 'exacerbated the situation'?", "options": ["(A) Broke the ice.", "(B) Cost an arm and a leg.", "(C) Missed the boat.", "(D) Added fuel to the fire."], "answer": "D", "explanation": "exacerbate 為「惡化」，與火上加油語意相近。" },
+            { "id": "37", "type": "reading", "question": "According to the passage, which of the following is true about Shackleton and his Antarctic expedition?", "options": ["(A) His journey lasted more than two years.", "(B) He was the first man to cross over the Antarctic.", "(C) His team camped out on Elephant Island for five months.", "(D) He sent five crew members on a lifeboat to get help from a whaling station."], "answer": "A", "explanation": "從 1914/8/4 出發到 1916/8/30 救援成功，歷時超過兩年。" },
+            { 
+              "id": "38", 
+              "type": "reading", 
+              "question": "Which of the following shows the correct route of the Endurance after leaving South Georgia?", 
+              "options": ["A", "B", "C", "D"], 
+              "optionImageUrls": [
+                "assets/exams/115/q38_a.jpg",
+                "assets/exams/115/q38_b.jpg",
+                "assets/exams/115/q38_c.jpg",
+                "assets/exams/115/q38_d.jpg"
+              ],
+              "answer": "C", 
+              "explanation": "路徑為向南進入 Weddell Sea 漂流，再向北前往 Elephant Island。" 
+            }
+          ]
+        },
+        {
+          "id": "39-42",
+          "title": "Spiral Staircases",
+          "article": "In many old castles in Europe, visitors often find a fantastic spiral staircase... Solomon... Trajan's Column... Middle Ages... advantages in helping to defend against attackers... narrow... clockwise upwards... attackers would have their right hand tight against the narrowest part... close to the central pole... uneven steps... defenders could retreat up them very swiftly...",
+          "questions": [
+            { "id": "39", "type": "reading", "question": "Which question can the passage answer?", "options": ["(A) Where was the first spiral staircase constructed?", "(B) Who was the first designer?", "(C) What is the world's most famous?", "(D) Why is it popular in modern times?"], "answer": "D", "explanation": "第四段解釋了現代受歡迎的原因。" },
+            { "id": "40", "type": "reading", "question": "What does 'them' refer to?", "options": ["(A) Stairs.", "(B) Confines.", "(C) Attackers.", "(D) Defenders."], "answer": "A", "explanation": "指防守者可以迅速撤退回「階梯」上。" },
+            { "id": "41", "type": "reading", "question": "Correct time sequence of materials?", "options": ["(A) stone → iron → steel → glass", "(B) stone → wood → iron → steel", "(C) iron → marble → wood → glass", "(D) marble → wood → stone → concrete"], "answer": "A", "explanation": "文章依序提到石造、鑄鐵、鋼、以及現代的玻璃。" },
+            { "id": "42", "type": "reading", "question": "Which of the following statements can be inferred about spiral staircases in the Medieval Ages?", "options": ["(A) The staircase was too narrow to allow any quick retreat.", "(B) The clockwise design favored right-handed castle defenders.", "(C) The uneven steps made it easier to ascend than descend the stairs.", "(D) The staircase was dark enough for defenders to hide from attackers."], "answer": "B", "explanation": "順時針設計讓向上進攻者的右（劍）手被卡住，對右撇子防守者有利。" }
+          ]
+        },
+        {
+          "id": "43-46",
+          "title": "Map Orientation",
+          "article": "Have you ever wondered why north comes at the top?... ancient times ... pointing to the east... India ... south is at the top... Egypt ... Arabia ... preference for north arose during the European age of exploration... North Star... Eurocentric... expansion of European imperialism ... GPS systems ... dynamic, oriented toward our travel path... a blip...",
+          "questions": [
+            { "id": "43", "type": "reading", "question": "What is the passage mainly about?", "options": ["(A) Why east is referred to as the 'Orient.'", "(B) How maps differ from GPS in function.", "(C) How map orientation evolved over time.", "(D) Why maps were important during the age of exploration."], "answer": "C", "explanation": "探討地圖朝向的演變歷史。" },
+            { "id": "44", "type": "reading", "question": "What does 'this' refer to in the second paragraph?", "options": ["(A) The word dakshina.", "(B) Physical evidence.", "(C) Ancient India.", "(D) East-orientation of maps."], "answer": "D", "explanation": "指稱前文提到的「古代印度地圖可能朝向東方」這件事。" },
+            { "id": "45", "type": "reading", "question": "Closest in meaning to 'a blip'?", "options": ["(A) A temporary state.", "(B) An urgent need.", "(C) A critical decision.", "(D) An advanced system."], "answer": "A", "explanation": "blip 在此指歷史中的一段「小插曲」或「暫時狀態」。" },
+            { "id": "46", "type": "reading", "question": "Which of the following statements is true?", "options": ["(A) Sailors took the North Star as their final destination.", "(B) The GPS system has a fixed direction for orientation.", "(C) South was placed at the top of maps in the pre-Biblical era.", "(D) Old Islamic maps put south at the top for religious purposes."], "answer": "D", "explanation": "穆斯林當時住在麥加北方，朝南的地圖讓他們看圖時如同望向聖城。" }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "貳、混合題",
+      "id": "47-50",
+      "topic": "Wonder Village",
+      "article": "Located along the sparkling coastline ... Wonder Village ... historic village ... unique commercial zone... Specialty stores: Oh Eco, After Work, Aroma Paradise, Something Different, Beyond World, The Pinery...",
+      "articleImageUrl": "assets/exams/115/wonder_village_map.jpg",
+      "questions": [
+        { "id": "47-48", "type": "fill_in_blanks", "question": "tradition coexists harmoniously with [47] and local features are perfectly [48] with foreign elements.", "answers": { "47": "innovation", "48": "blended" }, "explanation": "根據 Pinery 的描述填入 innovation；根據 After Work 的描述填入 blended。" },
+        { "id": "49", "type": "multiple_choice", "question": "Which stores should they go to for: (1) 19th c. lamp, (2) recycled plastic sunglasses, (3) aboriginal necklace?", "answer": "ADE", "explanation": "(D) 古董、(A) 環保物品、(E) 原住民工藝。" },
+        { "id": "50", "type": "short_answer", "question": "Which phrase is used by Joseph Tang to describe the 'uniqueness'?", "answer": "one of a kind", "explanation": "Joseph Tang 形容每間店都是 one of a kind。" }
+      ]
+    },
+    {
+      "section": "參、非選擇題",
+      "translation": [
+        { "id": "T1", "chinese": "現在越來越多高中英文老師已經增加在課堂上使用英文的百分比。", "answer": "Now, more and more senior high school English teachers have increased the percentage of English use in class." },
+        { "id": "T2", "chinese": "他們將學生依英語能力分成不同組別，進行多樣的聽、說活動。", "answer": "They divide students into different groups based on their English proficiency and conduct various listening and speaking activities." }
+      ],
+      "essay": {
+        "topic": "Pets' Role in Modern Taiwan",
+        "imageUrls": [
+          "assets/exams/115/115-essay.jpg"
+        ],
+        "description": "第一段描述圖中現象（推車、餵奶、寵物聚餐）；第二段說明原因與影響。"
+      }
+    }
+  ]
+}
