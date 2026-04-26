@@ -141,6 +141,9 @@
         .vocab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .vocab-cat-btn { background: var(--card-bg); color: var(--text-main); border: 2px solid var(--border-color); padding: 20px 10px; border-radius: var(--radius-md); text-align: center; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;}
         .vocab-cat-btn:hover, .vocab-cat-btn.active { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px);}
+        .vocab-cat-btn.disabled { opacity: 0.5; cursor: not-allowed; border-color: var(--border-color); }
+        .vocab-cat-btn.disabled:hover { transform: none; color: var(--text-main); }
+        
         .az-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 8px; margin-bottom: 20px; }
         .az-btn { background: var(--card-bg); color: var(--text-main); border: 2px solid var(--border-color); border-radius: 8px; font-weight: bold; padding: 10px 0; cursor: pointer; transition: 0.2s; text-align: center;}
         .az-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
@@ -185,7 +188,7 @@
             .navbar { padding: 12px 20px; }
             .main-content { padding: 30px 15px; }
             .flex-row { flex-direction: column; gap: 10px; }
-            .vocab-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .vocab-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .vocab-cat-btn { padding: 15px 5px; font-size: 0.9em; }
             .az-grid { grid-template-columns: repeat(6, 1fr); }
             .fc-word { font-size: 1.8em; }
@@ -237,6 +240,7 @@
             <button class="btn btn-secondary" onclick="showView('registerView')">建立新帳號</button>
             <button class="btn btn-outline" onclick="handleGuestLogin()">先以訪客身分體驗</button>
         </div>
+        
         <div id="registerView" class="view-section view-container centered-view">
             <div style="font-size: 3.5em; margin-bottom: 10px;">✍️</div>
             <h2>建立新帳號</h2>
@@ -366,9 +370,28 @@
             <div id="listModeContainer" style="display: none; max-height: 500px; overflow-y: auto; padding-right: 10px;"></div>
         </div>
 
-        <div id="pastExamsView" class="view-section view-container">
-            <h2>📝 歷屆試題</h2>
-            <p class="subtitle">歷年學測大考英文試題，功能積極建置中，敬請期待！</p>
+        <div id="pastExamsView" class="view-section view-container" style="max-width: 800px;">
+            <h2>📝 歷屆試題大廳</h2>
+            <p class="subtitle">選擇年度，展開 100 分鐘全真模擬考或分項挑戰！</p>
+
+            <div id="examLobby" class="vocab-grid">
+                <div class="vocab-cat-btn" onclick="fetchExamData('115')"><span class="cat-icon">🔥</span>115 學年度</div>
+                <div class="vocab-cat-btn disabled" onclick="Swal.fire('敬請期待', '114學年度考卷尚在建置中！', 'info')"><span class="cat-icon">🔒</span>114 學年度</div>
+                <div class="vocab-cat-btn disabled" onclick="Swal.fire('敬請期待', '113學年度考卷尚在建置中！', 'info')"><span class="cat-icon">🔒</span>113 學年度</div>
+            </div>
+
+            <div id="examLoading" class="loading-box" style="display:none;">
+                <div class="spinner"></div><p style="margin-top:15px;">從雲端調閱考卷中...</p>
+            </div>
+
+            <div id="examPreRoom" style="display:none; text-align:center; background:var(--card-bg); border:2px solid var(--border-color); border-radius:var(--radius-md); padding:30px;">
+                <h3 id="examTitle" style="color:var(--primary-color); font-size:1.8em; margin-bottom:10px;"></h3>
+                <p style="color:var(--text-muted); margin-bottom:20px; line-height: 1.5;">⚠️ 全真模擬考限時 100 分鐘，中途不可暫停。<br>交卷後將自動為您批改並換算 15 級分制。</p>
+                <div style="display:flex; gap:15px; justify-content:center; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="startFullExam()" style="flex:2; font-size:1.1em; min-width: 250px;">⏱️ 開始全真模擬考 (100 mins)</button>
+                    <button class="btn btn-secondary" onclick="backToExamLobby()" style="flex:1; min-width: 120px;">返回大廳</button>
+                </div>
+            </div>
         </div>
 
         <div id="aiEssayView" class="view-section view-container" style="max-width: 800px;">
@@ -518,9 +541,63 @@
             if (viewId === 'profileView') showProfileView();
             if (viewId === 'leaderboardView') loadLeaderboardData();
             if (viewId === 'vocabBookView' && currentUser !== '訪客') syncFavorites(); 
+            // 如果從準備室切換到其他頁面，把狀態重設回大廳
+            if (viewId === 'pastExamsView') backToExamLobby();
             window.scrollTo(0, 0);
         }
 
+        // ==========================================
+        // 📝 歷屆試題：大廳與 JSON 抓取邏輯
+        // ==========================================
+        let currentExamData = null; // 用來存放抓取到的歷屆試題 JSON
+
+        async function fetchExamData(year) {
+            document.getElementById('examLobby').style.display = 'none';
+            document.getElementById('examPreRoom').style.display = 'none';
+            document.getElementById('examLoading').style.display = 'block';
+
+            try {
+                // 🎯 這裡會去你的 GitHub Repository 撈你上傳的檔案
+                const response = await fetch(`./assets/exams/${year}.json`);
+                
+                if (!response.ok) throw new Error(`考卷 (${year}.json) 還沒準備好喔！請確認檔案是否有上傳至 GitHub 的 assets/exams/ 資料夾內。`);
+                
+                currentExamData = await response.json();
+                
+                document.getElementById('examLoading').style.display = 'none';
+                document.getElementById('examTitle').textContent = currentExamData.title || `${year} 學年度 英文考科`;
+                document.getElementById('examPreRoom').style.display = 'block';
+                
+            } catch (e) {
+                document.getElementById('examLoading').style.display = 'none';
+                document.getElementById('examLobby').style.display = 'grid'; 
+                Swal.fire('讀取失敗', e.message, 'error');
+            }
+        }
+
+        function backToExamLobby() {
+            currentExamData = null;
+            if(document.getElementById('examPreRoom')) document.getElementById('examPreRoom').style.display = 'none';
+            if(document.getElementById('examLobby')) document.getElementById('examLobby').style.display = 'grid';
+            if(document.getElementById('examLoading')) document.getElementById('examLoading').style.display = 'none';
+        }
+
+        function startFullExam() {
+            if (!currentExamData) return Swal.fire('錯誤', '沒有考卷資料！', 'error');
+            
+            // 測試用：在 Console 印出資料，並跳出成功提示
+            console.log("✅ 成功載入歷屆考卷 JSON 資料：", currentExamData);
+            Swal.fire({
+                title: '成功載入考卷！',
+                text: 'JSON 抓取成功！請按下 F12 開啟開發者工具 (Console) 查看你抓到的結構。下一步我們再來刻 100 分鐘的作答介面！',
+                icon: 'success'
+            });
+        }
+
+
+        // ==========================================
+        // 原有測驗系統邏輯
+        // ==========================================
         function startGame(isReview = false) {
             isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value;
             if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } 
@@ -707,7 +784,7 @@
             quizData.forEach((q, i) => {
                 let uAns = userAnswers[q.id] || ''; 
                 let isCorr = false;
-                let displayUAns = uAns; // 🎯 建立專門顯示用的答案變數
+                let displayUAns = uAns; 
                 
                 if (q.qType === 'spell') { 
                     const pureWord = getPureWord(q.correctAnswer);
@@ -725,13 +802,12 @@
                             if (wordLen <= 2 || j === start || j === end) { 
                                 reconstructedAnswer += c; 
                             } else {
-                                // 🎯 拼寫題還原邏輯：如果有打字就拼進去，沒打滿就補上底線讓玩家知道哪裡漏填
                                 reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_";
                                 tempTypedIndex++;
                             }
                         }
                     }
-                    displayUAns = reconstructedAnswer; // 🎯 讓結算畫面顯示完整還原後的字
+                    displayUAns = reconstructedAnswer; 
                     isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); 
                 } else { 
                     isCorr = (uAns === q.correctAnswer); 
@@ -744,7 +820,6 @@
                     gainedXP += (base + bonus);
                 }
                 
-                // 🎯 紀錄到資料庫的也是完整還原的 displayUAns
                 submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr });
                 
                 const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'");
@@ -752,7 +827,6 @@
                     ? `🎧 聽力題：<span style="color:var(--primary-color);">${q.correctWord}</span> <button onclick="speakWord('${safeEnWord}')" style="background:none;border:none;cursor:pointer;font-size:1.1em;vertical-align:middle;padding:0 5px;" title="重新聽一次">🔊</button>` 
                     : q.questionText;
 
-                // 🎯 結算畫面的「你答」現在會顯示完整的 displayUAns
                 detailDiv.innerHTML += `
                     <div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;">
                         <h4 style="margin-bottom: 8px; color: var(--text-main); line-height: 1.4;">${i+1}. ${displayTitle} <span style="color:${isCorr?'#10b981':'#ef4444'}; margin-left:5px;">${isCorr?'✔':'✘'}</span></h4>
