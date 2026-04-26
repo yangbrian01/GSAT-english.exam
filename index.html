@@ -40,11 +40,15 @@
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
         .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
-        .hamburger-btn { display: none; background: none; border: none; font-size: 1.8em; color: var(--text-main); cursor: pointer; padding: 0 5px; }
-        .nav-menu { display: flex; gap: 8px; align-items: center; }
-        .nav-info { display: flex; align-items: center; gap: 8px; }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
+        
+        /* 🎯 全局套用漢堡選單樣式 */
+        .hamburger-btn { display: block; background: none; border: none; font-size: 1.8em; color: var(--text-main); cursor: pointer; padding: 0 5px; }
+        .nav-menu { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--nav-bg); flex-direction: column; align-items: stretch; padding: 0 0 15px 0; border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .nav-menu.show { display: flex; }
+        .nav-info { display: flex; align-items: center; gap: 8px; padding: 15px 20px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; flex-wrap: wrap; background: var(--bg-color); }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; padding: 14px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
         .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); }
+        
         .badge { background: #fffbeb; color: #d97706; padding: 4px 10px; border-radius: 12px; font-size: 0.9em; font-weight: 700; white-space: nowrap; }
 
         .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; overflow: hidden; }
@@ -88,7 +92,6 @@
         .spell-input-area { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 30px; cursor: text; padding: 20px;}
         .spell-visual-text { font-family: monospace; font-size: 2.2em; font-weight: 800; color: var(--primary-color); letter-spacing: 0.2em; text-align: center; line-height: 1.5; word-break: break-all; position: relative; z-index: 1; pointer-events: none;}
         
-        /* 🎯 閃爍游標的專屬樣式 */
         .spell-cursor {
             display: inline-block;
             width: 3px;
@@ -160,11 +163,6 @@
 
         @media (max-width: 768px) {
             .navbar { padding: 12px 20px; }
-            .hamburger-btn { display: block; }
-            .nav-menu { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--nav-bg); flex-direction: column; align-items: stretch; padding: 0 0 15px 0; border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
-            .nav-menu.show { display: flex; }
-            .nav-info { padding: 15px 20px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; flex-wrap: wrap; background: var(--bg-color); }
-            .nav-btn { padding: 14px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
             .main-content { padding: 30px 15px; }
             .flex-row { flex-direction: column; gap: 10px; }
             .vocab-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -190,9 +188,10 @@
             <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
             <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
             <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')">📚 記憶系統</button>
-            <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
-            <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
+            <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
             <button class="nav-btn" onclick="showView('leaderboardView')">🏆 排行榜</button>
+            <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
+            <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
             <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
             <button class="nav-btn" style="color: var(--danger-color);" onclick="handleLogout()">登出</button>
         </div>
@@ -339,6 +338,11 @@
             <div id="listModeContainer" style="display: none; max-height: 500px; overflow-y: auto; padding-right: 10px;"></div>
         </div>
 
+        <div id="pastExamsView" class="view-section view-container">
+            <h2>📝 歷屆試題</h2>
+            <p class="subtitle">歷年學測大考英文試題，功能積極建置中，敬請期待！</p>
+        </div>
+
         <div id="aiEssayView" class="view-section view-container" style="max-width: 800px;">
             <h2>✍️ AI 作文批改</h2>
             <p class="subtitle">大考中心鐵血模式：依據 115 年標準，提供五大細項給分與分析。</p>
@@ -378,7 +382,7 @@
 
         <div id="aiTutorView" class="view-section view-container">
             <h2>🤖 隨身解題家教</h2>
-            <p class="subtitle">遇到不懂的文法或題目？貼上來，AI 老師幫這個解惑！</p>
+            <p class="subtitle">遇到不懂的文法或題目？貼上來，AI 老師幫你解惑！</p>
             <div class="input-group"><label>題目或段落內容</label><textarea id="tutorContextInput" placeholder="例如: Having finished his homework..."></textarea></div>
             <div class="input-group"><label>你想問什麼？</label><input type="text" id="tutorDoubtInput" placeholder="例如: 為什麼是用 Having finished？"></div>
             <button id="btnAskTutor" class="btn btn-primary" onclick="askAiTutor()">🙋‍♂️ 舉手發問</button>
@@ -436,7 +440,6 @@
         let isReviewQuizMode = false; let autoAdvanceTimer = null; 
         let userFavoriteWords = new Set();
 
-        // 🎯 確保純文字發音
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
             return rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim(); 
@@ -445,7 +448,9 @@
         function speakWord(text) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.speak(u); }
         function playCurrentWordAudio() { speakWord(getPureWord(quizData[currentQuestionIndex].correctWord)); }
 
-        const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'vocabBookView', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
+        // 🎯 更新後的 VIEW_IDS 陣列，加入了 pastExamsView
+        const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'vocabBookView', 'pastExamsView', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
+        
         function showView(viewId) {
             document.getElementById('navMenu').classList.remove('show');
             VIEW_IDS.forEach(id => document.getElementById(id).classList.remove('active'));
@@ -468,9 +473,6 @@
             window.scrollTo(0, 0);
         }
 
-        // ==========================================
-        // 測驗系統邏輯
-        // ==========================================
         function startGame(isReview = false) {
             isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value;
             if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } 
@@ -532,7 +534,6 @@
                     continue;
                 }
                 
-                // 只有遇到輸入格時才判斷游標位置，精準追蹤
                 if (typedIndex === cursorPos) {
                     displayStr += `<span class="spell-cursor"></span>`;
                 }
@@ -552,7 +553,6 @@
             document.getElementById('spellVisual').innerHTML = displayStr;
         }
 
-        // 🎯 點擊空白處統一聚焦到最後
         function focusTypingInput(e) {
             const input = document.getElementById('typingInput');
             input.focus();
@@ -563,11 +563,10 @@
             }, 10);
         }
 
-        // 🎯 精準點擊字母定位
         function setSpellCursor(index, event) {
             if (event) {
                 event.preventDefault();
-                event.stopPropagation(); // 阻止事件冒泡到外層容器
+                event.stopPropagation();
             }
             const input = document.getElementById('typingInput');
             input.focus();
@@ -699,11 +698,6 @@
 
         function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
 
-        // ==========================================
-        // 📖 單字書 A-Z 與 AI 快取邏輯
-        // ==========================================
-        let currentVocabList = []; let currentLetterList = []; let currentVocabCardIndex = 0; let currentLevel = 0;
-
         function syncFavorites() { if (currentUser === '訪客') return; apiCall('getFavorites', { username: currentUser }).then(res => { if (res.success) { userFavoriteWords.clear(); res.words.forEach(w => userFavoriteWords.add(w.word)); } }); }
         function backToVocabHome() { document.getElementById('vocabHomeGrid').style.display = 'grid'; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'none'; }
         function backToAzGrid() { if (currentLevel === 0) backToVocabHome(); else { document.getElementById('vocabFlashcardArea').style.display = 'none'; document.getElementById('vocabNavArea').style.display = 'block'; } }
@@ -815,9 +809,6 @@
             });
         }
 
-        // ==========================================
-        // 🤖 AI 作文與家教
-        // ==========================================
         function gradeAiEssay() {
             const text = document.getElementById('essayInput').value.trim();
             const topic = document.getElementById('essayTopicInput').value.trim(); 
@@ -885,9 +876,6 @@
             });
         }
 
-        // ==========================================
-        // 🧠 記憶閃卡系統 (SRS)
-        // ==========================================
         let reviewCardsData = []; let currentFlashcardIndex = 0; let showFlashcardMode = true;
         
         function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; renderReviewUI(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } }); }
@@ -959,9 +947,6 @@
             document.getElementById('listModeContainer').innerHTML = html;
         }
 
-        // ==========================================
-        // 👤 個人檔案與設定
-        // ==========================================
         function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; if(u.length<3||p.length<4)return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); showLoading('註冊中'); apiCall('registerUser',{username:u, password:p}).then(res=>{if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}else Swal.fire('失敗',res.message,'error');}); }
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
