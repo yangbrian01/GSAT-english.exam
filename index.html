@@ -41,7 +41,7 @@
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
         .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
         
-        /* 🎯 酷炫賽季橫幅樣式 */
+        /* 🎯 新增的賽季橫幅樣式 */
         .season-nav-banner {
             background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 6px 20px; border-radius: 50px; font-weight: 800; font-size: 1.05em; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); display: flex; align-items: center; gap: 8px; white-space: nowrap; margin: 0 15px;
         }
@@ -190,7 +190,7 @@
             .exam-topic-split { flex-direction: column; gap: 15px; padding: 15px; }
             .exam-topic-left { border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
             .exam-topic-right { padding-left: 0; }
-            .season-nav-banner { display: none; } /* 手機版空間不夠隱藏橫幅 */
+            .season-nav-banner { display: none; }
         }
 
         @media (max-width: 768px) {
@@ -261,12 +261,12 @@
             <div class="input-group">
                 <label>請選擇你目前的年級</label>
                 <select id="regGrade" style="padding: 14px; background-color: var(--card-bg); color: var(--text-main); border: 2px solid var(--border-color); border-radius: var(--radius-md);">
-                    <option value="1">高三 (Senior 3)</option>
-                    <option value="2">高二 (Senior 2)</option>
-                    <option value="3">高一 (Senior 1)</option>
-                    <option value="4">國三 (Junior 3)</option>
-                    <option value="5">國二 (Junior 2)</option>
-                    <option value="6">國一 (Junior 1)</option>
+                    <option value="0">高三 (Senior 3)</option>
+                    <option value="1">高二 (Senior 2)</option>
+                    <option value="2">高一 (Senior 1)</option>
+                    <option value="3">國三 (Junior 3)</option>
+                    <option value="4">國二 (Junior 2)</option>
+                    <option value="5">國一 (Junior 1)</option>
                 </select>
                 <p class="input-desc" style="color:#d97706;">系統會自動為您推算學測目標年度與自動升級。若畢業後半年未登入，帳號將暫時從排行榜隱藏。</p>
             </div>
@@ -404,13 +404,13 @@
                     <div id="profCurrentGrade" style="font-weight:bold; color:var(--primary-color); margin-bottom:10px; font-size:1.1em; background:var(--bg-color); padding:10px; border-radius:8px;">讀取中...</div>
                     <select id="profNewGrade" style="padding: 10px; background-color: var(--card-bg); color: var(--text-main); border: 2px solid var(--border-color); border-radius: var(--radius-md);">
                         <option value="">-- 手動校正年級 (選填) --</option>
-                        <option value="1">高三 (Senior 3)</option>
-                        <option value="2">高二 (Senior 2)</option>
-                        <option value="3">高一 (Senior 1)</option>
-                        <option value="4">國三 (Junior 3)</option>
-                        <option value="5">國二 (Junior 2)</option>
-                        <option value="6">國一 (Junior 1)</option>
-                        <option value="0">已畢業 (隱藏排行榜)</option>
+                        <option value="0">高三 (Senior 3)</option>
+                        <option value="1">高二 (Senior 2)</option>
+                        <option value="2">高一 (Senior 1)</option>
+                        <option value="3">國三 (Junior 3)</option>
+                        <option value="4">國二 (Junior 2)</option>
+                        <option value="5">國一 (Junior 1)</option>
+                        <option value="-1">已畢業 (隱藏排行榜)</option>
                     </select>
                 </div>
                 <div class="input-group"><label>修改使用者名稱</label><input type="text" id="profNewUsername" placeholder="輸入新的名稱 (留空則不修改)"></div>
@@ -465,18 +465,28 @@
         let touchStartX = 0, touchEndX = 0;
         let reviewCardsData = []; let currentFlashcardIndex = 0; let showFlashcardMode = true; 
 
-        function getCurrentSeason() {
+        // 🎯 取出「目前高三要考的學測年份」(例如今年8月前高三考115，8月後高三考116)
+        function getBaseGSATYear() {
             let now = new Date();
-            let currYear = now.getFullYear();
-            let currMonth = now.getMonth(); 
-            return (currMonth >= 1) ? (currYear - 1911) + 1 : (currYear - 1911);
+            let m = now.getMonth(); // 0-11
+            let y = now.getFullYear();
+            // 8月(含)以後開學 -> 新學年 -> 高三會考明年的學測
+            return (m >= 7) ? (y - 1911) + 1 : (y - 1911);
         }
 
+        // 🎯 計算目標學測年
         function calculateTargetYear(offsetStr) {
             let offset = parseInt(offsetStr);
-            if(offset === 0) return 0; 
-            let currentSeason = getCurrentSeason();
-            return currentSeason + (offset - 1);
+            if(isNaN(offset) || offset === -1) return 0; // 0代表已畢業
+            return getBaseGSATYear() + offset;
+        }
+
+        // 🎯 賽季橫幅 (2月開始就算下一個年度)
+        function getCurrentSeason() {
+            let now = new Date();
+            let y = now.getFullYear();
+            let m = now.getMonth(); 
+            return (m >= 1) ? (y - 1911) + 1 : (y - 1911);
         }
 
         function initSeasonBanner() {
@@ -891,6 +901,9 @@
             showView('examResultView');
         }
 
+        // ==========================================
+        // 原有系統邏輯
+        // ==========================================
         function startGame(isReview = false) { isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } else { const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); } }
         function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; } quizData = res.questions; totalQuestions = res.totalQuestions; if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); } }
         document.addEventListener('selectionchange', () => { if (document.activeElement && document.activeElement.id === 'typingInput') updateSpellVisual(); });
@@ -924,20 +937,128 @@
         function gradeAiEssay() { const text = document.getElementById('essayInput').value.trim(); const topic = document.getElementById('essayTopicInput').value.trim(); if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block'; apiCall('aiEssayGrading', { username: currentUser, topic: topic, essayText: text }).then(res => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; if (res.success && res.data && res.data.scores) { document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`; document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`; document.getElementById('resEssayOverall').textContent = res.data.overallComment; document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`; document.getElementById('a-content').textContent = res.data.scores.content.analysis; document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`; document.getElementById('a-org').textContent = res.data.scores.organization.analysis; document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`; document.getElementById('a-lang').textContent = res.data.scores.language.analysis; document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`; document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis; document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`; document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis; document.getElementById('resEssaySuggestions').textContent = res.data.suggestions; document.getElementById('resEssayKey').innerHTML = (res.data.keyImprovements || "").replace(/\n/g, '<br>'); document.getElementById('essayResult').style.display = 'block'; updateNavbarBadges(); } else { Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
         function askAiTutor() { const context = document.getElementById('tutorContextInput').value.trim(); const doubt = document.getElementById('tutorDoubtInput').value.trim(); if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning'); const btn = document.getElementById('btnAskTutor'); btn.disabled = true; document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block'; apiCall('aiTutor', { username: currentUser, question: context, doubt: doubt }).then(res => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; if (res.success && res.data) { document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>'); document.getElementById('tutorResult').style.display = 'block'; updateNavbarBadges(); } else { Swal.fire('呼叫老師失敗', res.message, 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
 
-        function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { try { if (!res.success) throw new Error("API 錯誤"); reviewCardsData = res.questions || []; if (reviewCardsData.length > 0) { let dueCount = 0, pendingCount = 0; reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; currentFlashcardIndex = 0; renderReviewUI(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } } catch(err) { Swal.fire('渲染失敗', err.message, 'error'); document.getElementById('singleFlashcardArea').innerHTML = `<p style="text-align:center; padding: 20px; color: var(--danger-color); font-weight: 600;">讀取失敗，請確認伺服器。 (${err.message})</p>`; } }).catch(err => { document.getElementById('singleFlashcardArea').innerHTML = `<p style="text-align:center; padding: 20px; color: var(--danger-color); font-weight: 600;">網路錯誤</p>`; }); }
-        function toggleFlashcardMode() { showFlashcardMode = !showFlashcardMode; renderReviewUI(); }
-        function renderReviewUI() { if (showFlashcardMode) { document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; renderSingleFlashcard(); } else { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'block'; renderListMode(); } }
-        function renderSingleFlashcard() { try { if (reviewCardsData.length === 0) return; const q = reviewCardsData[currentFlashcardIndex]; if (!q) throw new Error("卡片遺失"); const area = document.getElementById('singleFlashcardArea'); document.getElementById('fcCounter').textContent = `${currentFlashcardIndex + 1} / ${reviewCardsData.length}`; document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0; document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1; const safeQuestionStr = String(q.question || ''); const safeCorrectAnsStr = String(q.correctAnswer || ''); const hasChinese = /[\u4E00-\u9FFF]/.test(safeQuestionStr); const chWord = hasChinese ? safeQuestionStr : safeCorrectAnsStr; const enWord = hasChinese ? safeCorrectAnsStr : safeQuestionStr; const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; const cleanWord = getPureWord(enWord); const safeEnWord = cleanWord.replace(/'/g, "\\'"); area.innerHTML = `<div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};"><div class="flashcard-inner"><div class="flashcard-front"><div class="fc-word" style="font-size: 1.8em;">${chWord}</div><div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div><div class="fc-hint">點擊卡片翻面看英文</div></div><div class="flashcard-back"><button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><div class="fc-word">${cleanWord}</div>${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}</div></div></div>`; const cardElement = document.getElementById('fcContainer'); cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40) { if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); } if (touchEndX > touchStartX + 40) { if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); } }, {passive: true}); } catch(e) { document.getElementById('singleFlashcardArea').innerHTML = `<p style="text-align:center; padding: 20px; color: var(--danger-color); font-weight: 600;">渲染失敗: ${e.message}</p>`; } }
-        function changeFlashcard(delta) { const newIdx = currentFlashcardIndex + delta; if (newIdx >= 0 && newIdx < reviewCardsData.length) { currentFlashcardIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
-        function renderListMode() { let html = ''; reviewCardsData.forEach((q, i) => { const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; const hasChinese = /[\u4E00-\u9FFF]/.test(String(q.question || '')); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const cleanWord = getPureWord(enWord); const safeEnWord = cleanWord.replace(/'/g, "\\'"); html += `<div class="review-list-item" style="opacity: ${q.isDue ? '1' : '0.6'};"><div style="flex: 1;"><strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br><span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${cleanWord}</span></div><button class="list-speak-btn" onclick="speakWord('${safeEnWord}')">🔊</button></div>`; }); document.getElementById('listModeContainer').innerHTML = html; }
+        function loadIncorrectQuestions() { 
+            document.getElementById('flashcardModeContainer').style.display = 'none'; 
+            document.getElementById('listModeContainer').style.display = 'none'; 
+            document.getElementById('startReviewBtn').style.display = 'none'; 
+            document.getElementById('flashcardModeContainer').style.display = 'block'; 
+            document.getElementById('singleFlashcardArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; 
+            
+            apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { 
+                try {
+                    if (!res.success) throw new Error("後端 API 回傳失敗，請確認 code.gs 是否已重新部署！");
 
+                    reviewCardsData = res.questions || []; 
+                    if (reviewCardsData.length > 0) { 
+                        let dueCount = 0, pendingCount = 0; 
+                        reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); 
+                        document.getElementById('dueCountLabel').textContent = dueCount; 
+                        document.getElementById('pendingCountLabel').textContent = pendingCount; 
+                        if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; 
+                        currentFlashcardIndex = 0; 
+                        renderReviewUI(); 
+                    } else { 
+                        document.getElementById('dueCountLabel').textContent = '0'; 
+                        document.getElementById('pendingCountLabel').textContent = '0'; 
+                        document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; 
+                    } 
+                } catch(err) {
+                    Swal.fire('渲染失敗', '你的錯題資料可能已損壞：' + err.message, 'error');
+                    document.getElementById('singleFlashcardArea').innerHTML = `<p style="color: white; background: var(--danger-color); padding: 15px; border-radius: 8px; font-weight: bold; text-align: center;">連線異常，請確認伺服器狀態。</p>`;
+                }
+            }).catch(err => {
+                Swal.fire('網路連線失敗', err.message, 'error');
+            }); 
+        }
+        
+        function toggleFlashcardMode() { showFlashcardMode = !showFlashcardMode; renderReviewUI(); }
+
+        function renderReviewUI() {
+            if (showFlashcardMode) { document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('flashcardModeContainer').style.display = 'block'; renderSingleFlashcard(); } 
+            else { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'block'; renderListMode(); }
+        }
+
+        function renderSingleFlashcard() { 
+            try {
+                if (reviewCardsData.length === 0) return; 
+                const q = reviewCardsData[currentFlashcardIndex]; 
+                if (!q) throw new Error("找不到該卡片");
+
+                const area = document.getElementById('singleFlashcardArea'); 
+                document.getElementById('fcCounter').textContent = `${currentFlashcardIndex + 1} / ${reviewCardsData.length}`; 
+                document.getElementById('fcPrev').disabled = currentFlashcardIndex === 0; 
+                document.getElementById('fcNext').disabled = currentFlashcardIndex === reviewCardsData.length - 1; 
+                
+                const safeQuestionStr = String(q.question || '');
+                const safeCorrectAnsStr = String(q.correctAnswer || '');
+
+                const hasChinese = /[\u4E00-\u9FFF]/.test(safeQuestionStr); 
+                const chWord = hasChinese ? safeQuestionStr : safeCorrectAnsStr; 
+                const enWord = hasChinese ? safeCorrectAnsStr : safeQuestionStr; 
+                const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; 
+                
+                const cleanWord = getPureWord(enWord); 
+                const safeEnWord = cleanWord.replace(/'/g, "\\'"); 
+                
+                area.innerHTML = `
+                    <div class="flashcard-container" id="fcContainer" onclick="this.classList.toggle('flipped')" style="opacity: ${q.isDue ? '1' : '0.6'};">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-word" style="font-size: 1.8em;">${chWord}</div>
+                                <div style="position:absolute; top:15px; left:15px; font-weight:bold; color:var(--text-muted); font-size:0.9em;">${stageText}</div>
+                                <div class="fc-hint">點擊卡片翻面看英文</div>
+                            </div>
+                            <div class="flashcard-back">
+                                <button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button>
+                                <div class="fc-word">${cleanWord}</div>
+                                ${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>`; 
+                const cardElement = document.getElementById('fcContainer'); 
+                cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true}); 
+                cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40) { if (currentFlashcardIndex < reviewCardsData.length - 1) document.getElementById('fcNext').click(); } if (touchEndX > touchStartX + 40) { if (currentFlashcardIndex > 0) document.getElementById('fcPrev').click(); } }, {passive: true}); 
+            } catch(e) {
+                Swal.fire('卡片渲染錯誤', e.message, 'error');
+            }
+        }
+
+        function changeFlashcard(delta) { const newIdx = currentFlashcardIndex + delta; if (newIdx >= 0 && newIdx < reviewCardsData.length) { currentFlashcardIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
+
+        function renderListMode() {
+            let html = '';
+            reviewCardsData.forEach((q, i) => {
+                const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後';
+                const hasChinese = /[\u4E00-\u9FFF]/.test(String(q.question || ''));
+                const chWord = hasChinese ? q.question : q.correctAnswer;
+                const enWord = hasChinese ? q.correctAnswer : q.question;
+                const cleanWord = getPureWord(enWord);
+                const safeEnWord = cleanWord.replace(/'/g, "\\'");
+
+                html += `
+                    <div class="review-list-item" style="opacity: ${q.isDue ? '1' : '0.6'};">
+                        <div style="flex: 1;">
+                            <strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br>
+                            <span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${cleanWord}</span>
+                        </div>
+                        <button class="list-speak-btn" onclick="speakWord('${safeEnWord}')">🔊</button>
+                    </div>`;
+            });
+            document.getElementById('listModeContainer').innerHTML = html;
+        }
+
+        // 🎯 註冊時直接選擇目前年級對應的 offset，讓系統動態計算
         function handleRegister() { 
             const u=document.getElementById('regUsername').value.trim(); 
             const p=document.getElementById('regPassword').value; 
             const gradeOffset = document.getElementById('regGrade').value; 
+            
             if(u.length<3||p.length<4) return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); 
+            
             showLoading('註冊中'); 
+            
             let tYear = calculateTargetYear(gradeOffset);
+            
             apiCall('registerUser',{username:u, password:p, targetYear: tYear}).then(res=>{
                 if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}
                 else Swal.fire('失敗',res.message,'error');
@@ -947,6 +1068,7 @@
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
+        // 🎯 登入後防呆：檢查是否需要強制更新年級
         function updateNavbarBadges() { 
             apiCall('getProfileData', { username: currentUser }).then(res => { 
                 if(res.success) { 
@@ -954,7 +1076,9 @@
                     const level = Math.floor(Math.sqrt(xp / 10)) + 1;
                     document.getElementById('quickLevel').textContent = `Lv. ${level}`;
                     document.getElementById('quickXP').textContent = `${xp} XP`;
+
                     window.userTargetYear = res.targetYear;
+
                     if (res.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + currentUser)) {
                         showGradeUpdatePopup();
                     }
@@ -970,13 +1094,13 @@
                         各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴我們你<b>現在的年級</b>：
                     </div>
                     <select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;">
-                        <option value="1">高三 (Senior 3)</option>
-                        <option value="2">高二 (Senior 2)</option>
-                        <option value="3">高一 (Senior 1)</option>
-                        <option value="4">國三 (Junior 3)</option>
-                        <option value="5">國二 (Junior 2)</option>
-                        <option value="6">國一 (Junior 1)</option>
-                        <option value="0">已畢業 (隱藏排行榜)</option>
+                        <option value="0">高三 (Senior 3)</option>
+                        <option value="1">高二 (Senior 2)</option>
+                        <option value="2">高一 (Senior 1)</option>
+                        <option value="3">國三 (Junior 3)</option>
+                        <option value="4">國二 (Junior 2)</option>
+                        <option value="5">國一 (Junior 1)</option>
+                        <option value="-1">已畢業 (隱藏排行榜)</option>
                     </select>
                 `,
                 confirmButtonText: '進入新賽季！',
@@ -1021,22 +1145,22 @@
                     document.getElementById('profileLevelDisplay').innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`; 
                     document.getElementById('profileStatsDisplay').innerHTML = `<div style="display:flex; justify-content:center; gap: 40px; margin-bottom: 15px;"><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.totalAnswered}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">總答題數</div></div><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.correctRate}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">答對率</div></div></div>`; 
 
+                    // 🎯 動態反推目前年級
                     let targetYear = res.targetYear;
-                    let currentSeason = res.currentSeason || getCurrentSeason();
-                    let offset = targetYear - currentSeason + 1;
+                    let baseYear = getBaseGSATYear();
+                    let offset = targetYear - baseYear;
                     
                     let gradeStr = "已畢業";
-                    if (targetYear >= currentSeason) {
-                        if(offset === 1) gradeStr = "高三";
-                        else if(offset === 2) gradeStr = "高二";
-                        else if(offset === 3) gradeStr = "高一";
-                        else if(offset === 4) gradeStr = "國三";
-                        else if(offset === 5) gradeStr = "國二";
-                        else if(offset === 6) gradeStr = "國一";
-                        else if(offset > 6) gradeStr = "小學或以下";
-                    }
+                    if (targetYear === 0 || offset < 0) gradeStr = "已畢業";
+                    else if(offset === 0) gradeStr = "高三";
+                    else if(offset === 1) gradeStr = "高二";
+                    else if(offset === 2) gradeStr = "高一";
+                    else if(offset === 3) gradeStr = "國三";
+                    else if(offset === 4) gradeStr = "國二";
+                    else if(offset === 5) gradeStr = "國一";
+                    else if(offset > 5) gradeStr = "小學或以下";
                     
-                    document.getElementById('profCurrentGrade').textContent = `${gradeStr} (目標：${targetYear} 學測)`;
+                    document.getElementById('profCurrentGrade').textContent = (targetYear === 0) ? `已畢業 (不參與排行)` : `${gradeStr} (目標：${targetYear} 學測)`;
 
                     if (res.hasApiKey) { document.getElementById('quotaInfoBox').innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${res.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${res.essayUsed} / 1 篇`; } 
                 } 
@@ -1066,7 +1190,7 @@
                     document.getElementById('profNewUsername').value = ''; 
                     document.getElementById('profNewPassword').value = ''; 
                     document.getElementById('profNewGrade').value = '';
-                    window.userTargetYear = tYear; 
+                    if (tYear !== null) window.userTargetYear = tYear; 
                     showProfileView(); 
                 } else Swal.fire('失敗', res.message, 'error'); 
             }); 
