@@ -44,6 +44,7 @@
         @keyframes levelUpPop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #f59e0b; } 100% { transform: scale(1); } }
         .level-up-anim { animation: levelUpPop 1.2s ease-out; }
 
+        /* 🎯 橫幅與倒數計時區塊 (置中排版) */
         .season-nav-container { display: flex; align-items: center; gap: 15px; justify-content: center; flex: 1; margin: 0 20px; }
         .season-nav-banner { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 6px 20px; border-radius: 50px; font-weight: 800; font-size: 1.05em; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); white-space: nowrap; margin: 0; }
         .gsat-countdown-pill { font-weight: 800; color: var(--text-muted); background: var(--bg-color); border: 2px solid var(--border-color); padding: 6px 15px; border-radius: 50px; font-size: 0.95em; white-space: nowrap; }
@@ -192,7 +193,6 @@
             .exam-topic-split { flex-direction: column; gap: 15px; padding: 15px; }
             .exam-topic-left { border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
             .exam-topic-right { padding-left: 0; }
-            .season-nav-container { display: none; } 
         }
 
         @media (max-width: 768px) {
@@ -207,6 +207,7 @@
             .theme-toggle-float { bottom: 20px; right: 20px; width: 50px; height: 50px; }
             .exam-timer-bar { padding: 12px 15px; top: 0 !important; }
             .exam-timer-text { font-size: 1.5em; }
+            .season-nav-container { display: none; } /* 手機版橫幅先藏起來避免太擠 */
         }
     </style>
 </head>
@@ -470,43 +471,30 @@
         let touchStartX = 0, touchEndX = 0;
         let reviewCardsData = []; let currentFlashcardIndex = 0; let showFlashcardMode = true; 
 
-        // 🎯 取出「目前學年度」(8月為界線)
-        function getBaseAcadYear() {
+        // 🎯 極速純前端：計算賽季與倒數計時
+        function initSeasonBanner() {
             let now = new Date();
-            let m = now.getMonth(); // 0-11
-            let y = now.getFullYear();
-            return (m >= 7) ? (y - 1911) : (y - 1912); // 8月前算前一學年度
+            let currYear = now.getFullYear();
+            let currMonth = now.getMonth(); 
+            let season = (currMonth >= 1) ? (currYear - 1911) + 1 : (currYear - 1911);
+            
+            document.getElementById('currentSeasonText').textContent = season.toString();
+            
+            let examYear = season + 1911;
+            let examDate = new Date(examYear, 0, 20); // 預估 1/20
+            examDate.setHours(0, 0, 0, 0);
+            
+            let today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            let diffTime = examDate - today;
+            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays >= 0) {
+                document.getElementById('cdDays').textContent = diffDays;
+                document.getElementById('gsatCountdown').style.display = 'block';
+            }
         }
-
-        // 🎯 註冊時計算目標學測年
-        function calculateTargetYear(offsetStr) {
-            let offset = parseInt(offsetStr);
-            if(isNaN(offset) || offset === -1) return 0; // 0代表已畢業
-            // offset=0是高三(應屆)
-            return getBaseAcadYear() + 1 + offset;
-        }
-
-        // 🎯 系統全局資訊抓取 (包含動態學測倒數日期)
-        window.onload = () => { 
-            applyTheme(); 
-            apiCall('getSystemInfo').then(res => {
-                if (res.success) {
-                    document.getElementById('currentSeasonText').textContent = res.season;
-                    if (res.gsatDate) {
-                        let examDate = new Date(res.gsatDate);
-                        examDate.setHours(0, 0, 0, 0); // 設定為午夜
-                        let now = new Date();
-                        let today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                        let diffDays = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
-                        if (diffDays >= 0) {
-                            document.getElementById('cdDays').textContent = diffDays;
-                            document.getElementById('gsatCountdown').style.display = 'block';
-                        }
-                    }
-                }
-            });
-            if (currentUser) showView('setupView'); else showView('loginView'); 
-        };
 
         function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim() : ''; }
         function speakWord(text, rate = 0.85) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = rate; window.speechSynthesis.speak(u); }
@@ -916,6 +904,9 @@
             showView('examResultView');
         }
 
+        // ==========================================
+        // 原有系統邏輯
+        // ==========================================
         function startGame(isReview = false) { isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } else { const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); } }
         function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; } quizData = res.questions; totalQuestions = res.totalQuestions; if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); } }
         document.addEventListener('selectionchange', () => { if (document.activeElement && document.activeElement.id === 'typingInput') updateSpellVisual(); });
@@ -1059,6 +1050,7 @@
             document.getElementById('listModeContainer').innerHTML = html;
         }
 
+        // 🎯 註冊時計算目標學測年
         function handleRegister() { 
             const u=document.getElementById('regUsername').value.trim(); 
             const p=document.getElementById('regPassword').value; 
