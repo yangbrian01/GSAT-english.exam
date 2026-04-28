@@ -39,16 +39,20 @@
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; transition: background-color 0.3s, color 0.3s;}
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
-        .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
+        .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; flex-shrink: 0; }
         
-        /* 🎯 新增的賽季橫幅樣式 */
-        .season-nav-banner {
-            background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 6px 20px; border-radius: 50px; font-weight: 800; font-size: 1.05em; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); display: flex; align-items: center; gap: 8px; white-space: nowrap; margin: 0 15px;
-        }
+        /* 🎯 升級彈出動畫 */
+        @keyframes levelUpPop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #f59e0b; } 100% { transform: scale(1); } }
+        .level-up-anim { animation: levelUpPop 1.2s ease-out; }
 
-        .nav-right-group { display: flex; align-items: center; gap: 15px; }
+        /* 🎯 中間的橫幅與倒數區塊 */
+        .season-nav-container { display: flex; align-items: center; gap: 15px; justify-content: center; flex: 1; margin: 0 20px; }
+        .season-nav-banner { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 6px 20px; border-radius: 50px; font-weight: 800; font-size: 1.05em; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); white-space: nowrap; margin: 0; }
+        .gsat-countdown-pill { font-weight: 800; color: var(--text-muted); background: var(--bg-color); border: 2px solid var(--border-color); padding: 6px 15px; border-radius: 50px; font-size: 0.95em; white-space: nowrap; }
+
+        .nav-right-group { display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
         .nav-quick-info { display: flex; align-items: center; gap: 15px; background: var(--bg-color); padding: 8px 22px; border-radius: 50px; border: 2px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .quick-item { font-weight: 800; font-size: 1.1em; color: var(--text-main); letter-spacing: -0.3px;}
+        .quick-item { font-weight: 800; font-size: 1.1em; color: var(--text-main); letter-spacing: -0.3px; transition: 0.3s; display: inline-block; }
         .quick-btn { background: none; border: none; font-size: 1.7em; cursor: pointer; transition: 0.2s; display: flex; align-items: center; padding: 0;}
         .quick-btn:hover { transform: scale(1.1); }
         
@@ -190,7 +194,6 @@
             .exam-topic-split { flex-direction: column; gap: 15px; padding: 15px; }
             .exam-topic-left { border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
             .exam-topic-right { padding-left: 0; }
-            .season-nav-banner { display: none; }
         }
 
         @media (max-width: 768px) {
@@ -205,6 +208,7 @@
             .theme-toggle-float { bottom: 20px; right: 20px; width: 50px; height: 50px; }
             .exam-timer-bar { padding: 12px 15px; top: 0 !important; }
             .exam-timer-text { font-size: 1.5em; }
+            .season-nav-container { display: none; } /* 手機版橫幅先藏起來避免太擠 */
         }
     </style>
 </head>
@@ -215,8 +219,11 @@
     <nav class="navbar" id="topNavbar" style="display: none;">
         <div class="nav-brand">VocabMaster</div>
         
-        <div class="season-nav-banner desktop-only" id="seasonBanner">
-            🔥 <span id="currentSeasonText">---</span> 學測賽季進行中 ⚔️
+        <div class="season-nav-container desktop-only">
+            <div class="season-nav-banner">🔥 <span id="currentSeasonText">---</span> 學測賽季進行中 ⚔️</div>
+            <div id="gsatCountdown" class="gsat-countdown-pill" style="display:none;">
+                ⏳ 距離學測約 <span id="cdDays" style="color:var(--danger-color); font-size:1.15em;">--</span> 天
+            </div>
         </div>
 
         <div class="nav-right-group">
@@ -465,23 +472,7 @@
         let touchStartX = 0, touchEndX = 0;
         let reviewCardsData = []; let currentFlashcardIndex = 0; let showFlashcardMode = true; 
 
-        // 🎯 取出「目前高三要考的學測年份」(例如今年8月前高三考115，8月後高三考116)
-        function getBaseGSATYear() {
-            let now = new Date();
-            let m = now.getMonth(); // 0-11
-            let y = now.getFullYear();
-            // 8月(含)以後開學 -> 新學年 -> 高三會考明年的學測
-            return (m >= 7) ? (y - 1911) + 1 : (y - 1911);
-        }
-
-        // 🎯 計算目標學測年
-        function calculateTargetYear(offsetStr) {
-            let offset = parseInt(offsetStr);
-            if(isNaN(offset) || offset === -1) return 0; // 0代表已畢業
-            return getBaseGSATYear() + offset;
-        }
-
-        // 🎯 賽季橫幅 (2月開始就算下一個年度)
+        // 🎯 抓取當前賽季 (2月開始就算下一個年度)
         function getCurrentSeason() {
             let now = new Date();
             let y = now.getFullYear();
@@ -489,8 +480,38 @@
             return (m >= 1) ? (y - 1911) + 1 : (y - 1911);
         }
 
+        // 🎯 取出「目前學年度」(8月為界線)
+        function getBaseAcadYear() {
+            let now = new Date();
+            let m = now.getMonth(); // 0-11
+            let y = now.getFullYear();
+            return (m >= 7) ? (y - 1911) : (y - 1912); // 8月前算前一學年度
+        }
+
+        // 🎯 註冊時計算目標學測年 (基於目前的學籍去推算)
+        function calculateTargetYear(offsetStr) {
+            let offset = parseInt(offsetStr);
+            if(isNaN(offset) || offset === -1) return 0; // 0代表已畢業
+            // offset=0是高三(應屆), offset=1是高二, 依此類推
+            // 應屆高三的目標學測年 = 當前學年 + 1
+            return getBaseAcadYear() + 1 + offset;
+        }
+
         function initSeasonBanner() {
-            document.getElementById('currentSeasonText').textContent = getCurrentSeason().toString();
+            let season = getCurrentSeason();
+            document.getElementById('currentSeasonText').textContent = season.toString();
+            
+            // 🎯 倒數計時系統：目標年 1月20日
+            let examYear = 1911 + season;
+            let examDate = new Date(examYear, 0, 20); // 1 月 20 日
+            let now = new Date();
+            let diffTime = examDate - now;
+            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays >= 0) {
+                document.getElementById('cdDays').textContent = diffDays;
+                document.getElementById('gsatCountdown').style.display = 'block';
+            }
         }
 
         function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim() : ''; }
@@ -918,7 +939,7 @@
         function changeQuestion(delta) { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
         function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
-        function processSubmit() { let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; quizData.forEach((q, i) => { let uAns = userAnswers[q.id] || ''; let isCorr = false; let displayUAns = uAns; if (q.qType === 'spell') { const pureWord = getPureWord(q.correctAnswer); let tempTypedIndex = 0; let reconstructedAnswer = ""; for(let j=0; j<pureWord.length; j++) { let c = pureWord[j]; if (/[^a-zA-Z]/.test(c)) { reconstructedAnswer += c; } else { let start = j, end = j; while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; const wordLen = end - start + 1; if (wordLen <= 2 || j === start || j === end) { reconstructedAnswer += c; } else { reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_"; tempTypedIndex++; } } } displayUAns = reconstructedAnswer; isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); } if (isCorr) { correctCount++; let base = parseInt(q.level) || 1; let bonus = q.qType === 'listen' ? 2 : (q.qType === 'spell' ? 5 : 0); gainedXP += (base + bonus); } submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr }); const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'"); const displayTitle = q.qType === 'listen' ? `🎧 聽力題：<span style="color:var(--primary-color);">${q.correctWord}</span> <button onclick="speakWord('${safeEnWord}')" style="background:none;border:none;cursor:pointer;font-size:1.1em;vertical-align:middle;padding:0 5px;" title="重新聽一次">🔊</button>` : q.questionText; detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main); line-height: 1.4;">${i+1}. ${displayTitle} <span style="color:${isCorr?'#10b981':'#ef4444'}; margin-left:5px;">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && displayUAns ? ` | 你答: <span style="color:#ef4444;">${displayUAns}</span>` : ''}</p></div>`; }); let hasBonus = false; if (correctCount === totalQuestions && totalQuestions >= 10 && !isReviewQuizMode) { hasBonus = true; } if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode) { Swal.fire('太神啦！', '滿分通關！', 'success'); } else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); } const xpDisplay = document.getElementById('xpGainedDisplay'); if (!isReviewQuizMode && (gainedXP > 0 || hasBonus)) { if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } else { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`; } xpDisplay.style.display = 'block'; } else { xpDisplay.style.display = 'none'; } document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; showView('resultView'); document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%'; drawChart(correctCount, totalQuestions - correctCount); apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); }
+        function processSubmit() { let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; quizData.forEach((q, i) => { let uAns = userAnswers[q.id] || ''; let isCorr = false; let displayUAns = uAns; if (q.qType === 'spell') { const pureWord = getPureWord(q.correctAnswer); let tempTypedIndex = 0; let reconstructedAnswer = ""; for(let j=0; j<pureWord.length; j++) { let c = pureWord[j]; if (/[^a-zA-Z]/.test(c)) { reconstructedAnswer += c; } else { let start = j, end = j; while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; const wordLen = end - start + 1; if (wordLen <= 2 || j === start || j === end) { reconstructedAnswer += c; } else { reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_"; tempTypedIndex++; } } } displayUAns = reconstructedAnswer; isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); } if (isCorr) { correctCount++; let base = parseInt(q.level) || 1; let bonus = q.qType === 'listen' ? 2 : (q.qType === 'spell' ? 5 : 0); gainedXP += (base + bonus); } submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr }); const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'"); const displayTitle = q.qType === 'listen' ? `🎧 聽力題：<span style="color:var(--primary-color);">${q.correctWord}</span> <button onclick="speakWord('${safeEnWord}')" style="background:none;border:none;cursor:pointer;font-size:1.1em;vertical-align:middle;padding:0 5px;" title="重新聽一次">🔊</button>` : q.questionText; detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main); line-height: 1.4;">${i+1}. ${displayTitle} <span style="color:${isCorr?'#10b981':'#ef4444'}; margin-left:5px;">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && displayUAns ? ` | 你答: <span style="color:#ef4444;">${displayUAns}</span>` : ''}</p></div>`; }); let hasBonus = false; if (correctCount === totalQuestions && totalQuestions >= 10 && !isReviewQuizMode) { hasBonus = true; } if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); } const xpDisplay = document.getElementById('xpGainedDisplay'); if (!isReviewQuizMode && currentUser !== '訪客' && (gainedXP > 0 || hasBonus)) { if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } else { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`; } xpDisplay.style.display = 'block'; } else { xpDisplay.style.display = 'none'; } document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; showView('resultView'); document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%'; drawChart(correctCount, totalQuestions - correctCount); if (currentUser !== '訪客') { apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); } }
         function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
         function syncFavorites() { apiCall('getFavorites', { username: currentUser }).then(res => { if (res.success) { userFavoriteWords.clear(); res.words.forEach(w => userFavoriteWords.add(w.word)); } }); }
         function backToVocabHome() { document.getElementById('vocabHomeGrid').style.display = 'grid'; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'none'; }
@@ -946,7 +967,7 @@
             
             apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { 
                 try {
-                    if (!res.success) throw new Error("後端 API 回傳失敗，請確認 code.gs 是否已重新部署！");
+                    if (!res.success) throw new Error("API 錯誤");
 
                     reviewCardsData = res.questions || []; 
                     if (reviewCardsData.length > 0) { 
@@ -963,7 +984,7 @@
                         document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; 
                     } 
                 } catch(err) {
-                    Swal.fire('渲染失敗', '你的錯題資料可能已損壞：' + err.message, 'error');
+                    Swal.fire('渲染失敗', err.message, 'error');
                     document.getElementById('singleFlashcardArea').innerHTML = `<p style="color: white; background: var(--danger-color); padding: 15px; border-radius: 8px; font-weight: bold; text-align: center;">連線異常，請確認伺服器狀態。</p>`;
                 }
             }).catch(err => {
@@ -1011,7 +1032,7 @@
                             <div class="flashcard-back">
                                 <button class="speak-btn" style="position:absolute; top:15px; right:15px; font-size:1.5em; width:50px; height:50px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button>
                                 <div class="fc-word">${cleanWord}</div>
-                                ${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleString()}</div>` : ''}
+                                ${!q.isDue ? `<div style="font-size:0.8em; margin-top:20px;">解鎖: ${new Date(q.nextReview).toLocaleDateString()}</div>` : ''}
                             </div>
                         </div>
                     </div>`; 
@@ -1047,7 +1068,6 @@
             document.getElementById('listModeContainer').innerHTML = html;
         }
 
-        // 🎯 註冊時直接選擇目前年級對應的 offset，讓系統動態計算
         function handleRegister() { 
             const u=document.getElementById('regUsername').value.trim(); 
             const p=document.getElementById('regPassword').value; 
@@ -1068,15 +1088,31 @@
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
-        // 🎯 登入後防呆：檢查是否需要強制更新年級
+        // 🎯 升級提示與全域變數處理
+        window.currentLevel = null;
+
         function updateNavbarBadges() { 
             apiCall('getProfileData', { username: currentUser }).then(res => { 
                 if(res.success) { 
                     const xp = parseInt(res.totalXP) || 0;
                     const level = Math.floor(Math.sqrt(xp / 10)) + 1;
+                    
+                    // 🎯 等級提升動畫與彈窗
+                    if (window.currentLevel !== null && level > window.currentLevel) {
+                        Swal.fire({
+                            title: '🎊 恭喜升級！ 🎊',
+                            html: `太神啦！你的等級提升到了 <b>Level ${level}</b>！<br>繼續保持這個氣勢！`,
+                            icon: 'success',
+                            confirmButtonColor: '#f59e0b',
+                            confirmButtonText: '繼續刷題'
+                        });
+                        document.getElementById('quickLevel').classList.add('level-up-anim');
+                        setTimeout(() => document.getElementById('quickLevel').classList.remove('level-up-anim'), 1500);
+                    }
+                    window.currentLevel = level;
+
                     document.getElementById('quickLevel').textContent = `Lv. ${level}`;
                     document.getElementById('quickXP').textContent = `${xp} XP`;
-
                     window.userTargetYear = res.targetYear;
 
                     if (res.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + currentUser)) {
@@ -1145,10 +1181,10 @@
                     document.getElementById('profileLevelDisplay').innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`; 
                     document.getElementById('profileStatsDisplay').innerHTML = `<div style="display:flex; justify-content:center; gap: 40px; margin-bottom: 15px;"><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.totalAnswered}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">總答題數</div></div><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.correctRate}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">答對率</div></div></div>`; 
 
-                    // 🎯 動態反推目前年級
+                    // 🎯 完美動態反推目前年級
                     let targetYear = res.targetYear;
-                    let baseYear = getBaseGSATYear();
-                    let offset = targetYear - baseYear;
+                    let baseYear = getBaseAcadYear(); 
+                    let offset = targetYear - baseYear - 1;
                     
                     let gradeStr = "已畢業";
                     if (targetYear === 0 || offset < 0) gradeStr = "已畢業";
