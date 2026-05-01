@@ -506,12 +506,13 @@
     </main>
 
     <script>
-        // 🎯 SWR 架構：全域快取記憶體
+        // 🎯 SWR 全域快取記憶體 (Single Source of Truth)
         window.globalProfileCache = null;
+        window.userCurrentLevel = null; 
+        
         let globalLeaderboardData = [];
         let reviewCardsData = [];
         window.globalFavoritesCache = [];
-        window.userCurrentLevel = null; // 🎯 修正變數撞名問題，專屬玩家等級
 
         let isDarkMode = localStorage.getItem('darkMode') === 'true';
         function applyTheme() {
@@ -560,7 +561,7 @@
             return getBaseAcadYear() + 1 + offset;
         }
 
-        // 🚀 開場動畫：並行載入 SWR 架構
+        // 🚀 開場動畫：SWR 架構預載
         window.onload = async () => { 
             applyTheme(); 
             
@@ -570,11 +571,10 @@
             const sysPromise = apiCall('getSystemInfo');
             promises.push(sysPromise);
 
-            let profPromise = null;
             if (currentUser) {
-                profPromise = apiCall('getProfileData', { username: currentUser });
-                promises.push(profPromise);
-                
+                promises.push(apiCall('getProfileData', { username: currentUser }).then(res => {
+                    if(res.success) { window.globalProfileCache = res; }
+                }));
                 promises.push(apiCall('getLeaderboardData').then(res => {
                     if(res.success && res.data) { globalLeaderboardData = res.data; }
                 }));
@@ -615,33 +615,98 @@
                 document.getElementById('gsatCountdown').style.display = 'block';
             }
 
-            if (currentUser) {
-                const resProf = await profPromise;
-                if(resProf && resProf.success) { 
-                    window.globalProfileCache = resProf;
-                    const xp = parseInt(resProf.totalXP) || 0;
-                    const level = Math.floor(Math.sqrt(xp / 10)) + 1;
-                    
-                    window.userCurrentLevel = level; // 🎯 修正：使用專屬變數
-                    document.getElementById('quickLevel').textContent = `Lv. ${level}`;
-                    document.getElementById('quickXP').textContent = `${xp} XP`;
-                    window.userTargetYear = resProf.targetYear;
-
-                    if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + currentUser)) {
-                        showGradeUpdatePopup();
-                    }
-                }
+            if (window.globalProfileCache) {
+                renderGlobalProfile(window.globalProfileCache); // 🎯 統一渲染入口
             }
 
-            // 🎯 極致絲滑的高斯模糊退場
             document.getElementById('splashScreen').classList.add('hidden');
             
-            if (currentUser) {
-                showView('setupView', true); 
-            } else { 
-                showView('loginView'); 
-            }
+            if (currentUser) { showView('setupView', true); } 
+            else { showView('loginView'); }
         };
+
+        // 🎯 核心：樂觀更新與全域 UI 同步引擎
+        function renderGlobalProfile(resProf) {
+            window.globalProfileCache = resProf;
+            
+            const xp = parseInt(resProf.totalXP) || 0;
+            const level = Math.floor(Math.sqrt(xp / 10)) + 1;
+            
+            // 處理升級動畫
+            if (window.userCurrentLevel !== null && window.userCurrentLevel !== undefined && level > window.userCurrentLevel) {
+                Swal.fire({
+                    title: '🎊 恭喜升級！ 🎊',
+                    html: `太神啦！你的等級提升到了 <b>Level ${level}</b>！<br>繼續保持這個氣勢！`,
+                    icon: 'success',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: '繼續刷題'
+                });
+                document.getElementById('quickLevel').classList.add('level-up-anim');
+                setTimeout(() => document.getElementById('quickLevel').classList.remove('level-up-anim'), 1500);
+            }
+            window.userCurrentLevel = level;
+
+            // 1. 更新 Navbar
+            document.getElementById('quickLevel').textContent = `Lv. ${level}`;
+            document.getElementById('quickXP').textContent = `${xp} XP`;
+            window.userTargetYear = resProf.targetYear;
+
+            // 2. 更新 Profile View (如果有的話)
+            document.getElementById('profileUsernameDisplay').textContent = currentUser; 
+            const av = resProf.avatar || '👤'; 
+            const avDiv = document.getElementById('profileAvatarPreview'); 
+            if(avDiv) {
+                if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; } else { avDiv.innerHTML = av; } 
+            }
+            
+            const currentLevelBaseXP = Math.pow(level - 1, 2) * 10; 
+            const nextLevelXP = Math.pow(level, 2) * 10; 
+            const xpProgress = ((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100; 
+
+            const profileLevelDisplay = document.getElementById('profileLevelDisplay');
+            if(profileLevelDisplay) {
+                profileLevelDisplay.innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`; 
+            }
+            
+            const profileStatsDisplay = document.getElementById('profileStatsDisplay');
+            if(profileStatsDisplay) {
+                profileStatsDisplay.innerHTML = `<div style="display:flex; justify-content:center; gap: 40px; margin-bottom: 15px;"><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${resProf.totalAnswered}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">總答題數</div></div><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${resProf.correctRate}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">答對率</div></div></div>`; 
+            }
+
+            let targetYear = resProf.targetYear;
+            let baseYear = getBaseAcadYear(); 
+            let offset = targetYear - baseYear - 1;
+            
+            let gradeStr = "已畢業";
+            if (targetYear === 0 || offset < 0) gradeStr = "已畢業";
+            else if(offset === 0) gradeStr = "高三";
+            else if(offset === 1) gradeStr = "高二";
+            else if(offset === 2) gradeStr = "高一";
+            else if(offset === 3) gradeStr = "國三";
+            else if(offset === 4) gradeStr = "國二";
+            else if(offset === 5) gradeStr = "國一";
+            else if(offset > 5) gradeStr = "小學或以下";
+            
+            const profCurrentGrade = document.getElementById('profCurrentGrade');
+            if(profCurrentGrade) profCurrentGrade.textContent = (targetYear === 0) ? `已畢業 (不參與排行)` : `${gradeStr} (目標：${targetYear} 學測)`;
+
+            const quotaInfoBox = document.getElementById('quotaInfoBox');
+            if(quotaInfoBox && resProf.hasApiKey !== undefined) {
+                if (resProf.hasApiKey) { quotaInfoBox.innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${resProf.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${resProf.essayUsed} / 1 篇`; } 
+            }
+
+            if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + currentUser)) {
+                showGradeUpdatePopup();
+            }
+        }
+
+        // 🎯 靜默背景刷新器
+        function refreshProfileData() {
+            if (!currentUser || currentUser === '訪客') return;
+            apiCall('getProfileData', { username: currentUser }).then(res => { 
+                if(res.success) { renderGlobalProfile(res); } 
+            }); 
+        }
 
         function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim() : ''; }
         function getSpellBaseWord(rawWord) { let w = getPureWord(rawWord); w = w.replace(/\(.*?\)/g, ''); w = w.split('/')[0]; return w.trim(); }
@@ -661,17 +726,20 @@
                 if(viewId === 'quizView' || viewId === 'examTakingView') document.getElementById('topNavbar').style.display = 'none';
                 document.getElementById('quickName').textContent = currentUser;
                 
+                // 每次切換畫面時，靜默在背景抓新資料 (非從 Init 來的才抓)
                 if (viewId !== 'quizView' && viewId !== 'examTakingView' && !isFromInit) {
-                    updateNavbarBadges();
+                    refreshProfileData();
                 }
             } else { 
                 document.getElementById('topNavbar').style.display = 'none'; 
             }
 
+            // SWR 畫面切換：如果快取有，先瞬間渲染！
+            if (viewId === 'profileView' && window.globalProfileCache) {
+                renderGlobalProfile(window.globalProfileCache);
+            }
             if (viewId === 'reviewPage') loadIncorrectQuestions();
-            if (viewId === 'profileView') showProfileView();
             if (viewId === 'leaderboardView') loadLeaderboardData();
-            // 🎯 修正 Bug 1：單字書進入時，直接顯示主選單即可，不要觸發「不熟單字」的檢查
             if (viewId === 'vocabBookView') backToVocabHome(); 
             if (viewId === 'pastExamsView') backToExamLobby();
             window.scrollTo(0, 0);
@@ -1051,6 +1119,12 @@
                 document.getElementById('examXPReward').textContent = `🔥 歷屆通關獎勵：賺取 +${gainedXP} XP`;
                 if(gainedXP > 0) {
                     let mockSubmitData = []; for(let i=0; i<gainedXP; i++) mockSubmitData.push({ isCorrect: true, level: 1 });
+                    
+                    // 🎯 樂觀更新 XP
+                    if (window.globalProfileCache) {
+                        window.globalProfileCache.totalXP = parseInt(window.globalProfileCache.totalXP || 0) + gainedXP;
+                        renderGlobalProfile(window.globalProfileCache);
+                    }
                     apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: mockSubmitData, isReviewMode: false });
                 }
             }
@@ -1089,6 +1163,7 @@
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
         
         function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
+        
         function processSubmit() { 
             let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
             quizData.forEach((q, i) => { 
@@ -1137,6 +1212,26 @@
             if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } 
             else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); } 
             
+            // 🎯 樂觀更新 (Optimistic UI)：秒算秒顯示！
+            if (currentUser !== '訪客' && window.globalProfileCache) {
+                if (!isReviewQuizMode) {
+                    let oldAns = parseInt(window.globalProfileCache.totalAnswered) || 0;
+                    let oldCorr = parseInt(window.globalProfileCache.totalCorrect) || 0;
+                    let oldXP = parseInt(window.globalProfileCache.totalXP) || 0;
+                    
+                    window.globalProfileCache.totalAnswered = oldAns + totalQuestions;
+                    window.globalProfileCache.totalCorrect = oldCorr + correctCount;
+                    let finalXP = gainedXP + (hasBonus ? 20 : 0);
+                    window.globalProfileCache.totalXP = oldXP + finalXP;
+                    
+                    if(window.globalProfileCache.totalAnswered > 0) {
+                        window.globalProfileCache.correctRate = ((window.globalProfileCache.totalCorrect / window.globalProfileCache.totalAnswered) * 100).toFixed(2) + '%';
+                    }
+                }
+                // 瞬間重新渲染 Navbar 和 Profile
+                renderGlobalProfile(window.globalProfileCache);
+            }
+
             const xpDisplay = document.getElementById('xpGainedDisplay'); 
             if (!isReviewQuizMode && currentUser !== '訪客' && (gainedXP > 0 || hasBonus)) { 
                 if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } 
@@ -1150,14 +1245,18 @@
             showView('resultView'); 
             document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%'; 
             drawChart(correctCount, totalQuestions - correctCount); 
-            if (currentUser !== '訪客') { apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); } 
+            
+            // 背景默默存檔
+            if (currentUser !== '訪客') { 
+                apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); 
+            } 
         }
 
         function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
         
-        // 🎯 修正 Bug 1：改為靜默同步，不主動觸發警告
+        // 🎯 改良版單字書進入邏輯
         function loadVocabFavorites() { 
-            let currentLevel = 0; 
+            window.currentLevel = 0; 
             document.getElementById('vocabHomeGrid').style.display = 'none'; 
             
             const renderFavs = (list) => {
@@ -1192,6 +1291,7 @@
                 } 
             }); 
         }
+        
         function backToVocabHome() { document.getElementById('vocabHomeGrid').style.display = 'grid'; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'none'; }
         function backToAzGrid() { if (currentLevel === 0) backToVocabHome(); else { document.getElementById('vocabFlashcardArea').style.display = 'none'; document.getElementById('vocabNavArea').style.display = 'block'; } }
         function loadVocabLevel(level) { window.currentLevel = level; document.getElementById('vocabHomeGrid').style.display = 'none'; document.getElementById('vocabLoading').style.display = 'block'; apiCall('getVocabByLevel', { level }).then(res => { document.getElementById('vocabLoading').style.display = 'none'; if (res.success && res.words.length > 0) { currentVocabList = res.words; renderAzGrid(level); } else { Swal.fire('讀取失敗', '此級別尚無單字', 'error'); backToVocabHome(); } }); }
@@ -1207,6 +1307,7 @@
         function gradeAiEssay() { const text = document.getElementById('essayInput').value.trim(); const topic = document.getElementById('essayTopicInput').value.trim(); if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block'; apiCall('aiEssayGrading', { username: currentUser, topic: topic, essayText: text }).then(res => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; if (res.success && res.data && res.data.scores) { document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`; document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`; document.getElementById('resEssayOverall').textContent = res.data.overallComment; document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`; document.getElementById('a-content').textContent = res.data.scores.content.analysis; document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`; document.getElementById('a-org').textContent = res.data.scores.organization.analysis; document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`; document.getElementById('a-lang').textContent = res.data.scores.language.analysis; document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`; document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis; document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`; document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis; document.getElementById('resEssaySuggestions').textContent = res.data.suggestions; document.getElementById('resEssayKey').innerHTML = (res.data.keyImprovements || "").replace(/\n/g, '<br>'); document.getElementById('essayResult').style.display = 'block'; updateNavbarBadges(); } else { Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
         function askAiTutor() { const context = document.getElementById('tutorContextInput').value.trim(); const doubt = document.getElementById('tutorDoubtInput').value.trim(); if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning'); const btn = document.getElementById('btnAskTutor'); btn.disabled = true; document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block'; apiCall('aiTutor', { username: currentUser, question: context, doubt: doubt }).then(res => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; if (res.success && res.data) { document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>'); document.getElementById('tutorResult').style.display = 'block'; updateNavbarBadges(); } else { Swal.fire('呼叫老師失敗', res.message, 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
 
+        // 🎯 SWR 架構：記憶系統
         function setupReviewUI() {
             let dueCount = 0, pendingCount = 0; 
             reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); 
@@ -1349,130 +1450,6 @@
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
-        window.userCurrentLevel = null; // 🎯 正確的全域玩家等級變數
-
-        function updateNavbarBadges() { 
-            apiCall('getProfileData', { username: currentUser }).then(res => { 
-                if(res.success) { 
-                    const xp = parseInt(res.totalXP) || 0;
-                    const level = Math.floor(Math.sqrt(xp / 10)) + 1;
-                    
-                    // 🎯 修正：使用專屬的 userCurrentLevel 來判斷是否升級
-                    if (window.userCurrentLevel !== null && window.userCurrentLevel !== undefined && level > window.userCurrentLevel) {
-                        Swal.fire({
-                            title: '🎊 恭喜升級！ 🎊',
-                            html: `太神啦！你的等級提升到了 <b>Level ${level}</b>！<br>繼續保持這個氣勢！`,
-                            icon: 'success',
-                            confirmButtonColor: '#f59e0b',
-                            confirmButtonText: '繼續刷題'
-                        });
-                        document.getElementById('quickLevel').classList.add('level-up-anim');
-                        setTimeout(() => document.getElementById('quickLevel').classList.remove('level-up-anim'), 1500);
-                    }
-                    window.userCurrentLevel = level;
-
-                    document.getElementById('quickLevel').textContent = `Lv. ${level}`;
-                    document.getElementById('quickXP').textContent = `${xp} XP`;
-                    window.userTargetYear = res.targetYear;
-
-                    if (res.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + currentUser)) {
-                        showGradeUpdatePopup();
-                    }
-                } 
-            }); 
-        }
-
-        function showGradeUpdatePopup() {
-            Swal.fire({
-                title: '🚀 系統大升級：賽季天梯啟動！',
-                html: `
-                    <div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">
-                        各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴我們你<b>現在的年級</b>：
-                    </div>
-                    <select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;">
-                        <option value="0">高三 (Senior 3)</option>
-                        <option value="1">高二 (Senior 2)</option>
-                        <option value="2">高一 (Senior 1)</option>
-                        <option value="3">國三 (Junior 3)</option>
-                        <option value="4">國二 (Junior 2)</option>
-                        <option value="5">國一 (Junior 1)</option>
-                        <option value="-1">已畢業 (隱藏排行榜)</option>
-                    </select>
-                `,
-                confirmButtonText: '進入新賽季！',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                preConfirm: () => {
-                    const g = document.getElementById('swal-upgrade-grade').value;
-                    if (!g) { Swal.showValidationMessage('請選擇年級！'); }
-                    return g;
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    showLoading('資料轉移中...');
-                    let tYear = calculateTargetYear(result.value);
-                    apiCall('updateUserCredentials', { username: currentUser, newTargetYear: tYear }).then(r => {
-                        Swal.close();
-                        if(r.success) {
-                            localStorage.setItem('gradeUpdated_' + currentUser, 'true');
-                            window.userTargetYear = tYear;
-                            Swal.fire('升級成功！', '快去排行榜看看你的同屆對手吧！', 'success');
-                            showProfileView(); 
-                        } else { Swal.fire('錯誤', r.message, 'error'); }
-                    });
-                }
-            });
-        }
-        
-        function showProfileView() { 
-            document.getElementById('profileUsernameDisplay').textContent = currentUser; 
-            
-            const renderProfile = (res) => {
-                const av = res.avatar || '👤'; 
-                const avDiv = document.getElementById('profileAvatarPreview'); 
-                if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; } else { avDiv.innerHTML = av; } 
-                
-                const xp = parseInt(res.totalXP) || 0; 
-                const level = Math.floor(Math.sqrt(xp / 10)) + 1; 
-                const currentLevelBaseXP = Math.pow(level - 1, 2) * 10; 
-                const nextLevelXP = Math.pow(level, 2) * 10; 
-                const xpProgress = ((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100; 
-
-                document.getElementById('profileLevelDisplay').innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`; 
-                document.getElementById('profileStatsDisplay').innerHTML = `<div style="display:flex; justify-content:center; gap: 40px; margin-bottom: 15px;"><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.totalAnswered}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">總答題數</div></div><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${res.correctRate}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">答對率</div></div></div>`; 
-
-                let targetYear = res.targetYear;
-                let baseYear = getBaseAcadYear(); 
-                let offset = targetYear - baseYear - 1;
-                
-                let gradeStr = "已畢業";
-                if (targetYear === 0 || offset < 0) gradeStr = "已畢業";
-                else if(offset === 0) gradeStr = "高三";
-                else if(offset === 1) gradeStr = "高二";
-                else if(offset === 2) gradeStr = "高一";
-                else if(offset === 3) gradeStr = "國三";
-                else if(offset === 4) gradeStr = "國二";
-                else if(offset === 5) gradeStr = "國一";
-                else if(offset > 5) gradeStr = "小學或以下";
-                
-                document.getElementById('profCurrentGrade').textContent = (targetYear === 0) ? `已畢業 (不參與排行)` : `${gradeStr} (目標：${targetYear} 學測)`;
-
-                if (res.hasApiKey) { document.getElementById('quotaInfoBox').innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${res.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${res.essayUsed} / 1 篇`; } 
-            };
-
-            if (window.globalProfileCache) { renderProfile(window.globalProfileCache); }
-            else { document.getElementById('profCurrentGrade').textContent = '讀取中...'; }
-
-            apiCall('getProfileData', { username: currentUser }).then(res => { 
-                if (res.success) { 
-                    window.globalProfileCache = res;
-                    if(document.getElementById('profileView').classList.contains('active')) renderProfile(res);
-                } 
-            }); 
-        }
-
-        function handleAvatarFile(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); const MAX_SIZE = 400; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height); const base64Data = canvas.toDataURL('image/jpeg', 0.9); document.getElementById('profileAvatarPreview').innerHTML = `<img src="${base64Data}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; showLoading('上傳至雲端空間中...'); apiCall('uploadAvatarToDrive', { username: currentUser, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) Swal.fire('成功', '大頭貼已上傳並產生網址！', 'success'); else Swal.fire('失敗', r.message, 'error'); }); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
-        
         function handleCredentialUpdate() { 
             const newU = document.getElementById('profNewUsername').value.trim(); 
             const newP = document.getElementById('profNewPassword').value; 
@@ -1502,58 +1479,6 @@
 
         function handleApiKeyUpdate() { const k = document.getElementById('profApiKey').value.trim(); if (!k || !k.startsWith('AIza')) return Swal.fire('格式錯誤', '請輸入有效的 API Key (以 AIza 開頭)', 'warning'); showLoading('綁定中...'); apiCall('updateApiKey', { username: currentUser, apiKey: k }).then(res => { if(res.success) { Swal.fire('成功', res.message, 'success'); showProfileView(); document.getElementById('profApiKey').value=''; } else Swal.fire('失敗', '綁定失敗', 'error'); }); }
         
-        function loadLeaderboardData() { 
-            const container = document.getElementById('leaderboardTableContainer'); 
-            
-            if (globalLeaderboardData && globalLeaderboardData.length > 0) {
-                renderRank();
-            } else {
-                container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; 
-            }
-            
-            apiCall('getLeaderboardData').then(res => { 
-                if (res.success && res.data) {
-                    globalLeaderboardData = res.data;
-                    if(document.getElementById('leaderboardView').classList.contains('active')) renderRank(); 
-                } else if (!globalLeaderboardData || globalLeaderboardData.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">伺服器無回應</p>';
-                }
-            }); 
-        }
-
-        function renderRank() {
-            const rankType = document.getElementById('rankSelector').value; 
-            const cohortType = document.getElementById('cohortSelector').value; 
-            const container = document.getElementById('leaderboardTableContainer'); 
-
-            let filteredData = globalLeaderboardData.filter(p => {
-                if (cohortType === 'peer' && window.userTargetYear) {
-                    if (p.targetYear !== window.userTargetYear) return false;
-                }
-                if (rankType === 'king' && p.level >= 26) return true;
-                if (rankType === 'silver' && p.level >= 11 && p.level <= 25) return true;
-                if (rankType === 'bronze' && p.level <= 10) return true;
-                return false;
-            });
-
-            if(filteredData.length > 0) { 
-                let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>Level</th><th>經驗值 (XP)</th></tr>'; 
-                filteredData.forEach((d, i) => { 
-                    const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; 
-                    const isMe = String(d.username).trim().toLowerCase() === String(currentUser).trim().toLowerCase(); 
-                    const bgColor = isMe ? (isDarkMode ? 'rgba(16,185,129,0.1)' : '#d1fae5') : (isDarkMode ? 'transparent' : (i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent')); 
-                    const borderStyle = isMe ? 'border: 2px solid var(--secondary-color);' : ''; 
-                    
-                    let badgeHtml = d.badges ? `<span style="font-size:0.8em; margin-left:5px;" title="歷史成就">${d.badges}</span>` : '';
-                    const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>${badgeHtml}` : `${d.username}${badgeHtml}`; 
-                    
-                    html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`; 
-                }); 
-                container.innerHTML = html + '</table>'; 
-            } else { 
-                container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">此階級/屆別尚無玩家資料，趕快去刷題搶佔第一！</p>'; 
-            } 
-        }
     </script>
 </body>
 </html>
