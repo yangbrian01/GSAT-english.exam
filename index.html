@@ -38,34 +38,21 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; transition: background-color 0.3s, color 0.3s;}
 
-        /* 🎯 全新酷炫開場動畫 Splash Screen */
+        /* 🎯 極簡有質感的啟動畫面 */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 999999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+            transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
         }
         #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .splash-logo {
-            font-size: 3.5em; font-weight: 900; color: var(--primary-color);
-            margin-bottom: 10px; letter-spacing: -1px;
-            animation: pulse 1.5s infinite;
+        .modern-spinner {
+            width: 45px; height: 45px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
-        .splash-text {
-            font-size: 1.1em; color: var(--text-muted); font-weight: 700;
-            letter-spacing: 2px; text-transform: uppercase;
-        }
-        .splash-loader {
-            width: 220px; height: 4px; background: var(--border-color);
-            border-radius: 4px; margin-top: 40px; overflow: hidden; position: relative;
-        }
-        .splash-loader::after {
-            content: ''; position: absolute; left: -50%; top: 0;
-            width: 50%; height: 100%; background: var(--primary-color);
-            border-radius: 4px; animation: slideLoad 1s infinite ease-in-out;
-        }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        @keyframes slideLoad { 0% { left: -50%; } 100% { left: 100%; } }
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
         .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; flex-shrink: 0; }
@@ -244,11 +231,9 @@
 </head>
 <body>
 
-    <!-- 🎯 酷炫的預載入動畫 Splash Screen -->
+    <!-- 🎯 乾淨俐落的過場動畫 (只留 spinner，秒淡出) -->
     <div id="splashScreen">
-        <div class="splash-logo">VocabMaster</div>
-        <div class="splash-text">載入系統引擎中...</div>
-        <div class="splash-loader"></div>
+        <div class="modern-spinner"></div>
     </div>
 
     <button id="themeToggleBtn" class="theme-toggle-float" onclick="toggleTheme()">🌙</button>
@@ -511,49 +496,28 @@
 
         function getCurrentSeason() {
             let now = new Date();
-            let y = now.getFullYear();
-            let m = now.getMonth(); 
-            return (m >= 1) ? (y - 1911) + 1 : (y - 1911);
+            let currYear = now.getFullYear();
+            let currMonth = now.getMonth(); 
+            return (currMonth >= 1) ? (currYear - 1911) + 1 : (currYear - 1911);
         }
 
-        function getBaseAcadYear() {
-            let now = new Date();
-            let m = now.getMonth(); 
-            let y = now.getFullYear();
-            return (m >= 7) ? (y - 1911) : (y - 1912); 
-        }
-
-        function calculateTargetYear(offsetStr) {
-            let offset = parseInt(offsetStr);
-            if(isNaN(offset) || offset === -1) return 0; 
-            return getBaseAcadYear() + 1 + offset;
-        }
-
-        // 🎯 核心：超級平滑的預載入啟動流程
         window.onload = async () => { 
             applyTheme(); 
             
-            // 定義要並行處理的所有任務 Promise
             const promises = [];
-            
-            // 1. 強制動畫至少跑 1.2 秒，讓視覺有呼吸感
-            promises.push(new Promise(resolve => setTimeout(resolve, 1200)));
+            promises.push(new Promise(resolve => setTimeout(resolve, 300))); // 稍微等待 0.3 秒，避免閃爍過快
 
-            // 2. 抓取系統日期
             const sysPromise = apiCall('getSystemInfo');
             promises.push(sysPromise);
 
-            // 3. 如果已登入，順便把玩家資料也抓回來
             let profPromise = null;
             if (currentUser) {
                 profPromise = apiCall('getProfileData', { username: currentUser });
                 promises.push(profPromise);
             }
 
-            // 等待所有 API 任務與最短動畫時間結束
             await Promise.all(promises);
 
-            // ====== 處理 System Info ======
             const resSys = await sysPromise;
             let season = getCurrentSeason();
             let examDate;
@@ -570,14 +534,13 @@
             
             let now = new Date();
             let diffTime = examDate.getTime() - now.getTime();
-            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // 無條件捨去
+            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
             
             if (diffDays >= 0) {
                 document.getElementById('cdDays').textContent = diffDays;
                 document.getElementById('gsatCountdown').style.display = 'block';
             }
 
-            // ====== 處理 Profile Info ======
             if (currentUser) {
                 const resProf = await profPromise;
                 if(resProf.success) { 
@@ -595,11 +558,9 @@
                 }
             }
 
-            // 🎯 動畫結束，淡出 SplashScreen 並顯示主畫面
             document.getElementById('splashScreen').classList.add('hidden');
             
             if (currentUser) {
-                // 原本 showView 會觸發 updateNavbarBadges，我們改寫了它，加上參數避免重複呼叫 API
                 showView('setupView', true); 
             } else { 
                 showView('loginView'); 
@@ -624,7 +585,6 @@
                 if(viewId === 'quizView' || viewId === 'examTakingView') document.getElementById('topNavbar').style.display = 'none';
                 document.getElementById('quickName').textContent = currentUser;
                 
-                // 如果是啟動動畫剛跑完，就不用再呼叫一次 updateNavbarBadges 浪費資源
                 if (viewId !== 'quizView' && viewId !== 'examTakingView' && !isFromInit) {
                     updateNavbarBadges();
                 }
@@ -1050,8 +1010,8 @@
         function handleNextQuestion() { clearTimeout(autoAdvanceTimer); const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } if (currentQuestionIndex < quizData.length - 1) { changeQuestion(1); } else { submitQuiz(); } }
         function changeQuestion(delta) { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
-        function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
         
+        function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
         function processSubmit() { 
             let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
             quizData.forEach((q, i) => { 
