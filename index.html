@@ -49,7 +49,7 @@
         }
         #splashScreen.hidden { 
             opacity: 0; visibility: hidden; pointer-events: none; 
-            transform: scale(1.15); filter: blur(15px); /* 🎯 核心：高斯模糊退場 */
+            transform: scale(1.15); filter: blur(15px);
         }
         .splash-content {
             display: flex; flex-direction: column; align-items: center;
@@ -57,7 +57,6 @@
         }
         .splash-logo {
             font-size: 4.5em; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 2px;
-            /* 🎯 核心：金屬光澤流動漸層 */
             background: linear-gradient(110deg, var(--text-main) 0%, var(--text-muted) 35%, var(--primary-color) 50%, var(--text-muted) 65%, var(--text-main) 100%);
             background-size: 200% auto;
             -webkit-background-clip: text;
@@ -69,7 +68,6 @@
             letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px;
             opacity: 0.7; transform: translateY(-5px);
         }
-        /* 🎯 核心：極細雷射展開線 */
         .splash-laser-line {
             width: 0px; height: 2px;
             background: var(--primary-color);
@@ -243,9 +241,6 @@
             .exam-topic-split { flex-direction: column; gap: 15px; padding: 15px; }
             .exam-topic-left { border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
             .exam-topic-right { padding-left: 0; }
-            .season-nav-container { flex-direction: column; gap: 5px; margin: 0 10px; }
-            .season-nav-banner { font-size: 0.9em; padding: 4px 12px; }
-            .gsat-countdown-pill { font-size: 0.85em; padding: 4px 10px; }
         }
 
         @media (max-width: 768px) {
@@ -543,13 +538,25 @@
             return (m >= 1) ? (y - 1911) + 1 : (y - 1911);
         }
 
-        // 🎯 核心：全新的極致絲滑啟動流程
+        function getBaseAcadYear() {
+            let now = new Date();
+            let m = now.getMonth(); 
+            let y = now.getFullYear();
+            return (m >= 7) ? (y - 1911) : (y - 1912); 
+        }
+
+        function calculateTargetYear(offsetStr) {
+            let offset = parseInt(offsetStr);
+            if(isNaN(offset) || offset === -1) return 0; 
+            return getBaseAcadYear() + 1 + offset;
+        }
+
+        // 🎯 核心：全新的 1.5秒極簡高質感啟動流程
         window.onload = async () => { 
             applyTheme(); 
             
             const promises = [];
-            // 🎯 雷射進度條動畫時間約 1.5 秒，我們確保至少跑滿這個時間
-            promises.push(new Promise(resolve => setTimeout(resolve, 1500))); 
+            promises.push(new Promise(resolve => setTimeout(resolve, 1500))); // 讓進度條跑滿的最低時間
 
             const sysPromise = apiCall('getSystemInfo');
             promises.push(sysPromise);
@@ -602,7 +609,6 @@
                 }
             }
 
-            // 🎯 極致絲滑的高斯模糊退場
             document.getElementById('splashScreen').classList.add('hidden');
             
             if (currentUser) {
@@ -1055,8 +1061,8 @@
         function handleNextQuestion() { clearTimeout(autoAdvanceTimer); const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } if (currentQuestionIndex < quizData.length - 1) { changeQuestion(1); } else { submitQuiz(); } }
         function changeQuestion(delta) { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
-        function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
         
+        function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
         function processSubmit() { 
             let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
             quizData.forEach((q, i) => { 
@@ -1148,7 +1154,7 @@
             
             apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { 
                 try {
-                    if (!res.success) throw new Error("後端 API 回傳失敗，請確認 code.gs 是否已重新部署！");
+                    if (!res.success) throw new Error("API 錯誤");
 
                     reviewCardsData = res.questions || []; 
                     if (reviewCardsData.length > 0) { 
@@ -1165,7 +1171,7 @@
                         document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; 
                     } 
                 } catch(err) {
-                    Swal.fire('渲染失敗', '你的錯題資料可能已損壞：' + err.message, 'error');
+                    Swal.fire('渲染失敗', err.message, 'error');
                     document.getElementById('singleFlashcardArea').innerHTML = `<p style="color: white; background: var(--danger-color); padding: 15px; border-radius: 8px; font-weight: bold; text-align: center;">連線異常，請確認伺服器狀態。</p>`;
                 }
             }).catch(err => {
@@ -1268,6 +1274,8 @@
 
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
+
+        window.currentLevel = null;
 
         function updateNavbarBadges() { 
             apiCall('getProfileData', { username: currentUser }).then(res => { 
