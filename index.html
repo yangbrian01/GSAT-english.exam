@@ -44,7 +44,6 @@
         @keyframes levelUpPop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #f59e0b; } 100% { transform: scale(1); } }
         .level-up-anim { animation: levelUpPop 1.2s ease-out; }
 
-        /* 🎯 橫幅與倒數計時區塊 (置中排版) */
         .season-nav-container { display: flex; align-items: center; gap: 15px; justify-content: center; flex: 1; margin: 0 20px; transition: 0.3s; }
         .season-nav-banner { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 6px 20px; border-radius: 50px; font-weight: 800; font-size: 1.05em; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); white-space: nowrap; margin: 0; transition: 0.3s; }
         .gsat-countdown-pill { font-weight: 800; color: var(--text-muted); background: var(--bg-color); border: 2px solid var(--border-color); padding: 6px 15px; border-radius: 50px; font-size: 0.95em; white-space: nowrap; transition: 0.3s; }
@@ -474,7 +473,6 @@
         let touchStartX = 0, touchEndX = 0;
         let reviewCardsData = []; let currentFlashcardIndex = 0; let showFlashcardMode = true; 
 
-        // 🎯 抓取當前賽季 (2月開始就算下一個年度)
         function getCurrentSeason() {
             let now = new Date();
             let y = now.getFullYear();
@@ -482,24 +480,19 @@
             return (m >= 1) ? (y - 1911) + 1 : (y - 1911);
         }
 
-        // 🎯 取出「目前學年度」(8月為界線)
         function getBaseAcadYear() {
             let now = new Date();
-            let m = now.getMonth(); // 0-11
+            let m = now.getMonth(); 
             let y = now.getFullYear();
-            return (m >= 7) ? (y - 1911) : (y - 1912); // 8月前算前一學年度
+            return (m >= 7) ? (y - 1911) : (y - 1912); 
         }
 
-        // 🎯 註冊時計算目標學測年 (基於目前的學籍去推算)
         function calculateTargetYear(offsetStr) {
             let offset = parseInt(offsetStr);
-            if(isNaN(offset) || offset === -1) return 0; // 0代表已畢業
-            // offset=0是高三(應屆), offset=1是高二, 依此類推
-            // 應屆高三的目標學測年 = 當前學年 + 1
+            if(isNaN(offset) || offset === -1) return 0; 
             return getBaseAcadYear() + 1 + offset;
         }
 
-        // 🎯 系統全局資訊抓取 (包含從後端資料庫取得學測真實日期)
         window.onload = () => { 
             applyTheme(); 
             
@@ -510,7 +503,6 @@
                     season = res.season;
                     examDate = new Date(res.gsatDate);
                 } else {
-                    // 若抓取失敗或資料庫沒建，預設為當前賽季+1911 年的 1/16
                     let examYear = season + 1911;
                     examDate = new Date(examYear, 0, 16); 
                 }
@@ -519,7 +511,6 @@
                 examDate.setHours(0, 0, 0, 0); 
                 
                 let now = new Date();
-                // 🎯 這裡改為使用精準的現在時間，然後無條件捨去取天數！
                 let diffTime = examDate.getTime() - now.getTime();
                 let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                 
@@ -532,9 +523,17 @@
             if (currentUser) showView('setupView'); else showView('loginView'); 
         };
 
+        // 🎯 專門處理拼寫測驗的核心淨化器：砍掉括號與斜線後面的單字
         function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim() : ''; }
+        function getSpellBaseWord(rawWord) { 
+            let w = getPureWord(rawWord); 
+            w = w.replace(/\(.*?\)/g, ''); // 砍掉所有括號內的字 (含括號)
+            w = w.split('/')[0]; // 如果遇到斜線，只取斜線前面的單字
+            return w.trim(); 
+        }
+        
         function speakWord(text, rate = 0.85) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = rate; window.speechSynthesis.speak(u); }
-        function playCurrentWordAudio(isSlow = false) { speakWord(getPureWord(quizData[currentQuestionIndex].correctWord), isSlow ? 0.4 : 0.85); }
+        function playCurrentWordAudio(isSlow = false) { speakWord(getSpellBaseWord(quizData[currentQuestionIndex].correctWord), isSlow ? 0.4 : 0.85); }
 
         const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'vocabBookView', 'pastExamsView', 'examTakingView', 'examResultView', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
         
@@ -943,7 +942,24 @@
         function startGame(isReview = false) { isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } else { const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); } }
         function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; } quizData = res.questions; totalQuestions = res.totalQuestions; if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); } }
         document.addEventListener('selectionchange', () => { if (document.activeElement && document.activeElement.id === 'typingInput') updateSpellVisual(); });
-        function initSpellTemplate(word) { const pureWord = getPureWord(word); currentSpellTemplate = []; for(let i=0; i<pureWord.length; i++) { const char = pureWord[i]; if (/[^a-zA-Z]/.test(char)) { currentSpellTemplate.push(char); } else { let start = i, end = i; while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; if (end - start + 1 <= 2 || i === start || i === end) currentSpellTemplate.push(char); else currentSpellTemplate.push('_'); } } }
+        
+        // 🎯 核心：拼寫測驗淨化引擎 (只針對拼寫模式，砍掉括號與斜線)
+        function initSpellTemplate(word) { 
+            const pureWord = getSpellBaseWord(word); 
+            currentSpellTemplate = []; 
+            for(let i=0; i<pureWord.length; i++) { 
+                const char = pureWord[i]; 
+                if (/[^a-zA-Z]/.test(char)) { 
+                    currentSpellTemplate.push(char); 
+                } else { 
+                    let start = i, end = i; 
+                    while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; 
+                    while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; 
+                    if (end - start + 1 <= 2 || i === start || i === end) currentSpellTemplate.push(char); 
+                    else currentSpellTemplate.push('_'); 
+                } 
+            } 
+        }
         function updateSpellVisual() { const input = document.getElementById('typingInput'); const val = input.value.toLowerCase(); const cursorPos = input.selectionStart || 0; let displayStr = ""; let typedIndex = 0; for(let i=0; i<currentSpellTemplate.length; i++) { if (currentSpellTemplate[i] === ' ') { displayStr += "&nbsp;&nbsp;"; continue; } if (currentSpellTemplate[i] !== '_') { displayStr += currentSpellTemplate[i] + " "; continue; } if (typedIndex === cursorPos) displayStr += `<span class="spell-cursor"></span>`; if (typedIndex < val.length) displayStr += `<span style="color:var(--danger-color); pointer-events: auto; cursor:pointer;" onclick="setSpellCursor(${typedIndex}, event)">${val[typedIndex]}</span> `; else displayStr += `<span style="color:var(--text-muted); opacity: 0.5; pointer-events: auto; cursor:pointer;" onclick="setSpellCursor(${val.length}, event)">_</span> `; typedIndex++; } if (cursorPos === typedIndex) displayStr += `<span class="spell-cursor"></span>`; document.getElementById('spellVisual').innerHTML = displayStr; }
         function focusTypingInput(e) { const input = document.getElementById('typingInput'); input.focus(); setTimeout(() => { const len = input.value.length; input.setSelectionRange(len, len); updateSpellVisual(); }, 10); }
         function setSpellCursor(index, event) { if (event) { event.preventDefault(); event.stopPropagation(); } const input = document.getElementById('typingInput'); input.focus(); setTimeout(() => { input.setSelectionRange(index, index); updateSpellVisual(); }, 10); }
@@ -954,7 +970,71 @@
         function changeQuestion(delta) { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
         function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
-        function processSubmit() { let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; quizData.forEach((q, i) => { let uAns = userAnswers[q.id] || ''; let isCorr = false; let displayUAns = uAns; if (q.qType === 'spell') { const pureWord = getPureWord(q.correctAnswer); let tempTypedIndex = 0; let reconstructedAnswer = ""; for(let j=0; j<pureWord.length; j++) { let c = pureWord[j]; if (/[^a-zA-Z]/.test(c)) { reconstructedAnswer += c; } else { let start = j, end = j; while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; const wordLen = end - start + 1; if (wordLen <= 2 || j === start || j === end) { reconstructedAnswer += c; } else { reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_"; tempTypedIndex++; } } } displayUAns = reconstructedAnswer; isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); } else { isCorr = (uAns === q.correctAnswer); } if (isCorr) { correctCount++; let base = parseInt(q.level) || 1; let bonus = q.qType === 'listen' ? 2 : (q.qType === 'spell' ? 5 : 0); gainedXP += (base + bonus); } submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr }); const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'"); const displayTitle = q.qType === 'listen' ? `🎧 聽力題：<span style="color:var(--primary-color);">${q.correctWord}</span> <button onclick="speakWord('${safeEnWord}')" style="background:none;border:none;cursor:pointer;font-size:1.1em;vertical-align:middle;padding:0 5px;" title="重新聽一次">🔊</button>` : q.questionText; detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main); line-height: 1.4;">${i+1}. ${displayTitle} <span style="color:${isCorr?'#10b981':'#ef4444'}; margin-left:5px;">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && displayUAns ? ` | 你答: <span style="color:#ef4444;">${displayUAns}</span>` : ''}</p></div>`; }); let hasBonus = false; if (correctCount === totalQuestions && totalQuestions >= 10 && !isReviewQuizMode) { hasBonus = true; } if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); } const xpDisplay = document.getElementById('xpGainedDisplay'); if (!isReviewQuizMode && currentUser !== '訪客' && (gainedXP > 0 || hasBonus)) { if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } else { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`; } xpDisplay.style.display = 'block'; } else { xpDisplay.style.display = 'none'; } document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; showView('resultView'); document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%'; drawChart(correctCount, totalQuestions - correctCount); if (currentUser !== '訪客') { apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); } }
+        
+        function processSubmit() { 
+            let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
+            quizData.forEach((q, i) => { 
+                let uAns = userAnswers[q.id] || ''; let isCorr = false; let displayUAns = uAns; 
+                
+                if (q.qType === 'spell') { 
+                    const pureWord = getSpellBaseWord(q.correctAnswer); // 🎯 修正拼寫比對：用淨化後的基底單字比對
+                    let tempTypedIndex = 0; let reconstructedAnswer = ""; 
+                    for(let j=0; j<pureWord.length; j++) { 
+                        let c = pureWord[j]; 
+                        if (/[^a-zA-Z]/.test(c)) { 
+                            reconstructedAnswer += c; 
+                        } else { 
+                            let start = j, end = j; 
+                            while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; 
+                            while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; 
+                            const wordLen = end - start + 1; 
+                            if (wordLen <= 2 || j === start || j === end) { 
+                                reconstructedAnswer += c; 
+                            } else { 
+                                reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_"; tempTypedIndex++; 
+                            } 
+                        } 
+                    } 
+                    displayUAns = reconstructedAnswer; 
+                    isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); 
+                } else { 
+                    isCorr = (uAns === q.correctAnswer); 
+                } 
+                
+                if (isCorr) { 
+                    correctCount++; 
+                    let base = parseInt(q.level) || 1; 
+                    let bonus = q.qType === 'listen' ? 2 : (q.qType === 'spell' ? 5 : 0); 
+                    gainedXP += (base + bonus); 
+                } 
+                
+                submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr }); 
+                const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'"); 
+                const displayTitle = q.qType === 'listen' ? `🎧 聽力題：<span style="color:var(--primary-color);">${q.correctWord}</span> <button onclick="speakWord('${safeEnWord}')" style="background:none;border:none;cursor:pointer;font-size:1.1em;vertical-align:middle;padding:0 5px;" title="重新聽一次">🔊</button>` : q.questionText; 
+                detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main); line-height: 1.4;">${i+1}. ${displayTitle} <span style="color:${isCorr?'#10b981':'#ef4444'}; margin-left:5px;">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && displayUAns ? ` | 你答: <span style="color:#ef4444;">${displayUAns}</span>` : ''}</p></div>`; 
+            }); 
+            
+            let hasBonus = false; 
+            if (correctCount === totalQuestions && totalQuestions >= 10 && !isReviewQuizMode) { hasBonus = true; } 
+            if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } 
+            else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); } 
+            
+            const xpDisplay = document.getElementById('xpGainedDisplay'); 
+            if (!isReviewQuizMode && currentUser !== '訪客' && (gainedXP > 0 || hasBonus)) { 
+                if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } 
+                else { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`; } 
+                xpDisplay.style.display = 'block'; 
+            } else { 
+                xpDisplay.style.display = 'none'; 
+            } 
+            
+            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; 
+            showView('resultView'); 
+            document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%'; 
+            drawChart(correctCount, totalQuestions - correctCount); 
+            if (currentUser !== '訪客') { apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); } 
+        }
+
         function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
         function syncFavorites() { apiCall('getFavorites', { username: currentUser }).then(res => { if (res.success) { userFavoriteWords.clear(); res.words.forEach(w => userFavoriteWords.add(w.word)); } }); }
         function backToVocabHome() { document.getElementById('vocabHomeGrid').style.display = 'grid'; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'none'; }
@@ -982,7 +1062,7 @@
             
             apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { 
                 try {
-                    if (!res.success) throw new Error("後端 API 回傳失敗，請確認 code.gs 是否已重新部署！");
+                    if (!res.success) throw new Error("API 錯誤");
 
                     reviewCardsData = res.questions || []; 
                     if (reviewCardsData.length > 0) { 
@@ -999,7 +1079,7 @@
                         document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; 
                     } 
                 } catch(err) {
-                    Swal.fire('渲染失敗', '你的錯題資料可能已損壞：' + err.message, 'error');
+                    Swal.fire('渲染失敗', err.message, 'error');
                     document.getElementById('singleFlashcardArea').innerHTML = `<p style="color: white; background: var(--danger-color); padding: 15px; border-radius: 8px; font-weight: bold; text-align: center;">連線異常，請確認伺服器狀態。</p>`;
                 }
             }).catch(err => {
