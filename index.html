@@ -240,9 +240,6 @@
             .exam-topic-split { flex-direction: column; gap: 15px; padding: 15px; }
             .exam-topic-left { border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
             .exam-topic-right { padding-left: 0; }
-            .season-nav-container { flex-direction: column; gap: 5px; margin: 0 10px; }
-            .season-nav-banner { font-size: 0.9em; padding: 4px 12px; }
-            .gsat-countdown-pill { font-size: 0.85em; padding: 4px 10px; }
         }
 
         @media (max-width: 768px) {
@@ -506,10 +503,9 @@
     </main>
 
     <script>
-        // 🎯 SWR 全域快取記憶體與狀態鎖
+        // 🎯 SWR 全域快取記憶體 (Single Source of Truth)
         window.globalProfileCache = null;
         window.userCurrentLevel = null; 
-        window.isProfileSyncing = false; // 🔒 資料寫入鎖：防止 SWR 抓舊資料覆蓋
         
         let globalLeaderboardData = [];
         let reviewCardsData = [];
@@ -630,14 +626,13 @@
             else { showView('loginView'); }
         };
 
-        // 🎯 核心：全域 UI 同步引擎 + 最高水位線防呆
+        // 🎯 核心：樂觀更新與全域 UI 同步引擎
         function renderGlobalProfile(resProf) {
             window.globalProfileCache = resProf;
             
             const xp = parseInt(resProf.totalXP) || 0;
             const level = Math.floor(Math.sqrt(xp / 10)) + 1;
             
-            // 🎯 只有當等級"真正往上突破"時才跳動畫，且不允許被舊資料拉低
             if (window.userCurrentLevel !== null && window.userCurrentLevel !== undefined && level > window.userCurrentLevel) {
                 Swal.fire({
                     title: '🎊 恭喜升級！ 🎊',
@@ -649,15 +644,12 @@
                 document.getElementById('quickLevel').classList.add('level-up-anim');
                 setTimeout(() => document.getElementById('quickLevel').classList.remove('level-up-anim'), 1500);
             }
-            // 鎖死最高等級：Math.max 保證舊資料來了也不會讓變數下降
-            window.userCurrentLevel = Math.max(window.userCurrentLevel || 0, level);
+            window.userCurrentLevel = level;
 
-            // 更新 Navbar
             document.getElementById('quickLevel').textContent = `Lv. ${level}`;
             document.getElementById('quickXP').textContent = `${xp} XP`;
             window.userTargetYear = resProf.targetYear;
 
-            // 更新 Profile View
             document.getElementById('profileUsernameDisplay').textContent = currentUser; 
             const av = resProf.avatar || '👤'; 
             const avDiv = document.getElementById('profileAvatarPreview'); 
@@ -706,11 +698,11 @@
             }
         }
 
-        // 🎯 靜默背景刷新器 (鎖定時不動作)
+        // 🎯 靜默背景刷新器
         function refreshProfileData() {
-            if (!currentUser || currentUser === '訪客' || window.isProfileSyncing) return;
+            if (!currentUser || currentUser === '訪客') return;
             apiCall('getProfileData', { username: currentUser }).then(res => { 
-                if(res.success && !window.isProfileSyncing) { renderGlobalProfile(res); } 
+                if(res.success) { renderGlobalProfile(res); } 
             }); 
         }
 
@@ -1119,25 +1111,16 @@
             document.getElementById('examDetailResults').innerHTML = detailHtml;
             
             if (currentUser !== '訪客') {
-                window.isProfileSyncing = true; // 🔒 上鎖，禁止 SWR 抓舊資料覆蓋
                 let gainedXP = Math.floor(rawScore);
                 document.getElementById('examXPReward').textContent = `🔥 歷屆通關獎勵：賺取 +${gainedXP} XP`;
-                
                 if(gainedXP > 0) {
                     let mockSubmitData = []; for(let i=0; i<gainedXP; i++) mockSubmitData.push({ isCorrect: true, level: 1 });
                     
-                    // 樂觀更新
                     if (window.globalProfileCache) {
                         window.globalProfileCache.totalXP = parseInt(window.globalProfileCache.totalXP || 0) + gainedXP;
                         renderGlobalProfile(window.globalProfileCache);
                     }
-                    
-                    apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: mockSubmitData, isReviewMode: false }).then(() => {
-                        window.isProfileSyncing = false; // 🔓 解鎖
-                        refreshProfileData();
-                    });
-                } else {
-                    window.isProfileSyncing = false; // 🔓 解鎖
+                    apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: mockSubmitData, isReviewMode: false });
                 }
             }
 
@@ -1174,7 +1157,7 @@
         function changeQuestion(delta) { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
         
-        // 🎯 修正 Bug：按下交卷瞬間鎖死按鈕，防手抖無限刷等
+        // 🎯 防手抖連點機制：第一時間鎖死按鈕
         function submitQuiz() { 
             document.getElementById('nextButton').disabled = true; 
             
@@ -1242,32 +1225,23 @@
                 if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } 
                 else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); } 
                 
-                // 🎯 樂觀更新 + 鎖定背景更新
-                if (currentUser !== '訪客') {
-                    window.isProfileSyncing = true; // 🔒 鎖死！不准 SWR 覆蓋我剛算好的資料
-
-                    if (window.globalProfileCache) {
-                        if (!isReviewQuizMode) {
-                            let oldAns = parseInt(window.globalProfileCache.totalAnswered) || 0;
-                            let oldCorr = parseInt(window.globalProfileCache.totalCorrect) || 0;
-                            let oldXP = parseInt(window.globalProfileCache.totalXP) || 0;
-                            
-                            window.globalProfileCache.totalAnswered = oldAns + totalQuestions;
-                            window.globalProfileCache.totalCorrect = oldCorr + correctCount;
-                            let finalXP = gainedXP + (hasBonus ? 20 : 0);
-                            window.globalProfileCache.totalXP = oldXP + finalXP;
-                            
-                            if(window.globalProfileCache.totalAnswered > 0) {
-                                window.globalProfileCache.correctRate = ((window.globalProfileCache.totalCorrect / window.globalProfileCache.totalAnswered) * 100).toFixed(2) + '%';
-                            }
+                // 🎯 樂觀更新 (Optimistic UI)：XP與個人檔案秒步同步！
+                if (currentUser !== '訪客' && window.globalProfileCache) {
+                    if (!isReviewQuizMode) {
+                        let oldAns = parseInt(window.globalProfileCache.totalAnswered) || 0;
+                        let oldCorr = parseInt(window.globalProfileCache.totalCorrect) || 0;
+                        let oldXP = parseInt(window.globalProfileCache.totalXP) || 0;
+                        
+                        window.globalProfileCache.totalAnswered = oldAns + totalQuestions;
+                        window.globalProfileCache.totalCorrect = oldCorr + correctCount;
+                        let finalXP = gainedXP + (hasBonus ? 20 : 0);
+                        window.globalProfileCache.totalXP = oldXP + finalXP;
+                        
+                        if(window.globalProfileCache.totalAnswered > 0) {
+                            window.globalProfileCache.correctRate = ((window.globalProfileCache.totalCorrect / window.globalProfileCache.totalAnswered) * 100).toFixed(2) + '%';
                         }
-                        renderGlobalProfile(window.globalProfileCache); 
                     }
-                    
-                    apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }).then(() => {
-                        window.isProfileSyncing = false; // 🔓 後端存檔完畢，解鎖
-                        refreshProfileData(); 
-                    }); 
+                    renderGlobalProfile(window.globalProfileCache); // 呼叫全域更新引擎！
                 }
 
                 const xpDisplay = document.getElementById('xpGainedDisplay'); 
@@ -1284,16 +1258,19 @@
                 document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%'; 
                 drawChart(correctCount, totalQuestions - correctCount); 
                 
+                if (currentUser !== '訪客') { 
+                    apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); 
+                } 
             } catch (e) {
                 Swal.fire('發生錯誤', '交卷結算時發生異常：' + e.message, 'error');
-                document.getElementById('nextButton').disabled = false;
+                console.error(e);
             }
         }
 
         function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
         
         function loadVocabFavorites() { 
-            window.currentLevel = 0; 
+            let currentLevel = 0; 
             document.getElementById('vocabHomeGrid').style.display = 'none'; 
             
             const renderFavs = (list) => {
@@ -1328,7 +1305,6 @@
                 } 
             }); 
         }
-        
         function backToVocabHome() { document.getElementById('vocabHomeGrid').style.display = 'grid'; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'none'; }
         function backToAzGrid() { if (currentLevel === 0) backToVocabHome(); else { document.getElementById('vocabFlashcardArea').style.display = 'none'; document.getElementById('vocabNavArea').style.display = 'block'; } }
         function loadVocabLevel(level) { window.currentLevel = level; document.getElementById('vocabHomeGrid').style.display = 'none'; document.getElementById('vocabLoading').style.display = 'block'; apiCall('getVocabByLevel', { level }).then(res => { document.getElementById('vocabLoading').style.display = 'none'; if (res.success && res.words.length > 0) { currentVocabList = res.words; renderAzGrid(level); } else { Swal.fire('讀取失敗', '此級別尚無單字', 'error'); backToVocabHome(); } }); }
@@ -1379,17 +1355,6 @@
             }); 
         }
         
-        function setupReviewUI() {
-            let dueCount = 0, pendingCount = 0; 
-            reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); 
-            document.getElementById('dueCountLabel').textContent = dueCount; 
-            document.getElementById('pendingCountLabel').textContent = pendingCount; 
-            if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; 
-            else document.getElementById('startReviewBtn').style.display = 'none';
-            currentFlashcardIndex = 0; 
-            renderReviewUI(); 
-        }
-
         function toggleFlashcardMode() { showFlashcardMode = !showFlashcardMode; renderReviewUI(); }
 
         function renderReviewUI() {
@@ -1465,6 +1430,26 @@
             });
             document.getElementById('listModeContainer').innerHTML = html;
         }
+
+        function handleRegister() { 
+            const u=document.getElementById('regUsername').value.trim(); 
+            const p=document.getElementById('regPassword').value; 
+            const gradeOffset = document.getElementById('regGrade').value; 
+            
+            if(u.length<3||p.length<4) return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); 
+            
+            showLoading('註冊中'); 
+            
+            let tYear = calculateTargetYear(gradeOffset);
+            
+            apiCall('registerUser',{username:u, password:p, targetYear: tYear}).then(res=>{
+                if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}
+                else Swal.fire('失敗',res.message,'error');
+            }); 
+        }
+
+        function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
+        function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
     </script>
 </body>
