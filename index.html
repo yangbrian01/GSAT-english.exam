@@ -38,20 +38,47 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; transition: background-color 0.3s, color 0.3s;}
 
-        /* 🎯 極簡有質感的啟動畫面 */
+        /* 🚀 頂級 SaaS 質感的開場動畫 */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 999999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+            transition: opacity 0.6s cubic-bezier(0.8, 0, 0.2, 1), transform 0.6s cubic-bezier(0.8, 0, 0.2, 1), visibility 0.6s;
         }
-        #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .modern-spinner {
-            width: 45px; height: 45px;
-            border: 4px solid var(--border-color);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        #splashScreen.hidden { 
+            opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.05); 
+        }
+        .splash-content {
+            text-align: center;
+            animation: splashFadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        .splash-logo {
+            font-size: 3.8em; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .splash-subtitle {
+            font-size: 0.85em; font-weight: 700; color: var(--text-muted);
+            letter-spacing: 4px; text-transform: uppercase; margin-bottom: 35px;
+            opacity: 0.8;
+        }
+        .splash-progress-bar {
+            width: 220px; height: 3px; background: var(--border-color);
+            border-radius: 3px; margin: 0 auto; overflow: hidden;
+        }
+        .splash-progress {
+            width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+            animation: splashLoad 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes splashFadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes splashLoad {
+            0% { width: 0%; }
+            40% { width: 60%; }
+            100% { width: 100%; }
         }
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
@@ -231,9 +258,15 @@
 </head>
 <body>
 
-    <!-- 🎯 乾淨俐落的過場動畫 (只留 spinner，秒淡出) -->
+    <!-- 🚀 全新頂級質感的開場動畫 -->
     <div id="splashScreen">
-        <div class="modern-spinner"></div>
+        <div class="splash-content">
+            <div class="splash-logo">VocabMaster</div>
+            <div class="splash-subtitle">Premium Edition</div>
+            <div class="splash-progress-bar">
+                <div class="splash-progress"></div>
+            </div>
+        </div>
     </div>
 
     <button id="themeToggleBtn" class="theme-toggle-float" onclick="toggleTheme()">🌙</button>
@@ -501,11 +534,12 @@
             return (currMonth >= 1) ? (currYear - 1911) + 1 : (currYear - 1911);
         }
 
+        // 🎯 核心：全新的 1.5秒極簡高質感啟動流程
         window.onload = async () => { 
             applyTheme(); 
             
             const promises = [];
-            promises.push(new Promise(resolve => setTimeout(resolve, 300))); // 稍微等待 0.3 秒，避免閃爍過快
+            promises.push(new Promise(resolve => setTimeout(resolve, 1500))); // 讓進度條跑滿的最低時間
 
             const sysPromise = apiCall('getSystemInfo');
             promises.push(sysPromise);
@@ -1011,7 +1045,6 @@
         function changeQuestion(delta) { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
         
-        function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
         function processSubmit() { 
             let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
             quizData.forEach((q, i) => { 
@@ -1103,7 +1136,7 @@
             
             apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { 
                 try {
-                    if (!res.success) throw new Error("後端 API 回傳失敗，請確認 code.gs 是否已重新部署！");
+                    if (!res.success) throw new Error("API 錯誤");
 
                     reviewCardsData = res.questions || []; 
                     if (reviewCardsData.length > 0) { 
@@ -1120,7 +1153,7 @@
                         document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; 
                     } 
                 } catch(err) {
-                    Swal.fire('渲染失敗', '你的錯題資料可能已損壞：' + err.message, 'error');
+                    Swal.fire('渲染失敗', err.message, 'error');
                     document.getElementById('singleFlashcardArea').innerHTML = `<p style="color: white; background: var(--danger-color); padding: 15px; border-radius: 8px; font-weight: bold; text-align: center;">連線異常，請確認伺服器狀態。</p>`;
                 }
             }).catch(err => {
