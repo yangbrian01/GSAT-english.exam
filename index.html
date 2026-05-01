@@ -186,7 +186,6 @@
         body.dark-mode .swal2-popup { background: var(--card-bg); color: var(--text-main); }
         body.dark-mode .swal2-title, body.dark-mode .swal2-html-container { color: var(--text-main); }
 
-        /* 🎯 響應式排版修正：確保橫幅在手機與平板都不會消失 */
         @media (max-width: 850px) {
             .desktop-only { display: none !important; }
             .nav-right-group { gap: 10px; }
@@ -194,14 +193,9 @@
             .exam-topic-split { flex-direction: column; gap: 15px; padding: 15px; }
             .exam-topic-left { border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
             .exam-topic-right { padding-left: 0; }
-            /* 讓橫幅縮小一點，並改成兩排 */
-            .season-nav-container { flex-direction: column; gap: 5px; margin: 0 10px; }
-            .season-nav-banner { font-size: 0.9em; padding: 4px 12px; }
-            .gsat-countdown-pill { font-size: 0.85em; padding: 4px 10px; }
         }
 
         @media (max-width: 768px) {
-            /* 手機版： Navbar 允許換行，把橫幅擠到下面置中 */
             .navbar { padding: 12px 20px; flex-wrap: wrap; }
             .nav-brand { margin-right: auto; }
             .nav-right-group { margin-left: auto; }
@@ -230,7 +224,7 @@
         <div class="season-nav-container">
             <div class="season-nav-banner">🔥 <span id="currentSeasonText">---</span> 學測賽季進行中 ⚔️</div>
             <div id="gsatCountdown" class="gsat-countdown-pill" style="display:none;">
-                ⏳ 距離學測約 <span id="cdDays" style="color:var(--danger-color); font-size:1.15em;">--</span> 天
+                ⏳ 學測倒數 <span id="cdDays" style="color:var(--danger-color); font-size:1.15em;">--</span> 天
             </div>
         </div>
 
@@ -480,31 +474,35 @@
         let touchStartX = 0, touchEndX = 0;
         let reviewCardsData = []; let currentFlashcardIndex = 0; let showFlashcardMode = true; 
 
+        // 🎯 抓取當前賽季 (2月開始就算下一個年度)
         function getCurrentSeason() {
             let now = new Date();
-            let currYear = now.getFullYear();
-            let currMonth = now.getMonth(); 
-            return (currMonth >= 1) ? (currYear - 1911) + 1 : (currYear - 1911);
+            let y = now.getFullYear();
+            let m = now.getMonth(); 
+            return (m >= 1) ? (y - 1911) + 1 : (y - 1911);
         }
 
+        // 🎯 取出「目前學年度」(8月為界線)
         function getBaseAcadYear() {
             let now = new Date();
-            let m = now.getMonth(); 
+            let m = now.getMonth(); // 0-11
             let y = now.getFullYear();
-            return (m >= 7) ? (y - 1911) : (y - 1912); 
+            return (m >= 7) ? (y - 1911) : (y - 1912); // 8月前算前一學年度
         }
 
+        // 🎯 註冊時計算目標學測年 (基於目前的學籍去推算)
         function calculateTargetYear(offsetStr) {
             let offset = parseInt(offsetStr);
-            if(isNaN(offset) || offset === -1) return 0; 
+            if(isNaN(offset) || offset === -1) return 0; // 0代表已畢業
+            // offset=0是高三(應屆), offset=1是高二, 依此類推
+            // 應屆高三的目標學測年 = 當前學年 + 1
             return getBaseAcadYear() + 1 + offset;
         }
 
-        // 🎯 全純前端極速運算，無痛顯示賽季與精準的無條件捨去倒數天數
+        // 🎯 系統全局資訊抓取 (包含從後端資料庫取得學測真實日期)
         window.onload = () => { 
             applyTheme(); 
             
-            // 1. 抓取伺服器真實倒數日期，若失敗則使用前端預設計算
             apiCall('getSystemInfo').then(res => {
                 let season = getCurrentSeason();
                 let examDate;
@@ -512,15 +510,16 @@
                     season = res.season;
                     examDate = new Date(res.gsatDate);
                 } else {
+                    // 若抓取失敗或資料庫沒建，預設為當前賽季+1911 年的 1/16
                     let examYear = season + 1911;
-                    examDate = new Date(examYear, 0, 16); // 預設 1/16
+                    examDate = new Date(examYear, 0, 16); 
                 }
                 
                 document.getElementById('currentSeasonText').textContent = season.toString();
                 examDate.setHours(0, 0, 0, 0); 
-                let now = new Date();
                 
-                // 🎯 毫秒相減後，無條件捨去 (Math.floor)，實現真正的「剩餘 262 天」邏輯
+                let now = new Date();
+                // 🎯 這裡改為使用精準的現在時間，然後無條件捨去取天數！
                 let diffTime = examDate.getTime() - now.getTime();
                 let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                 
