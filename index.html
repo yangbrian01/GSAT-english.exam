@@ -240,6 +240,9 @@
             .exam-topic-split { flex-direction: column; gap: 15px; padding: 15px; }
             .exam-topic-left { border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
             .exam-topic-right { padding-left: 0; }
+            .season-nav-container { flex-direction: column; gap: 5px; margin: 0 10px; }
+            .season-nav-banner { font-size: 0.9em; padding: 4px 12px; }
+            .gsat-countdown-pill { font-size: 0.85em; padding: 4px 10px; }
         }
 
         @media (max-width: 768px) {
@@ -568,11 +571,10 @@
             const sysPromise = apiCall('getSystemInfo');
             promises.push(sysPromise);
 
-            let profPromise = null;
             if (currentUser) {
-                profPromise = apiCall('getProfileData', { username: currentUser });
-                promises.push(profPromise);
-                
+                promises.push(apiCall('getProfileData', { username: currentUser }).then(res => {
+                    if(res.success) { window.globalProfileCache = res; }
+                }));
                 promises.push(apiCall('getLeaderboardData').then(res => {
                     if(res.success && res.data) { globalLeaderboardData = res.data; }
                 }));
@@ -613,11 +615,8 @@
                 document.getElementById('gsatCountdown').style.display = 'block';
             }
 
-            if (currentUser) {
-                const resProf = await profPromise;
-                if(resProf && resProf.success) { 
-                    renderGlobalProfile(resProf); 
-                }
+            if (window.globalProfileCache) {
+                renderGlobalProfile(window.globalProfileCache); // 🎯 統一渲染入口
             }
 
             document.getElementById('splashScreen').classList.add('hidden');
@@ -633,6 +632,7 @@
             const xp = parseInt(resProf.totalXP) || 0;
             const level = Math.floor(Math.sqrt(xp / 10)) + 1;
             
+            // 處理升級動畫
             if (window.userCurrentLevel !== null && window.userCurrentLevel !== undefined && level > window.userCurrentLevel) {
                 Swal.fire({
                     title: '🎊 恭喜升級！ 🎊',
@@ -646,10 +646,12 @@
             }
             window.userCurrentLevel = level;
 
+            // 1. 更新 Navbar
             document.getElementById('quickLevel').textContent = `Lv. ${level}`;
             document.getElementById('quickXP').textContent = `${xp} XP`;
             window.userTargetYear = resProf.targetYear;
 
+            // 2. 更新 Profile View (如果有的話)
             document.getElementById('profileUsernameDisplay').textContent = currentUser; 
             const av = resProf.avatar || '👤'; 
             const avDiv = document.getElementById('profileAvatarPreview'); 
@@ -724,6 +726,7 @@
                 if(viewId === 'quizView' || viewId === 'examTakingView') document.getElementById('topNavbar').style.display = 'none';
                 document.getElementById('quickName').textContent = currentUser;
                 
+                // 每次切換畫面時，靜默在背景抓新資料 (非從 Init 來的才抓)
                 if (viewId !== 'quizView' && viewId !== 'examTakingView' && !isFromInit) {
                     refreshProfileData();
                 }
@@ -731,6 +734,7 @@
                 document.getElementById('topNavbar').style.display = 'none'; 
             }
 
+            // SWR 畫面切換：如果快取有，先瞬間渲染！
             if (viewId === 'profileView' && window.globalProfileCache) {
                 renderGlobalProfile(window.globalProfileCache);
             }
@@ -1116,6 +1120,7 @@
                 if(gainedXP > 0) {
                     let mockSubmitData = []; for(let i=0; i<gainedXP; i++) mockSubmitData.push({ isCorrect: true, level: 1 });
                     
+                    // 🎯 樂觀更新 XP
                     if (window.globalProfileCache) {
                         window.globalProfileCache.totalXP = parseInt(window.globalProfileCache.totalXP || 0) + gainedXP;
                         renderGlobalProfile(window.globalProfileCache);
@@ -1151,126 +1156,107 @@
         function focusTypingInput(e) { const input = document.getElementById('typingInput'); input.focus(); setTimeout(() => { const len = input.value.length; input.setSelectionRange(len, len); updateSpellVisual(); }, 10); }
         function setSpellCursor(index, event) { if (event) { event.preventDefault(); event.stopPropagation(); } const input = document.getElementById('typingInput'); input.focus(); setTimeout(() => { input.setSelectionRange(index, index); updateSpellVisual(); }, 10); }
         function getSpellAnswer() { return document.getElementById('typingInput').value.trim(); }
-        function renderQuestion(index) { document.getElementById('nextButton').disabled = false; clearTimeout(autoAdvanceTimer); currentQuestionIndex = index; const q = quizData[index]; document.getElementById('currentQNum').textContent = index + 1; document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction; const meaningDisplay = document.getElementById('meaningDisplay'); const optContainer = document.getElementById('optionsContainer'); const spellArea = document.getElementById('spellVisualArea'); const typingInput = document.getElementById('typingInput'); optContainer.style.display = 'none'; spellArea.style.display = 'none'; meaningDisplay.style.display = 'block'; if (q.qType === 'listen') { meaningDisplay.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 10px;"><div class="audio-only-btn" onclick="playCurrentWordAudio(false)" style="margin-bottom: 0; width: 120px; height: 120px;">🎧 <span style="font-size:0.25em; margin-top:8px; color:var(--text-muted);">正常</span></div><div class="audio-only-btn" onclick="playCurrentWordAudio(true)" style="margin-bottom: 0; width: 90px; height: 90px; font-size: 2em; border-color: var(--secondary-color);">🐌 <span style="font-size:0.3em; margin-top:5px; color:var(--text-muted);">慢速</span></div></div>`; setTimeout(() => playCurrentWordAudio(false), 400); optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); } else if (q.qType === 'spell') { meaningDisplay.textContent = q.questionText; spellArea.style.display = 'flex'; initSpellTemplate(q.correctWord); typingInput.value = userAnswers[q.id] || ''; typingInput.maxLength = currentSpellTemplate.filter(c => c === '_').length; updateSpellVisual(); setTimeout(() => { typingInput.focus(); const len = typingInput.value.length; typingInput.setSelectionRange(len, len); updateSpellVisual(); }, 100); typingInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } }; typingInput.onkeyup = updateSpellVisual; typingInput.onclick = updateSpellVisual; } else { meaningDisplay.textContent = q.questionText; optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); } updateNavButtons(); }
+        function renderQuestion(index) { clearTimeout(autoAdvanceTimer); currentQuestionIndex = index; const q = quizData[index]; document.getElementById('currentQNum').textContent = index + 1; document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction; const meaningDisplay = document.getElementById('meaningDisplay'); const optContainer = document.getElementById('optionsContainer'); const spellArea = document.getElementById('spellVisualArea'); const typingInput = document.getElementById('typingInput'); optContainer.style.display = 'none'; spellArea.style.display = 'none'; meaningDisplay.style.display = 'block'; if (q.qType === 'listen') { meaningDisplay.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 10px;"><div class="audio-only-btn" onclick="playCurrentWordAudio(false)" style="margin-bottom: 0; width: 120px; height: 120px;">🎧 <span style="font-size:0.25em; margin-top:8px; color:var(--text-muted);">正常</span></div><div class="audio-only-btn" onclick="playCurrentWordAudio(true)" style="margin-bottom: 0; width: 90px; height: 90px; font-size: 2em; border-color: var(--secondary-color);">🐌 <span style="font-size:0.3em; margin-top:5px; color:var(--text-muted);">慢速</span></div></div>`; setTimeout(() => playCurrentWordAudio(false), 400); optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); } else if (q.qType === 'spell') { meaningDisplay.textContent = q.questionText; spellArea.style.display = 'flex'; initSpellTemplate(q.correctWord); typingInput.value = userAnswers[q.id] || ''; typingInput.maxLength = currentSpellTemplate.filter(c => c === '_').length; updateSpellVisual(); setTimeout(() => { typingInput.focus(); const len = typingInput.value.length; typingInput.setSelectionRange(len, len); updateSpellVisual(); }, 100); typingInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } }; typingInput.onkeyup = updateSpellVisual; typingInput.onclick = updateSpellVisual; } else { meaningDisplay.textContent = q.questionText; optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); } updateNavButtons(); }
         function renderOptionsUI(q, container) { container.innerHTML = ''; q.options.forEach(word => { const btn = document.createElement('button'); btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`; btn.textContent = word; btn.onclick = () => { userAnswers[q.id] = word; Array.from(container.children).forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); clearTimeout(autoAdvanceTimer); autoAdvanceTimer = setTimeout(() => { handleNextQuestion(); }, 400); }; container.appendChild(btn); }); }
         function handleNextQuestion() { clearTimeout(autoAdvanceTimer); const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } if (currentQuestionIndex < quizData.length - 1) { changeQuestion(1); } else { submitQuiz(); } }
         function changeQuestion(delta) { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
         
-        // 🎯 防手抖連點機制：第一時間鎖死按鈕
-        function submitQuiz() { 
-            document.getElementById('nextButton').disabled = true; 
-            
-            const q = quizData[currentQuestionIndex]; 
-            if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); 
-            
-            const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; 
-            if (unans > 0) { 
-                Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { 
-                    if(r.isConfirmed) { processSubmit(); }
-                    else { document.getElementById('nextButton').disabled = false; } 
-                }); 
-            } else { 
-                processSubmit(); 
-            } 
-        }
+        function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
         
         function processSubmit() { 
-            try {
-                document.getElementById('nextButton').disabled = false; 
-                let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
-                quizData.forEach((q, i) => { 
-                    let uAns = userAnswers[q.id] || ''; let isCorr = false; let displayUAns = uAns; 
-                    
-                    if (q.qType === 'spell') { 
-                        const pureWord = getSpellBaseWord(q.correctAnswer); 
-                        let tempTypedIndex = 0; let reconstructedAnswer = ""; 
-                        for(let j=0; j<pureWord.length; j++) { 
-                            let c = pureWord[j]; 
-                            if (/[^a-zA-Z]/.test(c)) { 
+            let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
+            quizData.forEach((q, i) => { 
+                let uAns = userAnswers[q.id] || ''; let isCorr = false; let displayUAns = uAns; 
+                
+                if (q.qType === 'spell') { 
+                    const pureWord = getSpellBaseWord(q.correctAnswer); 
+                    let tempTypedIndex = 0; let reconstructedAnswer = ""; 
+                    for(let j=0; j<pureWord.length; j++) { 
+                        let c = pureWord[j]; 
+                        if (/[^a-zA-Z]/.test(c)) { 
+                            reconstructedAnswer += c; 
+                        } else { 
+                            let start = j, end = j; 
+                            while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; 
+                            while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; 
+                            const wordLen = end - start + 1; 
+                            if (wordLen <= 2 || j === start || j === end) { 
                                 reconstructedAnswer += c; 
                             } else { 
-                                let start = j, end = j; 
-                                while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; 
-                                while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; 
-                                const wordLen = end - start + 1; 
-                                if (wordLen <= 2 || j === start || j === end) { 
-                                    reconstructedAnswer += c; 
-                                } else { 
-                                    reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_"; tempTypedIndex++; 
-                                } 
+                                reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_"; tempTypedIndex++; 
                             } 
                         } 
-                        displayUAns = reconstructedAnswer; 
-                        isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); 
-                    } else { 
-                        isCorr = (uAns === q.correctAnswer); 
                     } 
-                    
-                    if (isCorr) { 
-                        correctCount++; 
-                        let base = parseInt(q.level) || 1; 
-                        let bonus = q.qType === 'listen' ? 2 : (q.qType === 'spell' ? 5 : 0); 
-                        gainedXP += (base + bonus); 
-                    } 
-                    
-                    submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr }); 
-                    const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'"); 
-                    const displayTitle = q.qType === 'listen' ? `🎧 聽力題：<span style="color:var(--primary-color);">${q.correctWord}</span> <button onclick="speakWord('${safeEnWord}')" style="background:none;border:none;cursor:pointer;font-size:1.1em;vertical-align:middle;padding:0 5px;" title="重新聽一次">🔊</button>` : q.questionText; 
-                    detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main); line-height: 1.4;">${i+1}. ${displayTitle} <span style="color:${isCorr?'#10b981':'#ef4444'}; margin-left:5px;">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && displayUAns ? ` | 你答: <span style="color:#ef4444;">${displayUAns}</span>` : ''}</p></div>`; 
-                }); 
-                
-                let hasBonus = false; 
-                if (correctCount === totalQuestions && totalQuestions >= 10 && !isReviewQuizMode) { hasBonus = true; } 
-                if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } 
-                else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); } 
-                
-                // 🎯 樂觀更新 (Optimistic UI)：XP與個人檔案秒步同步！
-                if (currentUser !== '訪客' && window.globalProfileCache) {
-                    if (!isReviewQuizMode) {
-                        let oldAns = parseInt(window.globalProfileCache.totalAnswered) || 0;
-                        let oldCorr = parseInt(window.globalProfileCache.totalCorrect) || 0;
-                        let oldXP = parseInt(window.globalProfileCache.totalXP) || 0;
-                        
-                        window.globalProfileCache.totalAnswered = oldAns + totalQuestions;
-                        window.globalProfileCache.totalCorrect = oldCorr + correctCount;
-                        let finalXP = gainedXP + (hasBonus ? 20 : 0);
-                        window.globalProfileCache.totalXP = oldXP + finalXP;
-                        
-                        if(window.globalProfileCache.totalAnswered > 0) {
-                            window.globalProfileCache.correctRate = ((window.globalProfileCache.totalCorrect / window.globalProfileCache.totalAnswered) * 100).toFixed(2) + '%';
-                        }
-                    }
-                    renderGlobalProfile(window.globalProfileCache); // 呼叫全域更新引擎！
-                }
-
-                const xpDisplay = document.getElementById('xpGainedDisplay'); 
-                if (!isReviewQuizMode && currentUser !== '訪客' && (gainedXP > 0 || hasBonus)) { 
-                    if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } 
-                    else { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`; } 
-                    xpDisplay.style.display = 'block'; 
+                    displayUAns = reconstructedAnswer; 
+                    isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); 
                 } else { 
-                    xpDisplay.style.display = 'none'; 
+                    isCorr = (uAns === q.correctAnswer); 
                 } 
                 
-                document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; 
-                showView('resultView'); 
-                document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%'; 
-                drawChart(correctCount, totalQuestions - correctCount); 
-                
-                if (currentUser !== '訪客') { 
-                    apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); 
+                if (isCorr) { 
+                    correctCount++; 
+                    let base = parseInt(q.level) || 1; 
+                    let bonus = q.qType === 'listen' ? 2 : (q.qType === 'spell' ? 5 : 0); 
+                    gainedXP += (base + bonus); 
                 } 
-            } catch (e) {
-                Swal.fire('發生錯誤', '交卷結算時發生異常：' + e.message, 'error');
-                console.error(e);
+                
+                submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr }); 
+                const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'"); 
+                const displayTitle = q.qType === 'listen' ? `🎧 聽力題：<span style="color:var(--primary-color);">${q.correctWord}</span> <button onclick="speakWord('${safeEnWord}')" style="background:none;border:none;cursor:pointer;font-size:1.1em;vertical-align:middle;padding:0 5px;" title="重新聽一次">🔊</button>` : q.questionText; 
+                detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main); line-height: 1.4;">${i+1}. ${displayTitle} <span style="color:${isCorr?'#10b981':'#ef4444'}; margin-left:5px;">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && displayUAns ? ` | 你答: <span style="color:#ef4444;">${displayUAns}</span>` : ''}</p></div>`; 
+            }); 
+            
+            let hasBonus = false; 
+            if (correctCount === totalQuestions && totalQuestions >= 10 && !isReviewQuizMode) { hasBonus = true; } 
+            if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } 
+            else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); } 
+            
+            // 🎯 樂觀更新 (Optimistic UI)：秒算秒顯示！
+            if (currentUser !== '訪客' && window.globalProfileCache) {
+                if (!isReviewQuizMode) {
+                    let oldAns = parseInt(window.globalProfileCache.totalAnswered) || 0;
+                    let oldCorr = parseInt(window.globalProfileCache.totalCorrect) || 0;
+                    let oldXP = parseInt(window.globalProfileCache.totalXP) || 0;
+                    
+                    window.globalProfileCache.totalAnswered = oldAns + totalQuestions;
+                    window.globalProfileCache.totalCorrect = oldCorr + correctCount;
+                    let finalXP = gainedXP + (hasBonus ? 20 : 0);
+                    window.globalProfileCache.totalXP = oldXP + finalXP;
+                    
+                    if(window.globalProfileCache.totalAnswered > 0) {
+                        window.globalProfileCache.correctRate = ((window.globalProfileCache.totalCorrect / window.globalProfileCache.totalAnswered) * 100).toFixed(2) + '%';
+                    }
+                }
+                // 瞬間重新渲染 Navbar 和 Profile
+                renderGlobalProfile(window.globalProfileCache);
             }
+
+            const xpDisplay = document.getElementById('xpGainedDisplay'); 
+            if (!isReviewQuizMode && currentUser !== '訪客' && (gainedXP > 0 || hasBonus)) { 
+                if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } 
+                else { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`; } 
+                xpDisplay.style.display = 'block'; 
+            } else { 
+                xpDisplay.style.display = 'none'; 
+            } 
+            
+            document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${totalQuestions} 題`; 
+            showView('resultView'); 
+            document.getElementById('scorePercentage').textContent = Math.round((correctCount / totalQuestions) * 100) + '%'; 
+            drawChart(correctCount, totalQuestions - correctCount); 
+            
+            // 背景默默存檔
+            if (currentUser !== '訪客') { 
+                apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }); 
+            } 
         }
 
         function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
         
+        // 🎯 改良版單字書進入邏輯
         function loadVocabFavorites() { 
-            let currentLevel = 0; 
+            window.currentLevel = 0; 
             document.getElementById('vocabHomeGrid').style.display = 'none'; 
             
             const renderFavs = (list) => {
@@ -1305,6 +1291,7 @@
                 } 
             }); 
         }
+        
         function backToVocabHome() { document.getElementById('vocabHomeGrid').style.display = 'grid'; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'none'; }
         function backToAzGrid() { if (currentLevel === 0) backToVocabHome(); else { document.getElementById('vocabFlashcardArea').style.display = 'none'; document.getElementById('vocabNavArea').style.display = 'block'; } }
         function loadVocabLevel(level) { window.currentLevel = level; document.getElementById('vocabHomeGrid').style.display = 'none'; document.getElementById('vocabLoading').style.display = 'block'; apiCall('getVocabByLevel', { level }).then(res => { document.getElementById('vocabLoading').style.display = 'none'; if (res.success && res.words.length > 0) { currentVocabList = res.words; renderAzGrid(level); } else { Swal.fire('讀取失敗', '此級別尚無單字', 'error'); backToVocabHome(); } }); }
@@ -1319,6 +1306,18 @@
 
         function gradeAiEssay() { const text = document.getElementById('essayInput').value.trim(); const topic = document.getElementById('essayTopicInput').value.trim(); if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block'; apiCall('aiEssayGrading', { username: currentUser, topic: topic, essayText: text }).then(res => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; if (res.success && res.data && res.data.scores) { document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`; document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`; document.getElementById('resEssayOverall').textContent = res.data.overallComment; document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`; document.getElementById('a-content').textContent = res.data.scores.content.analysis; document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`; document.getElementById('a-org').textContent = res.data.scores.organization.analysis; document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`; document.getElementById('a-lang').textContent = res.data.scores.language.analysis; document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`; document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis; document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`; document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis; document.getElementById('resEssaySuggestions').textContent = res.data.suggestions; document.getElementById('resEssayKey').innerHTML = (res.data.keyImprovements || "").replace(/\n/g, '<br>'); document.getElementById('essayResult').style.display = 'block'; updateNavbarBadges(); } else { Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
         function askAiTutor() { const context = document.getElementById('tutorContextInput').value.trim(); const doubt = document.getElementById('tutorDoubtInput').value.trim(); if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning'); const btn = document.getElementById('btnAskTutor'); btn.disabled = true; document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block'; apiCall('aiTutor', { username: currentUser, question: context, doubt: doubt }).then(res => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; if (res.success && res.data) { document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>'); document.getElementById('tutorResult').style.display = 'block'; updateNavbarBadges(); } else { Swal.fire('呼叫老師失敗', res.message, 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
+
+        // 🎯 SWR 架構：記憶系統
+        function setupReviewUI() {
+            let dueCount = 0, pendingCount = 0; 
+            reviewCardsData.forEach(q => q.isDue ? dueCount++ : pendingCount++); 
+            document.getElementById('dueCountLabel').textContent = dueCount; 
+            document.getElementById('pendingCountLabel').textContent = pendingCount; 
+            if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; 
+            else document.getElementById('startReviewBtn').style.display = 'none';
+            currentFlashcardIndex = 0; 
+            renderReviewUI(); 
+        }
 
         function loadIncorrectQuestions() { 
             document.getElementById('flashcardModeContainer').style.display = 'none'; 
@@ -1451,6 +1450,35 @@
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
 
+        function handleCredentialUpdate() { 
+            const newU = document.getElementById('profNewUsername').value.trim(); 
+            const newP = document.getElementById('profNewPassword').value; 
+            const newG = document.getElementById('profNewGrade').value;
+
+            if (!newU && !newP && !newG) return; 
+            if (newU && newU.length < 3) return Swal.fire('錯誤', '新帳號至少3碼', 'warning'); 
+            if (newP && newP.length < 4) return Swal.fire('錯誤', '新密碼至少4碼', 'warning'); 
+
+            let tYear = null;
+            if (newG !== "") { tYear = calculateTargetYear(newG); }
+
+            showLoading('更新中...'); 
+            apiCall('updateUserCredentials', { username: currentUser, newUsername: newU, newPassword: newP, newTargetYear: tYear }).then(res => { 
+                if(res.success) { 
+                    Swal.fire('成功', '帳號資料已更新', 'success'); 
+                    currentUser = res.newUsername; 
+                    localStorage.setItem('user', currentUser); 
+                    document.getElementById('profNewUsername').value = ''; 
+                    document.getElementById('profNewPassword').value = ''; 
+                    document.getElementById('profNewGrade').value = '';
+                    if (tYear !== null) window.userTargetYear = tYear; 
+                    showProfileView(); 
+                } else Swal.fire('失敗', res.message, 'error'); 
+            }); 
+        }
+
+        function handleApiKeyUpdate() { const k = document.getElementById('profApiKey').value.trim(); if (!k || !k.startsWith('AIza')) return Swal.fire('格式錯誤', '請輸入有效的 API Key (以 AIza 開頭)', 'warning'); showLoading('綁定中...'); apiCall('updateApiKey', { username: currentUser, apiKey: k }).then(res => { if(res.success) { Swal.fire('成功', res.message, 'success'); showProfileView(); document.getElementById('profApiKey').value=''; } else Swal.fire('失敗', '綁定失敗', 'error'); }); }
+        
     </script>
 </body>
 </html>
