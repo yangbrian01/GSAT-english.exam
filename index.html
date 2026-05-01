@@ -263,7 +263,6 @@
 </head>
 <body>
 
-    <!-- 🚀 全新頂級 SaaS 質感的開場動畫 -->
     <div id="splashScreen">
         <div class="splash-content">
             <div class="splash-logo">VocabMaster</div>
@@ -492,9 +491,11 @@
                     <option value="global">🌍 全球總排行</option>
                     <option value="peer">🎯 我的同屆排行</option>
                 </select>
+                <!-- 🎯 修改區：新增全區總榜，並設為預設選項 -->
                 <select id="rankSelector" onchange="renderRank()" style="flex:1; min-width:150px; padding: 12px; border-radius: var(--radius-md); border: 2px solid var(--primary-color); background: var(--card-bg); color: var(--primary-color); font-weight: bold; font-size: 1.05em; cursor: pointer; outline: none;">
+                    <option value="all" selected>🏆 全區總榜</option>
                     <option value="king">👑 王者榜 (Lv.26+)</option>
-                    <option value="silver" selected>🥈 白銀榜 (Lv.11-25)</option>
+                    <option value="silver">🥈 白銀榜 (Lv.11-25)</option>
                     <option value="bronze">🥉 青銅榜 (Lv.1-10)</option>
                 </select>
             </div>
