@@ -38,47 +38,55 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; transition: background-color 0.3s, color 0.3s;}
 
-        /* 🚀 頂級 SaaS 質感的開場動畫 */
+        /* 🚀 頂規 Apple / SaaS 質感開場動畫 */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-color); z-index: 999999;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at center, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+            z-index: 999999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.6s cubic-bezier(0.8, 0, 0.2, 1), transform 0.6s cubic-bezier(0.8, 0, 0.2, 1), visibility 0.6s;
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.7s;
         }
         #splashScreen.hidden { 
-            opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.05); 
+            opacity: 0; visibility: hidden; pointer-events: none; 
+            transform: scale(1.15); filter: blur(15px); /* 🎯 核心：高斯模糊退場 */
         }
         .splash-content {
-            text-align: center;
-            animation: splashFadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            display: flex; flex-direction: column; align-items: center;
+            animation: splashFloat 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .splash-logo {
-            font-size: 3.8em; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 5px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 4.5em; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 2px;
+            /* 🎯 核心：金屬光澤流動漸層 */
+            background: linear-gradient(110deg, var(--text-main) 0%, var(--text-muted) 35%, var(--primary-color) 50%, var(--text-muted) 65%, var(--text-main) 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmerShine 2.5s linear infinite;
         }
         .splash-subtitle {
             font-size: 0.85em; font-weight: 700; color: var(--text-muted);
-            letter-spacing: 4px; text-transform: uppercase; margin-bottom: 35px;
-            opacity: 0.8;
+            letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px;
+            opacity: 0.7; transform: translateY(-5px);
         }
-        .splash-progress-bar {
-            width: 220px; height: 3px; background: var(--border-color);
-            border-radius: 3px; margin: 0 auto; overflow: hidden;
+        /* 🎯 核心：極細雷射展開線 */
+        .splash-laser-line {
+            width: 0px; height: 2px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            box-shadow: 0 0 12px var(--primary-color);
+            animation: laserExpand 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards;
         }
-        .splash-progress {
-            width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            border-radius: 3px;
-            animation: splashLoad 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        
+        @keyframes shimmerShine { to { background-position: 200% center; } }
+        @keyframes splashFloat {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        @keyframes splashFadeIn {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes splashLoad {
-            0% { width: 0%; }
-            40% { width: 60%; }
-            100% { width: 100%; }
+        @keyframes laserExpand {
+            0% { width: 0px; opacity: 0; }
+            30% { opacity: 1; }
+            100% { width: 220px; opacity: 1; }
         }
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
@@ -235,6 +243,9 @@
             .exam-topic-split { flex-direction: column; gap: 15px; padding: 15px; }
             .exam-topic-left { border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
             .exam-topic-right { padding-left: 0; }
+            .season-nav-container { flex-direction: column; gap: 5px; margin: 0 10px; }
+            .season-nav-banner { font-size: 0.9em; padding: 4px 12px; }
+            .gsat-countdown-pill { font-size: 0.85em; padding: 4px 10px; }
         }
 
         @media (max-width: 768px) {
@@ -263,9 +274,7 @@
         <div class="splash-content">
             <div class="splash-logo">VocabMaster</div>
             <div class="splash-subtitle">Premium Edition</div>
-            <div class="splash-progress-bar">
-                <div class="splash-progress"></div>
-            </div>
+            <div class="splash-laser-line"></div>
         </div>
     </div>
 
@@ -529,17 +538,18 @@
 
         function getCurrentSeason() {
             let now = new Date();
-            let currYear = now.getFullYear();
-            let currMonth = now.getMonth(); 
-            return (currMonth >= 1) ? (currYear - 1911) + 1 : (currYear - 1911);
+            let y = now.getFullYear();
+            let m = now.getMonth(); 
+            return (m >= 1) ? (y - 1911) + 1 : (y - 1911);
         }
 
-        // 🎯 核心：全新的 1.5秒極簡高質感啟動流程
+        // 🎯 核心：全新的極致絲滑啟動流程
         window.onload = async () => { 
             applyTheme(); 
             
             const promises = [];
-            promises.push(new Promise(resolve => setTimeout(resolve, 1500))); // 讓進度條跑滿的最低時間
+            // 🎯 雷射進度條動畫時間約 1.5 秒，我們確保至少跑滿這個時間
+            promises.push(new Promise(resolve => setTimeout(resolve, 1500))); 
 
             const sysPromise = apiCall('getSystemInfo');
             promises.push(sysPromise);
@@ -592,6 +602,7 @@
                 }
             }
 
+            // 🎯 極致絲滑的高斯模糊退場
             document.getElementById('splashScreen').classList.add('hidden');
             
             if (currentUser) {
@@ -1044,6 +1055,7 @@
         function handleNextQuestion() { clearTimeout(autoAdvanceTimer); const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } if (currentQuestionIndex < quizData.length - 1) { changeQuestion(1); } else { submitQuiz(); } }
         function changeQuestion(delta) { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } const newIdx = currentQuestionIndex + delta; if (newIdx >= 0 && newIdx < quizData.length) renderQuestion(newIdx); }
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
+        function submitQuiz() { const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); const unans = quizData.length - Object.keys(userAnswers).filter(k => userAnswers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) processSubmit(); }); } else { processSubmit(); } }
         
         function processSubmit() { 
             let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
@@ -1136,7 +1148,7 @@
             
             apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { 
                 try {
-                    if (!res.success) throw new Error("API 錯誤");
+                    if (!res.success) throw new Error("後端 API 回傳失敗，請確認 code.gs 是否已重新部署！");
 
                     reviewCardsData = res.questions || []; 
                     if (reviewCardsData.length > 0) { 
@@ -1153,7 +1165,7 @@
                         document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; 
                     } 
                 } catch(err) {
-                    Swal.fire('渲染失敗', err.message, 'error');
+                    Swal.fire('渲染失敗', '你的錯題資料可能已損壞：' + err.message, 'error');
                     document.getElementById('singleFlashcardArea').innerHTML = `<p style="color: white; background: var(--danger-color); padding: 15px; border-radius: 8px; font-weight: bold; text-align: center;">連線異常，請確認伺服器狀態。</p>`;
                 }
             }).catch(err => {
@@ -1256,8 +1268,6 @@
 
         function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',sessionToken);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
         function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
-
-        window.currentLevel = null;
 
         function updateNavbarBadges() { 
             apiCall('getProfileData', { username: currentUser }).then(res => { 
