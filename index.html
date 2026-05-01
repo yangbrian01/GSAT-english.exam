@@ -38,6 +38,35 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; transition: background-color 0.3s, color 0.3s;}
 
+        /* 🎯 全新酷炫開場動畫 Splash Screen */
+        #splashScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color); z-index: 999999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+        #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .splash-logo {
+            font-size: 3.5em; font-weight: 900; color: var(--primary-color);
+            margin-bottom: 10px; letter-spacing: -1px;
+            animation: pulse 1.5s infinite;
+        }
+        .splash-text {
+            font-size: 1.1em; color: var(--text-muted); font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+        }
+        .splash-loader {
+            width: 220px; height: 4px; background: var(--border-color);
+            border-radius: 4px; margin-top: 40px; overflow: hidden; position: relative;
+        }
+        .splash-loader::after {
+            content: ''; position: absolute; left: -50%; top: 0;
+            width: 50%; height: 100%; background: var(--primary-color);
+            border-radius: 4px; animation: slideLoad 1s infinite ease-in-out;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes slideLoad { 0% { left: -50%; } 100% { left: 100%; } }
+
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
         .nav-brand { font-size: 1.5em; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; flex-shrink: 0; }
         
@@ -214,6 +243,13 @@
     </style>
 </head>
 <body>
+
+    <!-- 🎯 酷炫的預載入動畫 Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-logo">VocabMaster</div>
+        <div class="splash-text">載入系統引擎中...</div>
+        <div class="splash-loader"></div>
+    </div>
 
     <button id="themeToggleBtn" class="theme-toggle-float" onclick="toggleTheme()">🌙</button>
 
@@ -493,51 +529,91 @@
             return getBaseAcadYear() + 1 + offset;
         }
 
-        window.onload = () => { 
+        // 🎯 核心：超級平滑的預載入啟動流程
+        window.onload = async () => { 
             applyTheme(); 
             
-            apiCall('getSystemInfo').then(res => {
-                let season = getCurrentSeason();
-                let examDate;
-                if (res.success && res.gsatDate) {
-                    season = res.season;
-                    examDate = new Date(res.gsatDate);
-                } else {
-                    let examYear = season + 1911;
-                    examDate = new Date(examYear, 0, 16); 
-                }
-                
-                document.getElementById('currentSeasonText').textContent = season.toString();
-                examDate.setHours(0, 0, 0, 0); 
-                
-                let now = new Date();
-                let diffTime = examDate.getTime() - now.getTime();
-                let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                if (diffDays >= 0) {
-                    document.getElementById('cdDays').textContent = diffDays;
-                    document.getElementById('gsatCountdown').style.display = 'block';
-                }
-            });
+            // 定義要並行處理的所有任務 Promise
+            const promises = [];
+            
+            // 1. 強制動畫至少跑 1.2 秒，讓視覺有呼吸感
+            promises.push(new Promise(resolve => setTimeout(resolve, 1200)));
 
-            if (currentUser) showView('setupView'); else showView('loginView'); 
+            // 2. 抓取系統日期
+            const sysPromise = apiCall('getSystemInfo');
+            promises.push(sysPromise);
+
+            // 3. 如果已登入，順便把玩家資料也抓回來
+            let profPromise = null;
+            if (currentUser) {
+                profPromise = apiCall('getProfileData', { username: currentUser });
+                promises.push(profPromise);
+            }
+
+            // 等待所有 API 任務與最短動畫時間結束
+            await Promise.all(promises);
+
+            // ====== 處理 System Info ======
+            const resSys = await sysPromise;
+            let season = getCurrentSeason();
+            let examDate;
+            if (resSys.success && resSys.gsatDate) {
+                season = resSys.season;
+                examDate = new Date(resSys.gsatDate);
+            } else {
+                let examYear = season + 1911;
+                examDate = new Date(examYear, 0, 16); 
+            }
+            
+            document.getElementById('currentSeasonText').textContent = season.toString();
+            examDate.setHours(0, 0, 0, 0); 
+            
+            let now = new Date();
+            let diffTime = examDate.getTime() - now.getTime();
+            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // 無條件捨去
+            
+            if (diffDays >= 0) {
+                document.getElementById('cdDays').textContent = diffDays;
+                document.getElementById('gsatCountdown').style.display = 'block';
+            }
+
+            // ====== 處理 Profile Info ======
+            if (currentUser) {
+                const resProf = await profPromise;
+                if(resProf.success) { 
+                    const xp = parseInt(resProf.totalXP) || 0;
+                    const level = Math.floor(Math.sqrt(xp / 10)) + 1;
+                    
+                    window.currentLevel = level;
+                    document.getElementById('quickLevel').textContent = `Lv. ${level}`;
+                    document.getElementById('quickXP').textContent = `${xp} XP`;
+                    window.userTargetYear = resProf.targetYear;
+
+                    if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + currentUser)) {
+                        showGradeUpdatePopup();
+                    }
+                }
+            }
+
+            // 🎯 動畫結束，淡出 SplashScreen 並顯示主畫面
+            document.getElementById('splashScreen').classList.add('hidden');
+            
+            if (currentUser) {
+                // 原本 showView 會觸發 updateNavbarBadges，我們改寫了它，加上參數避免重複呼叫 API
+                showView('setupView', true); 
+            } else { 
+                showView('loginView'); 
+            }
         };
 
-        // 🎯 專門處理拼寫測驗的核心淨化器：砍掉括號與斜線後面的單字
         function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim() : ''; }
-        function getSpellBaseWord(rawWord) { 
-            let w = getPureWord(rawWord); 
-            w = w.replace(/\(.*?\)/g, ''); // 砍掉所有括號內的字 (含括號)
-            w = w.split('/')[0]; // 如果遇到斜線，只取斜線前面的單字
-            return w.trim(); 
-        }
-        
+        function getSpellBaseWord(rawWord) { let w = getPureWord(rawWord); w = w.replace(/\(.*?\)/g, ''); w = w.split('/')[0]; return w.trim(); }
         function speakWord(text, rate = 0.85) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = rate; window.speechSynthesis.speak(u); }
         function playCurrentWordAudio(isSlow = false) { speakWord(getSpellBaseWord(quizData[currentQuestionIndex].correctWord), isSlow ? 0.4 : 0.85); }
 
         const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'vocabBookView', 'pastExamsView', 'examTakingView', 'examResultView', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
         
-        function showView(viewId) {
+        function showView(viewId, isFromInit = false) {
             document.getElementById('navMenu').classList.remove('show');
             VIEW_IDS.forEach(id => document.getElementById(id).classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -547,8 +623,14 @@
                 document.getElementById('navWelcome').textContent = `👋 ${currentUser}`;
                 if(viewId === 'quizView' || viewId === 'examTakingView') document.getElementById('topNavbar').style.display = 'none';
                 document.getElementById('quickName').textContent = currentUser;
-                if (viewId !== 'quizView' && viewId !== 'examTakingView') updateNavbarBadges();
-            } else { document.getElementById('topNavbar').style.display = 'none'; }
+                
+                // 如果是啟動動畫剛跑完，就不用再呼叫一次 updateNavbarBadges 浪費資源
+                if (viewId !== 'quizView' && viewId !== 'examTakingView' && !isFromInit) {
+                    updateNavbarBadges();
+                }
+            } else { 
+                document.getElementById('topNavbar').style.display = 'none'; 
+            }
 
             if (viewId === 'reviewPage') loadIncorrectQuestions();
             if (viewId === 'profileView') showProfileView();
@@ -943,7 +1025,6 @@
         function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; } quizData = res.questions; totalQuestions = res.totalQuestions; if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); } }
         document.addEventListener('selectionchange', () => { if (document.activeElement && document.activeElement.id === 'typingInput') updateSpellVisual(); });
         
-        // 🎯 核心：拼寫測驗淨化引擎 (只針對拼寫模式，砍掉括號與斜線)
         function initSpellTemplate(word) { 
             const pureWord = getSpellBaseWord(word); 
             currentSpellTemplate = []; 
@@ -977,7 +1058,7 @@
                 let uAns = userAnswers[q.id] || ''; let isCorr = false; let displayUAns = uAns; 
                 
                 if (q.qType === 'spell') { 
-                    const pureWord = getSpellBaseWord(q.correctAnswer); // 🎯 修正拼寫比對：用淨化後的基底單字比對
+                    const pureWord = getSpellBaseWord(q.correctAnswer); 
                     let tempTypedIndex = 0; let reconstructedAnswer = ""; 
                     for(let j=0; j<pureWord.length; j++) { 
                         let c = pureWord[j]; 
@@ -1062,7 +1143,7 @@
             
             apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { 
                 try {
-                    if (!res.success) throw new Error("API 錯誤");
+                    if (!res.success) throw new Error("後端 API 回傳失敗，請確認 code.gs 是否已重新部署！");
 
                     reviewCardsData = res.questions || []; 
                     if (reviewCardsData.length > 0) { 
@@ -1079,7 +1160,7 @@
                         document.getElementById('singleFlashcardArea').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; 
                     } 
                 } catch(err) {
-                    Swal.fire('渲染失敗', err.message, 'error');
+                    Swal.fire('渲染失敗', '你的錯題資料可能已損壞：' + err.message, 'error');
                     document.getElementById('singleFlashcardArea').innerHTML = `<p style="color: white; background: var(--danger-color); padding: 15px; border-radius: 8px; font-weight: bold; text-align: center;">連線異常，請確認伺服器狀態。</p>`;
                 }
             }).catch(err => {
