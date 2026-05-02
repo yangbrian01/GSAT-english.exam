@@ -46,44 +46,28 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.7s;
         }
-        #splashScreen.hidden { 
-            opacity: 0; visibility: hidden; pointer-events: none; 
-            transform: scale(1.15); filter: blur(15px); 
-        }
-        .splash-content {
-            display: flex; flex-direction: column; align-items: center;
-            animation: splashFloat 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .splash-logo {
-            font-size: 4.5em; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 2px;
-            background: linear-gradient(110deg, var(--text-main) 0%, var(--text-muted) 35%, var(--primary-color) 50%, var(--text-muted) 65%, var(--text-main) 100%);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shimmerShine 2.5s linear infinite;
-        }
-        .splash-subtitle {
-            font-size: 0.85em; font-weight: 700; color: var(--text-muted);
-            letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px;
-            opacity: 0.7; transform: translateY(-5px);
-        }
-        .splash-laser-line {
-            width: 0px; height: 2px;
-            background: var(--primary-color);
-            border-radius: 2px;
-            box-shadow: 0 0 12px var(--primary-color);
-            animation: laserExpand 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards;
-        }
-        
+        #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.15); filter: blur(15px); }
+        .splash-content { display: flex; flex-direction: column; align-items: center; animation: splashFloat 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .splash-logo { font-size: 4.5em; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 2px; background: linear-gradient(110deg, var(--text-main) 0%, var(--text-muted) 35%, var(--primary-color) 50%, var(--text-muted) 65%, var(--text-main) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerShine 2.5s linear infinite; }
+        .splash-subtitle { font-size: 0.85em; font-weight: 700; color: var(--text-muted); letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.7; transform: translateY(-5px); }
+        .splash-laser-line { width: 0px; height: 2px; background: var(--primary-color); border-radius: 2px; box-shadow: 0 0 12px var(--primary-color); animation: laserExpand 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards; }
+
         @keyframes shimmerShine { to { background-position: 200% center; } }
-        @keyframes splashFloat {
-            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes laserExpand {
-            0% { width: 0px; opacity: 0; }
-            30% { opacity: 1; }
-            100% { width: 220px; opacity: 1; }
+        @keyframes splashFloat { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes laserExpand { 0% { width: 0px; opacity: 0; } 30% { opacity: 1; } 100% { width: 220px; opacity: 1; } }
+
+        /* 🔴 離線橫幅樣式 */
+        #offlineBanner {
+            display: none;
+            background-color: var(--danger-color);
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
@@ -104,77 +88,14 @@
         
         .hamburger-btn { display: block; background: none; border: none; font-size: 1.8em; color: var(--text-main); cursor: pointer; padding: 0 5px; }
 
-        /* 🎯 抽屜式側邊選單樣式 */
-        .nav-menu-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(2px);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .nav-menu-overlay.show {
-            display: block;
-            opacity: 1;
-        }
-
-        .nav-menu { 
-            position: fixed; 
-            top: 0; 
-            right: -320px; 
-            width: 320px; 
-            height: 100%;
-            background: var(--nav-bg); 
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column; 
-            align-items: stretch; 
-            padding: 0 0 15px 0; 
-            box-shadow: -4px 0 15px rgba(0,0,0,0.1); 
-            z-index: 1001;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow-y: auto; 
-        }
-        .nav-menu.show { 
-            right: 0; 
-        }
-
-        .nav-menu-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--bg-color);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .nav-info { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
-        
-        .close-menu-btn {
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 5px;
-            transition: color 0.2s;
-        }
-        .close-menu-btn:hover {
-            color: var(--danger-color);
-        }
-
+        .nav-menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
+        .nav-menu-overlay.show { display: block; opacity: 1; }
+        .nav-menu { position: fixed; top: 0; right: -320px; width: 320px; height: 100%; background: var(--nav-bg); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: stretch; padding: 0 0 15px 0; box-shadow: -4px 0 15px rgba(0,0,0,0.1); z-index: 1001; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
+        .nav-menu.show { right: 0; }
+        .nav-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-color); position: sticky; top: 0; z-index: 10; }
+        .nav-info { display: flex; align-items: center; gap: 8px; }
+        .close-menu-btn { background: none; border: none; font-size: 1.5em; color: var(--text-muted); cursor: pointer; padding: 5px; transition: color 0.2s; }
+        .close-menu-btn:hover { color: var(--danger-color); }
         .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; padding: 16px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
         .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); padding-left: 25px;}
 
@@ -221,21 +142,8 @@
         .spell-cursor { display: inline-block; width: 3px; height: 1.1em; background-color: var(--primary-color); vertical-align: text-bottom; animation: blink 1s step-end infinite; margin: 0 -1.5px; position: relative; z-index: 10; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        .exam-timer-bar {
-            position: -webkit-sticky !important; 
-            position: sticky !important; 
-            top: 15px !important; 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px);
-            padding: 15px 25px; 
-            border-radius: var(--radius-md); border: 3px solid var(--danger-color); 
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 25px; 
-            z-index: 99999 !important; 
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15);
-        }
+        .exam-timer-bar { position: -webkit-sticky !important; position: sticky !important; top: 15px !important; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 15px 25px; border-radius: var(--radius-md); border: 3px solid var(--danger-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; z-index: 99999 !important; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15); }
         body.dark-mode .exam-timer-bar { background: rgba(30, 41, 59, 0.95); }
-
         .exam-timer-text { color: var(--danger-color); font-weight: 900; font-size: 2em; font-family: monospace; letter-spacing: 2px;}
         .exam-section-title { color: var(--primary-color); font-size: 1.6em; font-weight: 800; border-bottom: 3px solid var(--border-color); padding-bottom: 10px; margin: 40px 0 20px 0; }
         .exam-topic-split { display: flex; gap: 30px; margin-bottom: 40px; background: var(--card-bg); padding: 25px; border-radius: var(--radius-md); border: 2px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.02);}
@@ -302,6 +210,18 @@
         body.dark-mode .swal2-popup { background: var(--card-bg); color: var(--text-main); }
         body.dark-mode .swal2-title, body.dark-mode .swal2-html-container { color: var(--text-main); }
 
+        /* 🟩 GitHub 熱力圖樣式 */
+        .heatmap-wrapper { margin-top: 25px; text-align: left; border-top: 1px solid var(--border-color); padding-top: 15px; }
+        .heatmap-scroll { overflow-x: auto; padding-bottom: 10px; }
+        .heatmap-grid { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 4px; width: max-content; }
+        .heatmap-cell { width: 14px; height: 14px; border-radius: 3px; background-color: var(--border-color); transition: 0.2s; }
+        .heatmap-cell:hover { transform: scale(1.2); }
+        .heatmap-cell[data-level="1"] { background-color: rgba(16, 185, 129, 0.3); }
+        .heatmap-cell[data-level="2"] { background-color: rgba(16, 185, 129, 0.6); }
+        .heatmap-cell[data-level="3"] { background-color: rgba(16, 185, 129, 0.8); }
+        .heatmap-cell[data-level="4"] { background-color: rgba(16, 185, 129, 1); box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
+        .heatmap-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.8em; color: var(--text-muted); margin-top: 8px;}
+
         @media (max-width: 850px) {
             .desktop-only { display: none !important; }
             .nav-right-group { gap: 10px; }
@@ -340,6 +260,11 @@
             <div class="splash-subtitle">Premium Edition</div>
             <div class="splash-laser-line"></div>
         </div>
+    </div>
+
+    <!-- 🔴 離線橫幅警告 -->
+    <div id="offlineBanner" style="display:none; background:var(--danger-color); color:white; text-align:center; padding:8px; font-weight:bold; position:sticky; top:0; z-index:99999; box-shadow:0 2px 10px rgba(0,0,0,0.2);">
+        🔌 離線模式：目前無網路連線，系統自動切換為快取題庫，成績將在恢復連線後同步！
     </div>
 
     <button id="themeToggleBtn" class="theme-toggle-float" onclick="toggleTheme()">🌙</button>
@@ -541,7 +466,11 @@
                 <div class="avatar-preview" id="profileAvatarPreview">👤</div>
                 <h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800; font-size: 1.8em; margin-bottom: 20px;"></h3>
                 <div id="profileLevelDisplay" style="margin-bottom: 20px;"></div>
-                <div id="profileStatsDisplay"></div>
+                
+                <!-- 🟩 GitHub 風格熱力圖容器 -->
+                <div id="profileHeatmap"></div>
+
+                <div id="profileStatsDisplay" style="margin-top: 20px;"></div>
                 <div class="input-group" style="text-align: left; margin-top:20px;"><label>更換大頭貼照</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">上傳您的專屬大頭貼照。</p></div>
             </div>
             
@@ -587,7 +516,6 @@
     </main>
 
     <script>
-        // 🎯 SWR 全域快取記憶體
         window.globalProfileCache = null;
         window.userCurrentLevel = null; 
         window.isSavingProfile = false; 
@@ -628,7 +556,22 @@
         
         const showLoading = (text) => { Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); };
         
-        // 🛡️ API 呼叫：包含 Token 攔截與逾時登出處理
+        // 🚀 斷網攔截 & 背景同步：離線恢復後自動將成績上傳
+        function syncOfflineData() {
+            document.getElementById('offlineBanner').style.display = 'none';
+            let queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
+            if (queue.length > 0 && navigator.onLine && currentUser) {
+                showLoading('同步離線成績中...');
+                Promise.all(queue.map(task => apiCall('saveQuizResult', task))).then(() => {
+                    localStorage.removeItem('offlineQueue');
+                    Swal.fire('同步完成', '離線期間的成績已成功上傳！', 'success');
+                    refreshProfileData();
+                });
+            }
+        }
+        window.addEventListener('online', syncOfflineData);
+        window.addEventListener('offline', () => { document.getElementById('offlineBanner').style.display = 'block'; });
+
         async function apiCall(action, data = {}) {
             try { 
                 data.sessionToken = localStorage.getItem('token') || sessionToken || null;
@@ -665,11 +608,8 @@
 
         window.onload = async () => { 
             applyTheme(); 
-            
-            // 🎯 UX 優化：首頁載入時自動填入上次的帳號
-            if (localStorage.getItem('user')) {
-                document.getElementById('loginUsername').value = localStorage.getItem('user');
-            }
+            if (!navigator.onLine) document.getElementById('offlineBanner').style.display = 'block';
+            if (localStorage.getItem('user')) document.getElementById('loginUsername').value = localStorage.getItem('user');
 
             const promises = [];
             promises.push(new Promise(resolve => setTimeout(resolve, 1200))); 
@@ -681,12 +621,13 @@
             if (currentUser && sessionToken) {
                 profPromise = apiCall('getProfileData', { username: currentUser });
                 promises.push(profPromise);
-                
-                promises.push(apiCall('getLeaderboardData').then(res => {
-                    if(res.success && res.data) { globalLeaderboardData = res.data; }
-                }));
-                promises.push(apiCall('getIncorrectQuestions', { username: currentUser }).then(res => {
-                    if(res.success && res.questions) { reviewCardsData = res.questions; }
+                promises.push(apiCall('getLeaderboardData').then(res => { if(res.success && res.data) globalLeaderboardData = res.data; }));
+                promises.push(apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { 
+                    if(res.success && res.questions) { 
+                        reviewCardsData = res.questions; 
+                        // 🚀 快取離線記憶庫
+                        localStorage.setItem('offlineIncorrect', JSON.stringify(res.questions));
+                    }
                 }));
                 promises.push(apiCall('getFavorites', { username: currentUser }).then(res => {
                     if(res.success) {
@@ -695,28 +636,30 @@
                         res.words.forEach(w => userFavoriteWords.add(w.word));
                     }
                 }));
+                
+                // 🚀 PWA 強化：偷偷把題庫 Level 3~5 抓下來存成離線版！
+                if (navigator.onLine) {
+                    apiCall('getAllQuestions', { numQuestions: 1500, mode: 'mixed', quizType: '1' }).then(res => {
+                        if (res.success) localStorage.setItem('offlineVocab', JSON.stringify(res));
+                    });
+                }
             }
 
             await Promise.all(promises);
 
             const resSys = await sysPromise;
-            let season = getCurrentSeason();
-            let examDate;
+            let season = getCurrentSeason(); let examDate;
             if (resSys && resSys.success && resSys.gsatDate) {
-                season = resSys.season;
-                examDate = new Date(resSys.gsatDate);
+                season = resSys.season; examDate = new Date(resSys.gsatDate);
             } else {
-                let examYear = season + 1911;
-                examDate = new Date(examYear, 0, 16); 
+                examDate = new Date(season + 1911, 0, 16); 
             }
             
             document.getElementById('currentSeasonText').textContent = season.toString();
             examDate.setHours(0, 0, 0, 0); 
             
-            let now = new Date();
-            let diffTime = examDate.getTime() - now.getTime();
+            let diffTime = examDate.getTime() - new Date().getTime();
             let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
-            
             if (diffDays >= 0) {
                 document.getElementById('cdDays').textContent = diffDays;
                 document.getElementById('gsatCountdown').style.display = 'block';
@@ -724,9 +667,8 @@
 
             if (currentUser && sessionToken) {
                 const resProf = await profPromise;
-                if(resProf && resProf.success) { 
-                    renderGlobalProfile(resProf); 
-                }
+                if(resProf && resProf.success) { renderGlobalProfile(resProf); }
+                syncOfflineData(); // 啟動時順便檢查有沒有離線成績卡著
             }
 
             const splash = document.getElementById('splashScreen');
@@ -739,61 +681,61 @@
         function showGradeUpdatePopup() {
             Swal.fire({
                 title: '🚀 系統大升級：賽季天梯啟動！',
-                html: `
-                    <div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">
-                        各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴我們你<b>現在的年級</b>：
-                    </div>
-                    <select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;">
-                        <option value="0">高三 (Senior 3)</option>
-                        <option value="1">高二 (Senior 2)</option>
-                        <option value="2">高一 (Senior 1)</option>
-                        <option value="3">國三 (Junior 3)</option>
-                        <option value="4">國二 (Junior 2)</option>
-                        <option value="5">國一 (Junior 1)</option>
-                        <option value="-1">已畢業 (隱藏排行榜)</option>
-                    </select>
-                `,
-                confirmButtonText: '進入新賽季！',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                preConfirm: () => {
-                    const g = document.getElementById('swal-upgrade-grade').value;
-                    if (!g) { Swal.showValidationMessage('請選擇年級！'); }
-                    return g;
-                }
+                html: `<div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴我們你<b>現在的年級</b>：</div><select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;"><option value="0">高三 (Senior 3)</option><option value="1">高二 (Senior 2)</option><option value="2">高一 (Senior 1)</option><option value="3">國三 (Junior 3)</option><option value="4">國二 (Junior 2)</option><option value="5">國一 (Junior 1)</option><option value="-1">已畢業 (隱藏排行榜)</option></select>`,
+                confirmButtonText: '進入新賽季！', allowOutsideClick: false, allowEscapeKey: false,
+                preConfirm: () => { const g = document.getElementById('swal-upgrade-grade').value; if (!g) Swal.showValidationMessage('請選擇年級！'); return g; }
             }).then((result) => {
                 if (result.isConfirmed) {
                     showLoading('資料轉移中...');
                     let tYear = calculateTargetYear(result.value);
                     apiCall('updateUserCredentials', { username: currentUser, newTargetYear: tYear }).then(r => {
                         Swal.close();
-                        if(r.success) {
-                            localStorage.setItem('gradeUpdated_' + currentUser, 'true');
-                            window.userTargetYear = tYear;
-                            Swal.fire('升級成功！', '快去排行榜看看你的同屆對手吧！', 'success');
-                            showView('profileView'); 
-                        } else { Swal.fire('錯誤', r.message, 'error'); }
+                        if(r.success) { localStorage.setItem('gradeUpdated_' + currentUser, 'true'); window.userTargetYear = tYear; Swal.fire('升級成功！', '快去排行榜看看你的同屆對手吧！', 'success'); showView('profileView'); } 
+                        else Swal.fire('錯誤', r.message, 'error');
                     });
                 }
             });
         }
 
+        // 🟩 渲染熱力圖
+        function renderHeatmap(activityLogStr) {
+            let log = {};
+            try { log = JSON.parse(activityLogStr || '{}'); } catch(e) {}
+            
+            let html = '<div class="heatmap-wrapper"><h4 style="margin-bottom:10px; color:var(--text-main);">🔥 過去 35 天學習熱力圖 (XP)</h4><div class="heatmap-scroll"><div class="heatmap-grid">';
+            
+            let today = new Date();
+            let days = [];
+            for(let i = 34; i >= 0; i--) {
+                let d = new Date(today);
+                d.setDate(d.getDate() - i);
+                days.push(d);
+            }
+            
+            days.forEach(d => {
+                // 產生 YYYY-MM-DD
+                let key = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+                let xp = log[key] || 0;
+                let level = 0;
+                if(xp > 0) level = 1;
+                if(xp > 50) level = 2;
+                if(xp > 150) level = 3;
+                if(xp > 300) level = 4;
+                html += `<div class="heatmap-cell" data-level="${level}" title="${key}: 賺取了 ${xp} XP"></div>`;
+            });
+
+            html += '</div></div><div class="heatmap-legend">休息 <div class="heatmap-cell" data-level="0"></div><div class="heatmap-cell" data-level="1"></div><div class="heatmap-cell" data-level="2"></div><div class="heatmap-cell" data-level="3"></div><div class="heatmap-cell" data-level="4"></div> 爆肝</div></div>';
+            document.getElementById('profileHeatmap').innerHTML = html;
+        }
+
         function renderGlobalProfile(resProf) {
             window.globalProfileCache = resProf;
-            
             const xp = parseInt(resProf.totalXP) || 0;
             const level = Math.floor(Math.sqrt(xp / 10)) + 1;
             
             if (window.userCurrentLevel !== null && window.userCurrentLevel !== undefined && level > window.userCurrentLevel) {
-                Swal.fire({
-                    title: '🎊 恭喜升級！ 🎊',
-                    html: `太神啦！你的等級提升到了 <b>Level ${level}</b>！<br>繼續保持這個氣勢！`,
-                    icon: 'success',
-                    confirmButtonColor: '#f59e0b',
-                    confirmButtonText: '繼續刷題'
-                });
-                document.getElementById('quickLevel').classList.add('level-up-anim');
-                setTimeout(() => document.getElementById('quickLevel').classList.remove('level-up-anim'), 1500);
+                Swal.fire({ title: '🎊 恭喜升級！ 🎊', html: `太神啦！你的等級提升到了 <b>Level ${level}</b>！<br>繼續保持這個氣勢！`, icon: 'success', confirmButtonColor: '#f59e0b', confirmButtonText: '繼續刷題' });
+                document.getElementById('quickLevel').classList.add('level-up-anim'); setTimeout(() => document.getElementById('quickLevel').classList.remove('level-up-anim'), 1500);
             }
             window.userCurrentLevel = level;
 
@@ -808,64 +750,38 @@
                 if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; } else { avDiv.innerHTML = av; } 
             }
             
-            const currentLevelBaseXP = Math.pow(level - 1, 2) * 10; 
-            const nextLevelXP = Math.pow(level, 2) * 10; 
+            const currentLevelBaseXP = Math.pow(level - 1, 2) * 10; const nextLevelXP = Math.pow(level, 2) * 10; 
             const xpProgress = ((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100; 
 
             const profileLevelDisplay = document.getElementById('profileLevelDisplay');
-            if(profileLevelDisplay) {
-                profileLevelDisplay.innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`; 
-            }
+            if(profileLevelDisplay) { profileLevelDisplay.innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`; }
             
-            const profileStatsDisplay = document.getElementById('profileStatsDisplay');
-            if(profileStatsDisplay) {
-                profileStatsDisplay.innerHTML = `<div style="display:flex; justify-content:center; gap: 40px; margin-bottom: 15px;"><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${resProf.totalAnswered}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">總答題數</div></div><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${resProf.correctRate}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">答對率</div></div></div>`; 
-            }
+            // 🟩 渲染 Github 風格熱力圖
+            renderHeatmap(resProf.activityLog);
 
-            let targetYear = resProf.targetYear;
-            let baseYear = getBaseAcadYear(); 
-            let offset = targetYear - baseYear - 1;
-            
-            let gradeStr = "已畢業";
-            if (targetYear === 0 || offset < 0) gradeStr = "已畢業";
-            else if(offset === 0) gradeStr = "高三";
-            else if(offset === 1) gradeStr = "高二";
-            else if(offset === 2) gradeStr = "高一";
-            else if(offset === 3) gradeStr = "國三";
-            else if(offset === 4) gradeStr = "國二";
-            else if(offset === 5) gradeStr = "國一";
-            else if(offset > 5) gradeStr = "小學或以下";
-            
-            const profCurrentGrade = document.getElementById('profCurrentGrade');
-            if(profCurrentGrade) profCurrentGrade.textContent = (targetYear === 0) ? `已畢業 (不參與排行)` : `${gradeStr} (目標：${targetYear} 學測)`;
+            const profileStatsDisplay = document.getElementById('profileStatsDisplay');
+            if(profileStatsDisplay) { profileStatsDisplay.innerHTML = `<div style="display:flex; justify-content:center; gap: 40px; margin-bottom: 15px;"><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${resProf.totalAnswered}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">總答題數</div></div><div style="text-align:center;"><div style="font-size:1.6em; font-weight:800; color:var(--text-main);">${resProf.correctRate}</div><div style="font-size:0.85em; font-weight:600; color:var(--text-muted);">答對率</div></div></div>`; }
+
+            let targetYear = resProf.targetYear; let baseYear = getBaseAcadYear(); let offset = targetYear - baseYear - 1;
+            let gradeStr = (targetYear === 0 || offset < 0) ? "已畢業" : (offset === 0 ? "高三" : offset === 1 ? "高二" : offset === 2 ? "高一" : offset === 3 ? "國三" : offset === 4 ? "國二" : offset === 5 ? "國一" : "小學或以下");
+            const profCurrentGrade = document.getElementById('profCurrentGrade'); if(profCurrentGrade) profCurrentGrade.textContent = (targetYear === 0) ? `已畢業 (不參與排行)` : `${gradeStr} (目標：${targetYear} 學測)`;
 
             const quotaInfoBox = document.getElementById('quotaInfoBox');
             if(quotaInfoBox && resProf.hasApiKey !== undefined) {
                 if (resProf.hasApiKey) { quotaInfoBox.innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${resProf.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${resProf.essayUsed} / 1 篇`; } 
             }
-
-            if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + currentUser)) {
-                showGradeUpdatePopup();
-            }
+            if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + currentUser)) { showGradeUpdatePopup(); }
         }
 
         function refreshProfileData() {
-            if (!currentUser || currentUser === '訪客' || window.isSavingProfile) return;
-            apiCall('getProfileData', { username: currentUser }).then(res => { 
-                if(res.success && !window.isSavingProfile) { renderGlobalProfile(res); } 
-            }); 
+            if (!currentUser || currentUser === '訪客' || window.isSavingProfile || !navigator.onLine) return;
+            apiCall('getProfileData', { username: currentUser }).then(res => { if(res.success && !window.isSavingProfile) { renderGlobalProfile(res); } }); 
         }
 
         function toggleMenu() {
-            const menu = document.getElementById('navMenu');
-            const overlay = document.getElementById('navMenuOverlay');
-            if (menu.classList.contains('show')) {
-                menu.classList.remove('show');
-                overlay.classList.remove('show');
-            } else {
-                menu.classList.add('show');
-                overlay.classList.add('show');
-            }
+            const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay');
+            if (menu.classList.contains('show')) { menu.classList.remove('show'); overlay.classList.remove('show'); } 
+            else { menu.classList.add('show'); overlay.classList.add('show'); }
         }
 
         function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim() : ''; }
@@ -876,34 +792,20 @@
         const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'vocabBookView', 'pastExamsView', 'examTakingView', 'examResultView', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
         
         function showView(viewId, isFromInit = false) {
-            const menu = document.getElementById('navMenu');
-            const overlay = document.getElementById('navMenuOverlay');
-            if(menu) menu.classList.remove('show');
-            if(overlay) overlay.classList.remove('show');
+            const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay');
+            if(menu) menu.classList.remove('show'); if(overlay) overlay.classList.remove('show');
             
-            VIEW_IDS.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.classList.remove('active');
-            });
-            const targetEl = document.getElementById(viewId);
-            if(targetEl) targetEl.classList.add('active');
+            VIEW_IDS.forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
+            const targetEl = document.getElementById(viewId); if(targetEl) targetEl.classList.add('active');
 
             if (currentUser) {
-                document.getElementById('topNavbar').style.display = 'flex';
-                document.getElementById('navWelcome').textContent = `👋 ${currentUser}`;
+                document.getElementById('topNavbar').style.display = 'flex'; document.getElementById('navWelcome').textContent = `👋 ${currentUser}`;
                 if(viewId === 'quizView' || viewId === 'examTakingView') document.getElementById('topNavbar').style.display = 'none';
                 document.getElementById('quickName').textContent = currentUser;
-                
-                if (viewId !== 'quizView' && viewId !== 'examTakingView' && !isFromInit) {
-                    refreshProfileData();
-                }
-            } else { 
-                document.getElementById('topNavbar').style.display = 'none'; 
-            }
+                if (viewId !== 'quizView' && viewId !== 'examTakingView' && !isFromInit) { refreshProfileData(); }
+            } else { document.getElementById('topNavbar').style.display = 'none'; }
 
-            if (viewId === 'profileView' && window.globalProfileCache) {
-                renderGlobalProfile(window.globalProfileCache);
-            }
+            if (viewId === 'profileView' && window.globalProfileCache) { renderGlobalProfile(window.globalProfileCache); }
             if (viewId === 'reviewPage') loadIncorrectQuestions();
             if (viewId === 'leaderboardView') loadLeaderboardData();
             if (viewId === 'vocabBookView') backToVocabHome(); 
@@ -912,355 +814,145 @@
         }
 
         async function fetchExamData(year) {
-            document.getElementById('examLobby').style.display = 'none';
-            document.getElementById('examPreRoom').style.display = 'none';
-            document.getElementById('examLoading').style.display = 'block';
-
+            if(!navigator.onLine) return Swal.fire('離線中', '歷屆試題需要網路連線才能下載喔！', 'warning');
+            document.getElementById('examLobby').style.display = 'none'; document.getElementById('examPreRoom').style.display = 'none'; document.getElementById('examLoading').style.display = 'block';
             try {
-                const url = `https://yangbrian01.github.io/GSAT-english.exam/assets/exams/${year}.json`;
-                const response = await fetch(url + '?t=' + new Date().getTime());
-                if (!response.ok) throw new Error(`考卷 (${year}.json) 還沒準備好喔！請確認檔案是否有上傳至 GitHub 的 assets/exams/ 資料夾內。`);
+                const url = `https://yangbrian01.github.io/GSAT-english.exam/assets/exams/${year}.json?t=${new Date().getTime()}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`考卷 (${year}.json) 還沒準備好喔！`);
                 currentExamData = await response.json();
-                
-                document.getElementById('examLoading').style.display = 'none';
-                document.getElementById('examTitle').textContent = currentExamData.title || `${year} 學年度 英文考科`;
-                document.getElementById('examPreRoom').style.display = 'block';
-            } catch (e) {
-                document.getElementById('examLoading').style.display = 'none';
-                document.getElementById('examLobby').style.display = 'grid'; 
-                Swal.fire('讀取失敗', e.message, 'error');
-            }
+                document.getElementById('examLoading').style.display = 'none'; document.getElementById('examTitle').textContent = currentExamData.title || `${year} 學年度 英文考科`; document.getElementById('examPreRoom').style.display = 'block';
+            } catch (e) { document.getElementById('examLoading').style.display = 'none'; document.getElementById('examLobby').style.display = 'grid'; Swal.fire('讀取失敗', e.message, 'error'); }
         }
 
-        function backToExamLobby() {
-            currentExamData = null; clearInterval(examTimer);
-            if(document.getElementById('examPreRoom')) document.getElementById('examPreRoom').style.display = 'none';
-            if(document.getElementById('examLobby')) document.getElementById('examLobby').style.display = 'grid';
-            if(document.getElementById('examLoading')) document.getElementById('examLoading').style.display = 'none';
-        }
+        function backToExamLobby() { currentExamData = null; clearInterval(examTimer); if(document.getElementById('examPreRoom')) document.getElementById('examPreRoom').style.display = 'none'; if(document.getElementById('examLobby')) document.getElementById('examLobby').style.display = 'grid'; if(document.getElementById('examLoading')) document.getElementById('examLoading').style.display = 'none'; }
 
         function startFullExam() {
             if (!currentExamData) return Swal.fire('錯誤', '沒有考卷資料！', 'error');
-            
-            window.isSubmitting = false; 
-            document.getElementById('inExamTitleDisplay').textContent = currentExamData.title;
-            examAnswersStorage = {};
-            examEndTime = Date.now() + 100 * 60 * 1000; 
-            
-            renderExamPaper();
-            showView('examTakingView');
-            
-            clearInterval(examTimer);
-            updateTimerDisplay();
-            
-            examTimer = setInterval(() => {
-                let timeLeft = Math.round((examEndTime - Date.now()) / 1000);
-                if (timeLeft <= 0) {
-                    timeLeft = 0;
-                    clearInterval(examTimer);
-                    Swal.fire('時間到！', '考試結束，系統將自動交卷', 'warning').then(() => { processExamSubmission(); });
-                }
-                updateTimerDisplay(timeLeft);
-            }, 1000);
+            window.isSubmitting = false; document.getElementById('inExamTitleDisplay').textContent = currentExamData.title; examAnswersStorage = {}; examEndTime = Date.now() + 100 * 60 * 1000; 
+            renderExamPaper(); showView('examTakingView');
+            clearInterval(examTimer); updateTimerDisplay();
+            examTimer = setInterval(() => { let timeLeft = Math.round((examEndTime - Date.now()) / 1000); if (timeLeft <= 0) { timeLeft = 0; clearInterval(examTimer); Swal.fire('時間到！', '考試結束，系統將自動交卷', 'warning').then(() => { processExamSubmission(); }); } updateTimerDisplay(timeLeft); }, 1000);
         }
 
         function updateTimerDisplay(timeLeft) {
-            if(timeLeft === undefined) timeLeft = Math.max(0, Math.round((examEndTime - Date.now()) / 1000));
-            let m = Math.floor(timeLeft / 60);
-            let s = timeLeft % 60;
-            document.getElementById('examCountdownText').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-            if(timeLeft < 600) document.getElementById('examCountdownText').style.color = '#991b1b';
-            else document.getElementById('examCountdownText').style.color = 'var(--danger-color)';
+            if(timeLeft === undefined) timeLeft = Math.max(0, Math.round((examEndTime - Date.now()) / 1000)); let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; document.getElementById('examCountdownText').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            if(timeLeft < 600) document.getElementById('examCountdownText').style.color = '#991b1b'; else document.getElementById('examCountdownText').style.color = 'var(--danger-color)';
         }
 
         function buildPassageSection(item, groupId) {
-            let sharedOpts = item.options || null;
-            let html = `<div class="exam-topic-split"><div class="exam-topic-left">`;
-            
+            let sharedOpts = item.options || null; let html = `<div class="exam-topic-split"><div class="exam-topic-left">`;
             if (item.title || item.topic) html += `<h3 style="margin-bottom:10px;">${item.title || item.topic}</h3>`;
             if (item.article) html += `<p style="line-height:1.8; font-size:1.05em; color:var(--text-main);">${item.article.replace(/\/n|\n/g, '<br>')}</p>`;
             if (item.articleImageUrl) html += `<img src="${item.articleImageUrl}" style="max-width:100%; border-radius:8px; margin-top:15px;">`;
-            
-            if (sharedOpts) {
-                html += `<div style="background:var(--bg-color); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid var(--border-color);">`;
-                html += `<strong style="color:var(--primary-color);">【選項區】</strong><br>`;
-                sharedOpts.forEach(opt => { html += `<span style="display:inline-block; margin-right: 15px; margin-top: 5px; font-weight:600;">${opt}</span>`; });
-                html += `</div>`;
-            }
-
-            html += `</div><div class="exam-topic-right">`;
-            if (item.questions) {
-                item.questions.forEach(q => { html += buildExamQuestionHtml(q, sharedOpts, groupId); });
-            }
-            html += `</div></div>`;
+            if (sharedOpts) { html += `<div style="background:var(--bg-color); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid var(--border-color);"><strong style="color:var(--primary-color);">【選項區】</strong><br>`; sharedOpts.forEach(opt => { html += `<span style="display:inline-block; margin-right: 15px; margin-top: 5px; font-weight:600;">${opt}</span>`; }); html += `</div>`; }
+            html += `</div><div class="exam-topic-right">`; if (item.questions) { item.questions.forEach(q => { html += buildExamQuestionHtml(q, sharedOpts, groupId); }); } html += `</div></div>`;
             return html;
         }
 
         function renderExamPaper() {
-            const container = document.getElementById('examPaperContent');
-            let html = '';
-
+            const container = document.getElementById('examPaperContent'); let html = '';
             if(currentExamData.examData) {
                 currentExamData.examData.forEach(part => {
                     html += `<h2 class="exam-section-title">${part.section}</h2>`;
-
-                    if(part.questions && !part.topics && !part.article) {
-                        part.questions.forEach(q => { html += buildExamQuestionHtml(q); });
-                    }
-
-                    if(part.topics) {
-                        part.topics.forEach(topic => {
-                            let groupId = 'topic_' + (topic.id ? topic.id.replace(/\W/g, '_') : Math.floor(Math.random()*1000));
-                            html += buildPassageSection(topic, groupId);
-                        });
-                    }
-
-                    if(part.article && !part.topics) {
-                        let groupId = 'part_' + Math.floor(Math.random()*1000);
-                        html += buildPassageSection(part, groupId);
-                    }
-
-                    if(part.translation) {
-                        html += `<div class="exam-topic-split"><div class="exam-topic-left" style="border:none;">`;
-                        html += `<h3 style="margin-bottom:15px;">中譯英</h3>`;
-                        part.translation.forEach(t => {
-                            html += `<p style="font-weight:bold; margin-bottom:10px;">${t.id}. ${t.chinese}</p>`;
-                            html += `<textarea class="exam-text-input" id="exam_ans_${t.id}" onchange="examAnswersStorage['${t.id}'] = this.value" placeholder="請在此輸入英文翻譯..."></textarea>`;
-                        });
-                        html += `</div></div>`;
-                    }
-                    if(part.essay) {
-                        html += `<div class="exam-topic-split" style="flex-direction:column;">`;
-                        html += `<h3 style="margin-bottom:10px;">英文作文: ${part.essay.topic}</h3>`;
-                        html += `<p style="margin-bottom:15px; color:var(--text-muted);">${part.essay.description}</p>`;
-                        if(part.essay.imageUrls) {
-                            html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`;
-                            part.essay.imageUrls.forEach(img => html += `<img src="${img}" style="max-width:30%; border-radius:8px;">`);
-                            html += `</div>`;
-                        }
-                        html += `<textarea class="exam-text-input" id="exam_ans_essay" style="min-height:250px;" onchange="examAnswersStorage['essay'] = this.value" placeholder="請在此撰寫您的英文作文..."></textarea>`;
-                        html += `</div>`;
-                    }
+                    if(part.questions && !part.topics && !part.article) { part.questions.forEach(q => { html += buildExamQuestionHtml(q); }); }
+                    if(part.topics) { part.topics.forEach(topic => { let groupId = 'topic_' + (topic.id ? topic.id.replace(/\W/g, '_') : Math.floor(Math.random()*1000)); html += buildPassageSection(topic, groupId); }); }
+                    if(part.article && !part.topics) { let groupId = 'part_' + Math.floor(Math.random()*1000); html += buildPassageSection(part, groupId); }
+                    if(part.translation) { html += `<div class="exam-topic-split"><div class="exam-topic-left" style="border:none;"><h3 style="margin-bottom:15px;">中譯英</h3>`; part.translation.forEach(t => { html += `<p style="font-weight:bold; margin-bottom:10px;">${t.id}. ${t.chinese}</p><textarea class="exam-text-input" id="exam_ans_${t.id}" onchange="examAnswersStorage['${t.id}'] = this.value" placeholder="請在此輸入英文翻譯..."></textarea>`; }); html += `</div></div>`; }
+                    if(part.essay) { html += `<div class="exam-topic-split" style="flex-direction:column;"><h3 style="margin-bottom:10px;">英文作文: ${part.essay.topic}</h3><p style="margin-bottom:15px; color:var(--text-muted);">${part.essay.description}</p>`; if(part.essay.imageUrls) { html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`; part.essay.imageUrls.forEach(img => html += `<img src="${img}" style="max-width:30%; border-radius:8px;">`); html += `</div>`; } html += `<textarea class="exam-text-input" id="exam_ans_essay" style="min-height:250px;" onchange="examAnswersStorage['essay'] = this.value" placeholder="請在此撰寫您的英文作文..."></textarea></div>`; }
                 });
-            }
-            container.innerHTML = html;
+            } container.innerHTML = html;
         }
 
         function buildExamQuestionHtml(q, sharedOptions, groupId) {
-            let qTitleText = q.question ? q.question.replace(/\/n|\n/g, '<br>') : '請依據左文選出 / 填寫最適當的答案：';
-            let qHtml = `<div class="exam-q-block"><div class="exam-q-title">${q.id}. ${qTitleText}</div>`;
-            
+            let qTitleText = q.question ? q.question.replace(/\/n|\n/g, '<br>') : '請依據左文選出 / 填寫最適當的答案：'; let qHtml = `<div class="exam-q-block"><div class="exam-q-title">${q.id}. ${qTitleText}</div>`;
             if(q.questionImageUrl) qHtml += `<img src="${q.questionImageUrl}" style="max-width:100%; border-radius:8px; margin-bottom:10px;">`;
-            
-            if (q.answers) {
-                let keys = Object.keys(q.answers);
-                keys.forEach(k => {
-                    qHtml += `<div style="margin-bottom: 10px; display:flex; align-items:center; gap: 10px;">
-                        <strong style="font-size: 1.1em; color:var(--primary-color);">${k}.</strong> 
-                        <input type="text" class="exam-text-input" style="margin-bottom: 0;" placeholder="輸入第 ${k} 格答案" onchange="examAnswersStorage['${k}'] = this.value">
-                    </div>`;
-                });
-            } 
-            else if (q.options) {
-                q.options.forEach((opt, idx) => {
-                    let optContent = opt;
-                    if(q.optionImageUrls && q.optionImageUrls[idx]) {
-                        optContent = `<span>${opt}</span><br><img src="${q.optionImageUrls[idx]}" style="max-width:150px; margin-top:5px; border-radius:5px;">`;
-                    }
-                    let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt;
-                    qHtml += `<label class="exam-radio-label"><input type="radio" name="exam_q_${q.id}" value="${val}" onchange="examAnswersStorage['${q.id}'] = this.value"> <span>${optContent}</span></label>`;
-                });
-            } else if (sharedOptions && sharedOptions.length > 0) {
-                qHtml += `<select class="exam-text-input shared-dropdown-${groupId}" onchange="handleSharedDropdownChange('${groupId}', '${q.id}', this)" style="cursor:pointer; background-color: var(--card-bg);">`;
-                qHtml += `<option value="">請選擇...</option>`;
-                sharedOptions.forEach(opt => {
-                    let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt.split(' ')[0];
-                    qHtml += `<option value="${val}">${opt}</option>`;
-                });
-                qHtml += `</select>`;
-            } else {
-                qHtml += `<input type="text" class="exam-text-input" placeholder="輸入答案 (如 ADE 或單字)" onchange="examAnswersStorage['${q.id}'] = this.value">`;
-            }
-            qHtml += `</div>`;
-            return qHtml;
+            if (q.answers) { Object.keys(q.answers).forEach(k => { qHtml += `<div style="margin-bottom: 10px; display:flex; align-items:center; gap: 10px;"><strong style="font-size: 1.1em; color:var(--primary-color);">${k}.</strong> <input type="text" class="exam-text-input" style="margin-bottom: 0;" placeholder="輸入第 ${k} 格答案" onchange="examAnswersStorage['${k}'] = this.value"></div>`; }); } 
+            else if (q.options) { q.options.forEach((opt, idx) => { let optContent = opt; if(q.optionImageUrls && q.optionImageUrls[idx]) { optContent = `<span>${opt}</span><br><img src="${q.optionImageUrls[idx]}" style="max-width:150px; margin-top:5px; border-radius:5px;">`; } let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt; qHtml += `<label class="exam-radio-label"><input type="radio" name="exam_q_${q.id}" value="${val}" onchange="examAnswersStorage['${q.id}'] = this.value"> <span>${optContent}</span></label>`; }); } 
+            else if (sharedOptions && sharedOptions.length > 0) { qHtml += `<select class="exam-text-input shared-dropdown-${groupId}" onchange="handleSharedDropdownChange('${groupId}', '${q.id}', this)" style="cursor:pointer; background-color: var(--card-bg);"><option value="">請選擇...</option>`; sharedOptions.forEach(opt => { let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt.split(' ')[0]; qHtml += `<option value="${val}">${opt}</option>`; }); qHtml += `</select>`; } 
+            else { qHtml += `<input type="text" class="exam-text-input" placeholder="輸入答案 (如 ADE 或單字)" onchange="examAnswersStorage['${q.id}'] = this.value">`; }
+            return qHtml + `</div>`;
         }
 
         function handleSharedDropdownChange(groupId, qId, selectElem) {
-            examAnswersStorage[qId] = selectElem.value;
-            let selects = document.querySelectorAll(`.shared-dropdown-${groupId}`);
-            let selectedValues = [];
-            selects.forEach(s => { if(s.value) selectedValues.push(s.value); });
-
-            selects.forEach(s => {
-                let options = s.querySelectorAll('option');
-                options.forEach(opt => {
-                    if (opt.value === "") return;
-                    if (selectedValues.includes(opt.value) && s.value !== opt.value) {
-                        opt.disabled = true; opt.style.color = '#94a3b8'; 
-                    } else {
-                        opt.disabled = false; opt.style.color = ''; 
-                    }
-                });
-            });
+            examAnswersStorage[qId] = selectElem.value; let selects = document.querySelectorAll(`.shared-dropdown-${groupId}`); let selectedValues = []; selects.forEach(s => { if(s.value) selectedValues.push(s.value); });
+            selects.forEach(s => { let options = s.querySelectorAll('option'); options.forEach(opt => { if (opt.value === "") return; if (selectedValues.includes(opt.value) && s.value !== opt.value) { opt.disabled = true; opt.style.color = '#94a3b8'; } else { opt.disabled = false; opt.style.color = ''; } }); });
         }
 
-        function forceSubmitExam() {
-            Swal.fire({
-                title: '確定要交卷嗎？', text: "交卷後無法修改答案，未作答的題目將以 0 分計算。", icon: 'warning', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答'
-            }).then((result) => {
-                if (result.isConfirmed) { clearInterval(examTimer); processExamSubmission(); }
-            });
-        }
-
-        function getQuestionScoreInfo(qId) {
-            let id = parseInt(qId);
-            if (isNaN(id)) return { max: 0, type: 'none' }; 
-            if (id >= 1 && id <= 30) return { max: 1, type: 'single' };
-            if (id >= 31 && id <= 46) return { max: 2, type: 'single' };
-            if (id === 47 || id === 48 || id === 50) return { max: 2, type: 'fill' };
-            if (id === 49) return { max: 4, type: 'multi', opts: 5 }; 
-            return { max: 0, type: 'none' }; 
-        }
+        function forceSubmitExam() { Swal.fire({ title: '確定要交卷嗎？', text: "交卷後無法修改答案，未作答的題目將以 0 分計算。", icon: 'warning', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then((result) => { if (result.isConfirmed) { clearInterval(examTimer); processExamSubmission(); } }); }
+        function getQuestionScoreInfo(qId) { let id = parseInt(qId); if (isNaN(id)) return { max: 0, type: 'none' }; if (id >= 1 && id <= 30) return { max: 1, type: 'single' }; if (id >= 31 && id <= 46) return { max: 2, type: 'single' }; if (id === 47 || id === 48 || id === 50) return { max: 2, type: 'fill' }; if (id === 49) return { max: 4, type: 'multi', opts: 5 }; return { max: 0, type: 'none' }; }
 
         async function processExamSubmission() {
-            if (window.isSubmitting) return; 
-            window.isSubmitting = true;
+            if(!navigator.onLine) return Swal.fire('離線中', '閱卷功能需要網路連線。', 'error');
+            if (window.isSubmitting) return; window.isSubmitting = true;
 
             showLoading('正在為您閱卷與結算分數 (包含 AI 手寫批改)...');
-            let rawScore = 0; let detailHtml = '';
+            let rawScore = 0; let detailHtml = ''; let flatQuestions = [];
             
-            let flatQuestions = [];
             currentExamData.examData.forEach(part => {
-                const addQ = (q) => { 
-                    if (q.answers) {
-                        for(let k in q.answers) { flatQuestions.push({ id: k, answer: q.answers[k], explanation: q.explanation }); }
-                    } else if (q.answer) {
-                        flatQuestions.push({ id: q.id, answer: q.answer, explanation: q.explanation });
-                    }
-                };
+                const addQ = (q) => { if (q.answers) { for(let k in q.answers) { flatQuestions.push({ id: k, answer: q.answers[k], explanation: q.explanation }); } } else if (q.answer) { flatQuestions.push({ id: q.id, answer: q.answer, explanation: q.explanation }); } };
                 if(part.questions) part.questions.forEach(addQ);
                 if(part.topics) part.topics.forEach(t => t.questions && t.questions.forEach(addQ));
             });
 
             flatQuestions.forEach(q => {
                 if(q.id.startsWith('Q') || q.id.startsWith('T') || q.id === 'essay' || isNaN(parseInt(q.id))) return; 
+                let rawUAns = (examAnswersStorage[q.id] || '').trim(); let rawCAns = String(q.answer).trim();
+                let uAns = rawUAns.toUpperCase(); let cAns = rawCAns.toUpperCase();
+                let info = getQuestionScoreInfo(q.id); let qScore = 0; let isCorr = false;
 
-                let rawUAns = (examAnswersStorage[q.id] || '').trim();
-                let rawCAns = String(q.answer).trim();
-                
-                let uAns = rawUAns.toUpperCase();
-                let cAns = rawCAns.toUpperCase();
-                
-                let info = getQuestionScoreInfo(q.id);
-                let qScore = 0; let isCorr = false;
-
-                if (info.type === 'single' || info.type === 'fill') {
-                    if (uAns === cAns && uAns !== '') { qScore = info.max; isCorr = true; }
-                } else if (info.type === 'multi') {
-                    let uArr = uAns.replace(/[^A-E]/g, '').split('');
-                    let cArr = cAns.replace(/[^A-E]/g, '').split('');
-                    let allOptions = "ABCDE".substring(0, info.opts).split('');
-                    let k = 0; 
+                if (info.type === 'single' || info.type === 'fill') { if (uAns === cAns && uAns !== '') { qScore = info.max; isCorr = true; } } 
+                else if (info.type === 'multi') {
+                    let uArr = uAns.replace(/[^A-E]/g, '').split(''); let cArr = cAns.replace(/[^A-E]/g, '').split('');
+                    let allOptions = "ABCDE".substring(0, info.opts).split(''); let k = 0; 
                     allOptions.forEach(opt => { if (uArr.includes(opt) !== cArr.includes(opt)) k++; });
-                    
-                    qScore = ((info.opts - 2 * k) / info.opts) * info.max;
-                    if (qScore < 0 || uArr.length === 0) qScore = 0; 
-                    
-                    if (qScore === info.max) isCorr = true;
-                    else if (qScore > 0) isCorr = 'partial';
+                    qScore = ((info.opts - 2 * k) / info.opts) * info.max; if (qScore < 0 || uArr.length === 0) qScore = 0; 
+                    if (qScore === info.max) isCorr = true; else if (qScore > 0) isCorr = 'partial';
                 }
-
                 rawScore += qScore;
-                
-                let icon = isCorr === true ? '<span style="color:#10b981;">✔ 答對</span>' : 
-                           isCorr === 'partial' ? `<span style="color:#d97706;">(部分給分得 ${qScore} 分)</span>` : 
-                           '<span style="color:#ef4444;">✘ 答錯</span>';
-
-                detailHtml += `
-                    <div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;">
-                        <h4 style="margin-bottom: 8px; color: var(--text-main);">第 ${q.id} 題 ${icon}</h4>
-                        <p style="font-size: 0.95em; color: var(--text-muted); margin-bottom: 8px;">你的答案: <span style="color:${isCorr?'#10b981':'#ef4444'}; font-weight:bold;">${rawUAns||'未作答'}</span> | 正確答案: <strong style="color:var(--text-main);">${rawCAns}</strong></p>
-                        <div style="font-size: 0.9em; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-radius: 5px;">${q.explanation||'無提供解析'}</div>
-                    </div>`;
+                let icon = isCorr === true ? '<span style="color:#10b981;">✔ 答對</span>' : isCorr === 'partial' ? `<span style="color:#d97706;">(部分給分得 ${qScore} 分)</span>` : '<span style="color:#ef4444;">✘ 答錯</span>';
+                detailHtml += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main);">第 ${q.id} 題 ${icon}</h4><p style="font-size: 0.95em; color: var(--text-muted); margin-bottom: 8px;">你的答案: <span style="color:${isCorr?'#10b981':'#ef4444'}; font-weight:bold;">${rawUAns||'未作答'}</span> | 正確答案: <strong style="color:var(--text-main);">${rawCAns}</strong></p><div style="font-size: 0.9em; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-radius: 5px;">${q.explanation||'無提供解析'}</div></div>`;
             });
 
-            let transData = [];
-            let essayUserText = examAnswersStorage['essay'] || '';
-            let essayTopicText = '';
-            
+            let transData = []; let essayUserText = examAnswersStorage['essay'] || ''; let essayTopicText = '';
             currentExamData.examData.forEach(part => {
-                if(part.translation) {
-                    part.translation.forEach(t => {
-                        transData.push({ id: t.id, chinese: t.chinese, correct: t.answer, user: examAnswersStorage[t.id] || '' });
-                    });
-                }
+                if(part.translation) { part.translation.forEach(t => { transData.push({ id: t.id, chinese: t.chinese, correct: t.answer, user: examAnswersStorage[t.id] || '' }); }); }
                 if(part.essay) { essayTopicText = part.essay.topic + " " + part.essay.description; }
             });
 
-            let transScoreTotal = 0;
-            let essayScoreFinal = 0;
+            let transScoreTotal = 0; let essayScoreFinal = 0;
             let hasHandwritten = transData.some(t => t.user.trim().length > 0) || essayUserText.trim().length > 0;
 
             if (hasHandwritten && currentUser !== '訪客') {
                 try {
-                    let aiRes = await apiCall('aiMockExamGrading', {
-                        username: currentUser,
-                        translations: transData,
-                        essayText: essayUserText,
-                        essayTopic: essayTopicText
-                    });
-
+                    let aiRes = await apiCall('aiMockExamGrading', { username: currentUser, translations: transData, essayText: essayUserText, essayTopic: essayTopicText });
                     if (aiRes.success && aiRes.data) {
                         detailHtml += `<div style="margin-top:20px; border-top: 3px solid var(--border-color); padding-top: 20px;"><h3 style="color:var(--primary-color); margin-bottom: 15px;">✍️ AI 手寫題批改結果</h3>`;
-                        
                         if (aiRes.data.translations) {
                             aiRes.data.translations.forEach((tr, idx) => {
-                                let tInfo = transData[idx];
-                                transScoreTotal += tr.score;
-                                detailHtml += `
-                                <div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;">
-                                    <h4 style="margin-bottom: 8px; color: var(--text-main);">翻譯第 ${idx+1} 題 <span style="color:var(--secondary-color); margin-left:5px;">得分: ${tr.score} / 4</span></h4>
-                                    <p style="font-size: 0.9em; color: var(--text-muted); margin-bottom: 5px;">題目: ${tInfo.chinese}</p>
-                                    <p style="font-size: 0.95em; color: var(--text-muted); margin-bottom: 8px;">你的作答: <span style="font-weight:bold; color:var(--text-main);">${tInfo.user || '未作答'}</span></p>
-                                    <p style="font-size: 0.95em; color: #10b981; margin-bottom: 8px;">標準答案: <strong>${tInfo.correct}</strong></p>
-                                    <div style="font-size: 0.9em; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-radius: 5px;">🤖 AI 建議: ${tr.feedback}</div>
-                                </div>`;
+                                let tInfo = transData[idx]; transScoreTotal += tr.score;
+                                detailHtml += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main);">翻譯第 ${idx+1} 題 <span style="color:var(--secondary-color); margin-left:5px;">得分: ${tr.score} / 4</span></h4><p style="font-size: 0.9em; color: var(--text-muted); margin-bottom: 5px;">題目: ${tInfo.chinese}</p><p style="font-size: 0.95em; color: var(--text-muted); margin-bottom: 8px;">你的作答: <span style="font-weight:bold; color:var(--text-main);">${tInfo.user || '未作答'}</span></p><p style="font-size: 0.95em; color: #10b981; margin-bottom: 8px;">標準答案: <strong>${tInfo.correct}</strong></p><div style="font-size: 0.9em; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-radius: 5px;">🤖 AI 建議: ${tr.feedback}</div></div>`;
                             });
                         }
-
                         if (aiRes.data.essay) {
                             essayScoreFinal = aiRes.data.essay.score;
-                            detailHtml += `
-                            <div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;">
-                                <h4 style="margin-bottom: 8px; color: var(--text-main);">英文作文 <span style="color:var(--secondary-color); margin-left:5px;">得分: ${essayScoreFinal} / 20</span></h4>
-                                <div style="font-size: 0.9em; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-radius: 5px; margin-bottom: 10px; max-height: 100px; overflow-y:auto;">你的作答: ${essayUserText || '未作答'}</div>
-                                <div style="font-size: 0.95em; color: #b45309; background: #fef3c7; padding: 10px; border-radius: 5px; font-weight:600;">🤖 AI 總評: ${aiRes.data.essay.feedback}</div>
-                            </div>`;
+                            detailHtml += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main);">英文作文 <span style="color:var(--secondary-color); margin-left:5px;">得分: ${essayScoreFinal} / 20</span></h4><div style="font-size: 0.9em; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-radius: 5px; margin-bottom: 10px; max-height: 100px; overflow-y:auto;">你的作答: ${essayUserText || '未作答'}</div><div style="font-size: 0.95em; color: #b45309; background: #fef3c7; padding: 10px; border-radius: 5px; font-weight:600;">🤖 AI 總評: ${aiRes.data.essay.feedback}</div></div>`;
                         }
                         detailHtml += `</div>`;
                     } else { detailHtml += `<div style="color: var(--danger-color); padding: 10px; font-weight:bold;">AI 批改失敗，手寫題暫以 0 分計算。(${aiRes.message})</div>`; }
                 } catch(e) { detailHtml += `<div style="color: var(--danger-color); padding: 10px; font-weight:bold;">AI 連線異常，手寫題暫以 0 分計算。</div>`; }
-            } else if (hasHandwritten && currentUser === '訪客') {
-                detailHtml += `<div style="color: var(--danger-color); padding: 10px; font-weight:bold;">訪客模式不支援 AI 手寫批改，手寫題以 0 分計算。請註冊登入。</div>`;
-            } else {
-                detailHtml += `<div style="color: var(--text-muted); padding: 10px; font-weight:bold; background:var(--bg-color); border-radius:8px; text-align:center; margin-top:20px;">未作答手寫題，以 0 分計算。</div>`;
-            }
+            } else if (hasHandwritten && currentUser === '訪客') { detailHtml += `<div style="color: var(--danger-color); padding: 10px; font-weight:bold;">訪客模式不支援 AI 手寫批改，手寫題以 0 分計算。請註冊登入。</div>`; } 
+            else { detailHtml += `<div style="color: var(--text-muted); padding: 10px; font-weight:bold; background:var(--bg-color); border-radius:8px; text-align:center; margin-top:20px;">未作答手寫題，以 0 分計算。</div>`; }
 
-            rawScore += transScoreTotal + essayScoreFinal;
-            rawScore = parseFloat(rawScore.toFixed(2));
-
+            rawScore += transScoreTotal + essayScoreFinal; rawScore = parseFloat(rawScore.toFixed(2));
             let finalLevel = 1; const curve = currentExamData.gradingCurve;
             for(let i=15; i>=1; i--) {
                 let rangeStr = curve[`level${i}`]; if(!rangeStr) continue;
                 let matches = rangeStr.match(/([\d\.]+)\s*<\s*X\s*≤\s*([\d\.]+)/);
-                if(matches) {
-                    let min = parseFloat(matches[1]); let max = parseFloat(matches[2]);
-                    if(rawScore > min && rawScore <= max) { finalLevel = i; break; }
-                }
+                if(matches) { let min = parseFloat(matches[1]); let max = parseFloat(matches[2]); if(rawScore > min && rawScore <= max) { finalLevel = i; break; } }
             }
 
             Swal.close();
-            
             let selectScoreDisplay = rawScore - (transScoreTotal + essayScoreFinal);
             document.getElementById('examRawScore').innerHTML = `選擇與混合題得分: <strong style="color:var(--primary-color);">${selectScoreDisplay.toFixed(2)} / 72</strong><br>手寫題得分: <strong style="color:var(--primary-color);">${(transScoreTotal + essayScoreFinal)} / 28</strong><br>總原始分: <span style="font-size:1.3em; font-weight:800;">${rawScore}</span>`;
             document.getElementById('examLevelScore').textContent = `${finalLevel} 級分`;
@@ -1271,27 +963,43 @@
                 document.getElementById('examXPReward').textContent = `🔥 歷屆通關獎勵：賺取 +${gainedXP} XP`;
                 if(gainedXP > 0) {
                     let mockSubmitData = []; for(let i=0; i<gainedXP; i++) mockSubmitData.push({ isCorrect: true, level: 1 });
-                    
                     if (window.globalProfileCache) {
                         window.globalProfileCache.totalXP = parseInt(window.globalProfileCache.totalXP || 0) + gainedXP;
                         renderGlobalProfile(window.globalProfileCache); 
                     }
-
                     window.isSavingProfile = true; 
                     apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: mockSubmitData, isReviewMode: false }).then(() => {
-                        window.isSavingProfile = false; 
-                        refreshProfileData(); 
+                        window.isSavingProfile = false; refreshProfileData(); 
                     });
                 }
             }
-
             showView('examResultView');
         }
 
+        // 🚀 一般測驗：加入斷網讀取快取機制
         function startGame(isReview = false) { 
             window.isSubmitting = false; 
-            isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } else { const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); } 
+            isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; 
+            
+            if (!navigator.onLine) {
+                if (isReviewQuizMode) {
+                    let cache = JSON.parse(localStorage.getItem('offlineIncorrect') || '[]');
+                    if(cache.length === 0) return Swal.fire('離線中', '無離線錯題庫可用，請先連線！', 'warning');
+                    processQuizData({ success: true, questions: shuffleArray(cache).slice(0, 20), totalQuestions: Math.min(cache.length, 20) });
+                } else {
+                    let cache = JSON.parse(localStorage.getItem('offlineVocab') || 'null');
+                    if(!cache) return Swal.fire('離線中', '尚未快取單字庫，請先連線一次！', 'warning');
+                    let num = parseInt(document.getElementById('numQuestionsInput').value);
+                    let qs = cache.questions;
+                    processQuizData({ success: true, questions: shuffleArray(qs).slice(0, num), totalQuestions: num });
+                }
+                return;
+            }
+
+            if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } 
+            else { const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); } 
         }
+
         function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; } quizData = res.questions; totalQuestions = res.totalQuestions; if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); } }
         document.addEventListener('selectionchange', () => { if (document.activeElement && document.activeElement.id === 'typingInput') updateSpellVisual(); });
         
@@ -1315,6 +1023,7 @@
         function focusTypingInput(e) { const input = document.getElementById('typingInput'); input.focus(); setTimeout(() => { const len = input.value.length; input.setSelectionRange(len, len); updateSpellVisual(); }, 10); }
         function setSpellCursor(index, event) { if (event) { event.preventDefault(); event.stopPropagation(); } const input = document.getElementById('typingInput'); input.focus(); setTimeout(() => { input.setSelectionRange(index, index); updateSpellVisual(); }, 10); }
         function getSpellAnswer() { return document.getElementById('typingInput').value.trim(); }
+        
         function renderQuestion(index) { document.getElementById('nextButton').disabled = false; clearTimeout(autoAdvanceTimer); currentQuestionIndex = index; const q = quizData[index]; document.getElementById('currentQNum').textContent = index + 1; document.getElementById('quizInstruction').textContent = (isReviewQuizMode ? `🧠 記憶覆測：` : '') + q.instruction; const meaningDisplay = document.getElementById('meaningDisplay'); const optContainer = document.getElementById('optionsContainer'); const spellArea = document.getElementById('spellVisualArea'); const typingInput = document.getElementById('typingInput'); optContainer.style.display = 'none'; spellArea.style.display = 'none'; meaningDisplay.style.display = 'block'; if (q.qType === 'listen') { meaningDisplay.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 10px;"><div class="audio-only-btn" onclick="playCurrentWordAudio(false)" style="margin-bottom: 0; width: 120px; height: 120px;">🎧 <span style="font-size:0.25em; margin-top:8px; color:var(--text-muted);">正常</span></div><div class="audio-only-btn" onclick="playCurrentWordAudio(true)" style="margin-bottom: 0; width: 90px; height: 90px; font-size: 2em; border-color: var(--secondary-color);">🐌 <span style="font-size:0.3em; margin-top:5px; color:var(--text-muted);">慢速</span></div></div>`; setTimeout(() => playCurrentWordAudio(false), 400); optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); } else if (q.qType === 'spell') { meaningDisplay.textContent = q.questionText; spellArea.style.display = 'flex'; initSpellTemplate(q.correctWord); typingInput.value = userAnswers[q.id] || ''; typingInput.maxLength = currentSpellTemplate.filter(c => c === '_').length; updateSpellVisual(); setTimeout(() => { typingInput.focus(); const len = typingInput.value.length; typingInput.setSelectionRange(len, len); updateSpellVisual(); }, 100); typingInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); handleNextQuestion(); } }; typingInput.onkeyup = updateSpellVisual; typingInput.onclick = updateSpellVisual; } else { meaningDisplay.textContent = q.questionText; optContainer.style.display = 'block'; renderOptionsUI(q, optContainer); } updateNavButtons(); }
         function renderOptionsUI(q, container) { container.innerHTML = ''; q.options.forEach(word => { const btn = document.createElement('button'); btn.className = `option-btn ${userAnswers[q.id] === word ? 'selected' : ''}`; btn.textContent = word; btn.onclick = () => { userAnswers[q.id] = word; Array.from(container.children).forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); clearTimeout(autoAdvanceTimer); autoAdvanceTimer = setTimeout(() => { handleNextQuestion(); }, 400); }; container.appendChild(btn); }); }
         function handleNextQuestion() { clearTimeout(autoAdvanceTimer); const q = quizData[currentQuestionIndex]; if (q.qType === 'spell') { userAnswers[q.id] = getSpellAnswer(); } if (currentQuestionIndex < quizData.length - 1) { changeQuestion(1); } else { submitQuiz(); } }
@@ -1323,7 +1032,6 @@
         
         function submitQuiz() { 
             document.getElementById('nextButton').disabled = true; 
-            
             const q = quizData[currentQuestionIndex]; 
             if (q.qType === 'spell') userAnswers[q.id] = getSpellAnswer(); 
             
@@ -1333,11 +1041,10 @@
                     if(r.isConfirmed) { processSubmit(); }
                     else { document.getElementById('nextButton').disabled = false; } 
                 }); 
-            } else { 
-                processSubmit(); 
-            } 
+            } else { processSubmit(); } 
         }
         
+        // 🚀 離線佇列機制：如果斷網，就把成績存起來
         function processSubmit() { 
             if (window.isSubmitting) return; 
             window.isSubmitting = true;
@@ -1353,32 +1060,18 @@
                         let tempTypedIndex = 0; let reconstructedAnswer = ""; 
                         for(let j=0; j<pureWord.length; j++) { 
                             let c = pureWord[j]; 
-                            if (/[^a-zA-Z]/.test(c)) { 
-                                reconstructedAnswer += c; 
-                            } else { 
+                            if (/[^a-zA-Z]/.test(c)) { reconstructedAnswer += c; } else { 
                                 let start = j, end = j; 
                                 while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; 
                                 while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; 
                                 const wordLen = end - start + 1; 
-                                if (wordLen <= 2 || j === start || j === end) { 
-                                    reconstructedAnswer += c; 
-                                } else { 
-                                    reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_"; tempTypedIndex++; 
-                                } 
+                                if (wordLen <= 2 || j === start || j === end) { reconstructedAnswer += c; } else { reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_"; tempTypedIndex++; } 
                             } 
                         } 
-                        displayUAns = reconstructedAnswer; 
-                        isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); 
-                    } else { 
-                        isCorr = (uAns === q.correctAnswer); 
-                    } 
+                        displayUAns = reconstructedAnswer; isCorr = (reconstructedAnswer.toLowerCase() === pureWord.toLowerCase()); 
+                    } else { isCorr = (uAns === q.correctAnswer); } 
                     
-                    if (isCorr) { 
-                        correctCount++; 
-                        let base = parseInt(q.level) || 1; 
-                        let bonus = q.qType === 'listen' ? 2 : (q.qType === 'spell' ? 5 : 0); 
-                        gainedXP += (base + bonus); 
-                    } 
+                    if (isCorr) { correctCount++; let base = parseInt(q.level) || 1; let bonus = q.qType === 'listen' ? 2 : (q.qType === 'spell' ? 5 : 0); gainedXP += (base + bonus); } 
                     
                     submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr }); 
                     const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'"); 
@@ -1396,12 +1089,17 @@
                         let oldAns = parseInt(window.globalProfileCache.totalAnswered) || 0;
                         let oldCorr = parseInt(window.globalProfileCache.totalCorrect) || 0;
                         let oldXP = parseInt(window.globalProfileCache.totalXP) || 0;
-                        
                         window.globalProfileCache.totalAnswered = oldAns + totalQuestions;
                         window.globalProfileCache.totalCorrect = oldCorr + correctCount;
                         let finalXP = gainedXP + (hasBonus ? 20 : 0);
                         window.globalProfileCache.totalXP = oldXP + finalXP;
                         
+                        // 本地直接更新熱力圖 (讓離線也能看到綠色方塊變深)
+                        let log = {}; try { log = JSON.parse(window.globalProfileCache.activityLog || '{}'); } catch(e){}
+                        let todayStr = new Date().toLocaleDateString('en-CA', {timeZone: 'Asia/Taipei'});
+                        log[todayStr] = (log[todayStr] || 0) + finalXP;
+                        window.globalProfileCache.activityLog = JSON.stringify(log);
+
                         if(window.globalProfileCache.totalAnswered > 0) {
                             window.globalProfileCache.correctRate = ((window.globalProfileCache.totalCorrect / window.globalProfileCache.totalAnswered) * 100).toFixed(2) + '%';
                         }
@@ -1424,11 +1122,15 @@
                 drawChart(correctCount, totalQuestions - correctCount); 
                 
                 if (currentUser !== '訪客') { 
-                    window.isSavingProfile = true; 
-                    apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }).then(() => {
-                        window.isSavingProfile = false; 
-                        refreshProfileData(); 
-                    }); 
+                    const payload = { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode };
+                    if (navigator.onLine) {
+                        window.isSavingProfile = true; 
+                        apiCall('saveQuizResult', payload).then(() => { window.isSavingProfile = false; refreshProfileData(); }); 
+                    } else {
+                        let queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
+                        queue.push(payload);
+                        localStorage.setItem('offlineQueue', JSON.stringify(queue));
+                    }
                 } 
             } catch (e) {
                 Swal.fire('發生錯誤', '交卷結算時發生異常：' + e.message, 'error');
@@ -1461,6 +1163,7 @@
             } else {
                 document.getElementById('vocabLoading').style.display = 'block'; 
             }
+            if(!navigator.onLine) return document.getElementById('vocabLoading').style.display = 'none';
 
             apiCall('getFavorites', { username: currentUser }).then(res => { 
                 document.getElementById('vocabLoading').style.display = 'none'; 
@@ -1484,10 +1187,10 @@
         function renderSingleVocabCard() { try { if (currentLetterList.length === 0) return; const q = currentLetterList[currentVocabCardIndex]; const area = document.getElementById('vbCardContainer'); document.getElementById('vbCounter').textContent = `${currentVocabCardIndex + 1} / ${currentLetterList.length}`; document.getElementById('vbPrev').disabled = currentVocabCardIndex === 0; document.getElementById('vbNext').disabled = currentVocabCardIndex === currentLetterList.length - 1; const isFav = userFavoriteWords.has(q.word); const cleanWord = getPureWord(q.word); const safeEnWord = cleanWord.replace(/'/g, "\\'"); area.innerHTML = `<div class="flashcard-container" id="vbContainer" onclick="this.classList.toggle('flipped')"><div class="flashcard-inner"><div class="flashcard-front"><button class="speak-btn" style="position:absolute; top:15px; right:15px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><button style="position:absolute; top:15px; left:15px; background:none; border:none; font-size:1.8em; cursor:pointer; color:${isFav?'#ef4444':'#cbd5e1'};" onclick="event.stopPropagation(); toggleFavOnCard('${q.word}', '${q.meaning}')" id="cardFavBtn">${isFav?'❤️':'🤍'}</button><div class="fc-word">${cleanWord}</div><div class="fc-hint">點擊翻面</div></div><div class="flashcard-back" style="overflow-y: auto;"><div class="fc-word" style="font-size:1.5em; margin-bottom:5px;">${q.meaning}</div><div id="aiBlock-${q.pureWord}" style="margin-top:15px; width:100%; text-align:left; font-size:0.9em; line-height:1.5; display:none;"><div id="aiSpinner-${q.pureWord}" style="text-align:center;"><div class="spinner" style="width:25px;height:25px;border-width:2px;"></div></div><div id="aiContent-${q.pureWord}" style="display:none; color: var(--text-main);"></div></div><button class="btn btn-secondary" style="margin-top: 15px; padding: 8px 15px; font-size:0.9em; width:auto;" onclick="event.stopPropagation(); loadAiForCard('${q.pureWord}')" id="aiBtn-${q.pureWord}">🤖 展開 AI 深度解析</button></div></div></div>`; const cardElement = document.getElementById('vbContainer'); cardElement.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 40 && currentVocabCardIndex < currentLetterList.length - 1) document.getElementById('vbNext').click(); if (touchEndX > touchStartX + 40 && currentVocabCardIndex > 0) document.getElementById('vbPrev').click(); }, {passive: true}); } catch(e) { console.error(e); } }
         function changeVocabCard(delta) { const newIdx = currentVocabCardIndex + delta; if (newIdx >= 0 && newIdx < currentLetterList.length) { currentVocabCardIndex = newIdx; const wrapper = document.getElementById('vbSlideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleVocabCard(); } }
         function toggleFavOnCard(word, meaning) { const btn = document.getElementById('cardFavBtn'); const isFav = userFavoriteWords.has(word); if (isFav) { userFavoriteWords.delete(word); btn.textContent = '🤍'; btn.style.color = '#cbd5e1'; } else { userFavoriteWords.add(word); btn.textContent = '❤️'; btn.style.color = '#ef4444'; } apiCall('toggleFavorite', { username: currentUser, word: word, meaning: meaning, isAdding: !isFav }); }
-        function loadAiForCard(pureWord) { const btn = document.getElementById(`aiBtn-${pureWord}`); const block = document.getElementById(`aiBlock-${pureWord}`); const spinner = document.getElementById(`aiSpinner-${pureWord}`); const content = document.getElementById(`aiContent-${pureWord}`); if (btn) btn.style.display = 'none'; block.style.display = 'block'; if (content.innerHTML !== '') return; apiCall('aiDictionary', { username: currentUser, word: pureWord }).then(res => { spinner.style.display = 'none'; if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>📌 意思：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🌱 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 例句：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:var(--text-muted); margin-top:5px;">⚡ 快取秒讀</div>' : ''}`; content.style.display = 'block'; } else { content.innerHTML = `<span style="color:var(--danger-color);">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; } }); }
+        function loadAiForCard(pureWord) { if(!navigator.onLine) return Swal.fire('離線中', 'AI 字典需要網路連線。', 'error'); const btn = document.getElementById(`aiBtn-${pureWord}`); const block = document.getElementById(`aiBlock-${pureWord}`); const spinner = document.getElementById(`aiSpinner-${pureWord}`); const content = document.getElementById(`aiContent-${pureWord}`); if (btn) btn.style.display = 'none'; block.style.display = 'block'; if (content.innerHTML !== '') return; apiCall('aiDictionary', { username: currentUser, word: pureWord }).then(res => { spinner.style.display = 'none'; if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>📌 意思：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🌱 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 例句：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:var(--text-muted); margin-top:5px;">⚡ 快取秒讀</div>' : ''}`; content.style.display = 'block'; } else { content.innerHTML = `<span style="color:var(--danger-color);">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; } }); }
 
-        function gradeAiEssay() { const text = document.getElementById('essayInput').value.trim(); const topic = document.getElementById('essayTopicInput').value.trim(); if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block'; apiCall('aiEssayGrading', { username: currentUser, topic: topic, essayText: text }).then(res => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; if (res.success && res.data && res.data.scores) { document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`; document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`; document.getElementById('resEssayOverall').textContent = res.data.overallComment; document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`; document.getElementById('a-content').textContent = res.data.scores.content.analysis; document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`; document.getElementById('a-org').textContent = res.data.scores.organization.analysis; document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`; document.getElementById('a-lang').textContent = res.data.scores.language.analysis; document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`; document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis; document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`; document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis; document.getElementById('resEssaySuggestions').textContent = res.data.suggestions; document.getElementById('resEssayKey').innerHTML = (res.data.keyImprovements || "").replace(/\n/g, '<br>'); document.getElementById('essayResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
-        function askAiTutor() { const context = document.getElementById('tutorContextInput').value.trim(); const doubt = document.getElementById('tutorDoubtInput').value.trim(); if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning'); const btn = document.getElementById('btnAskTutor'); btn.disabled = true; document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block'; apiCall('aiTutor', { username: currentUser, question: context, doubt: doubt }).then(res => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; if (res.success && res.data) { document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>'); document.getElementById('tutorResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('呼叫老師失敗', res.message, 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
+        function gradeAiEssay() { if(!navigator.onLine) return Swal.fire('離線中', 'AI 批改需要網路連線。', 'error'); const text = document.getElementById('essayInput').value.trim(); const topic = document.getElementById('essayTopicInput').value.trim(); if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block'; apiCall('aiEssayGrading', { username: currentUser, topic: topic, essayText: text }).then(res => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; if (res.success && res.data && res.data.scores) { document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`; document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`; document.getElementById('resEssayOverall').textContent = res.data.overallComment; document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`; document.getElementById('a-content').textContent = res.data.scores.content.analysis; document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`; document.getElementById('a-org').textContent = res.data.scores.organization.analysis; document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`; document.getElementById('a-lang').textContent = res.data.scores.language.analysis; document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`; document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis; document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`; document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis; document.getElementById('resEssaySuggestions').textContent = res.data.suggestions; document.getElementById('resEssayKey').innerHTML = (res.data.keyImprovements || "").replace(/\n/g, '<br>'); document.getElementById('essayResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
+        function askAiTutor() { if(!navigator.onLine) return Swal.fire('離線中', 'AI 家教需要網路連線。', 'error'); const context = document.getElementById('tutorContextInput').value.trim(); const doubt = document.getElementById('tutorDoubtInput').value.trim(); if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning'); const btn = document.getElementById('btnAskTutor'); btn.disabled = true; document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block'; apiCall('aiTutor', { username: currentUser, question: context, doubt: doubt }).then(res => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; if (res.success && res.data) { document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>'); document.getElementById('tutorResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('呼叫老師失敗', res.message, 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
 
         function setupReviewUI() {
             let dueCount = 0, pendingCount = 0; 
@@ -1504,7 +1207,6 @@
             document.getElementById('flashcardModeContainer').style.display = 'none'; 
             document.getElementById('listModeContainer').style.display = 'none'; 
             document.getElementById('startReviewBtn').style.display = 'none'; 
-            
             const area = document.getElementById('singleFlashcardArea');
             
             if (reviewCardsData && reviewCardsData.length > 0) {
@@ -1513,6 +1215,13 @@
             } else {
                 document.getElementById('flashcardModeContainer').style.display = 'block'; 
                 area.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; 
+            }
+            if(!navigator.onLine) {
+                let cache = JSON.parse(localStorage.getItem('offlineIncorrect') || '[]');
+                reviewCardsData = cache;
+                if(reviewCardsData.length > 0) setupReviewUI();
+                else area.innerHTML = '<p style="text-align:center; padding: 20px; color: var(--danger-color); font-weight: 600;">無離線記憶庫資料</p>';
+                return;
             }
             
             apiCall('getIncorrectQuestions', { username: currentUser }).then(res => { 
@@ -1612,16 +1321,10 @@
         }
 
         function handleRegister() { 
-            const u=document.getElementById('regUsername').value.trim(); 
-            const p=document.getElementById('regPassword').value; 
-            const gradeOffset = document.getElementById('regGrade').value; 
-            
-            if(u.length<3||p.length<4) return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); 
-            
-            showLoading('註冊中'); 
-            
+            if(!navigator.onLine) return Swal.fire('離線中', '註冊需要網路連線。', 'error');
+            const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; const gradeOffset = document.getElementById('regGrade').value; 
+            if(u.length<3||p.length<4) return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); showLoading('註冊中'); 
             let tYear = calculateTargetYear(gradeOffset);
-            
             apiCall('registerUser',{username:u, password:p, targetYear: tYear}).then(res=>{
                 if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;}
                 else Swal.fire('失敗',res.message,'error');
@@ -1629,39 +1332,27 @@
         }
 
         function handleLogin() { 
-            const u=document.getElementById('loginUsername').value.trim(); 
-            const p=document.getElementById('loginPassword').value; 
-            showLoading('登入中'); 
+            if(!navigator.onLine) return Swal.fire('離線中', '登入需要網路連線。', 'error');
+            const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); 
             apiCall('loginUser',{username:u, password:p}).then(res=>{
                 if(res.success){
-                    currentUser=res.user;
-                    sessionToken=res.token;
-                    localStorage.setItem('user',u); 
-                    localStorage.setItem('token',res.token);
-                    Swal.close();
-                    showView('setupView');
-                    applyTheme(); 
+                    currentUser=res.user; sessionToken=res.token; localStorage.setItem('user',u); localStorage.setItem('token',res.token); Swal.close(); showView('setupView'); applyTheme(); 
                 } else Swal.fire('失敗',res.message,'error');
             }); 
         }
         
-        // 🎯 登出時只清 Token，保留帳號
+        // 🎯 登出：保留帳號，清空 Token
         function handleLogout() { 
             Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{
                 if(r.isConfirmed){
-                    const savedUser = currentUser;
-                    currentUser = null;
-                    sessionToken = null;
-                    localStorage.removeItem('token'); 
-                    localStorage.setItem('user', savedUser); 
-                    
-                    showView('loginView');
-                    document.getElementById('loginUsername').value = savedUser; 
+                    const savedUser = currentUser; currentUser = null; sessionToken = null; localStorage.removeItem('token'); localStorage.setItem('user', savedUser); 
+                    showView('loginView'); document.getElementById('loginUsername').value = savedUser; 
                 }
             }); 
         }
 
         function handleAvatarFile(event) {
+            if(!navigator.onLine) return Swal.fire('離線中', '上傳頭像需要網路連線。', 'error');
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1686,129 +1377,80 @@
         }
 
         function handleCredentialUpdate() {
-            const newU = document.getElementById('profNewUsername').value.trim();
-            const newP = document.getElementById('profNewPassword').value;
-            const newG = document.getElementById('profNewGrade').value;
-
-            if (!newU && !newP && !newG) return;
-            if (newU && newU.length < 3) return Swal.fire('錯誤', '新帳號至少3碼', 'warning');
-            if (newP && newP.length < 4) return Swal.fire('錯誤', '新密碼至少4碼', 'warning');
-
-            let tYear = null;
-            if (newG !== "") { tYear = calculateTargetYear(newG); }
-
+            if(!navigator.onLine) return Swal.fire('離線中', '更新資料需要網路連線。', 'error');
+            const newU = document.getElementById('profNewUsername').value.trim(); const newP = document.getElementById('profNewPassword').value; const newG = document.getElementById('profNewGrade').value;
+            if (!newU && !newP && !newG) return; 
+            if (newU && newU.length < 3) return Swal.fire('錯誤', '新帳號至少3碼', 'warning'); if (newP && newP.length < 4) return Swal.fire('錯誤', '新密碼至少4碼', 'warning');
+            let tYear = null; if (newG !== "") { tYear = calculateTargetYear(newG); }
             showLoading('更新中...');
             apiCall('updateUserCredentials', { username: currentUser, newUsername: newU, newPassword: newP, newTargetYear: tYear }).then(res => {
                 if(res.success) {
-                    Swal.fire('成功', '帳號資料已更新', 'success');
-                    currentUser = res.newUsername;
-                    localStorage.setItem('user', currentUser);
-                    document.getElementById('profNewUsername').value = '';
-                    document.getElementById('profNewPassword').value = '';
-                    document.getElementById('profNewGrade').value = '';
-                    if (tYear !== null) window.userTargetYear = tYear;
-                    refreshProfileData();
+                    Swal.fire('成功', '帳號資料已更新', 'success'); currentUser = res.newUsername; localStorage.setItem('user', currentUser);
+                    document.getElementById('profNewUsername').value = ''; document.getElementById('profNewPassword').value = ''; document.getElementById('profNewGrade').value = '';
+                    if (tYear !== null) window.userTargetYear = tYear; refreshProfileData();
                 } else Swal.fire('失敗', res.message, 'error');
             });
         }
 
         function handleApiKeyUpdate() {
+            if(!navigator.onLine) return Swal.fire('離線中', '綁定金鑰需要網路連線。', 'error');
             const k = document.getElementById('profApiKey').value.trim();
             if (!k || !k.startsWith('AIza')) return Swal.fire('格式錯誤', '請輸入有效的 API Key (以 AIza 開頭)', 'warning');
             showLoading('綁定中...');
             apiCall('updateApiKey', { username: currentUser, apiKey: k }).then(res => {
-                if(res.success) {
-                    Swal.fire('成功', res.message, 'success');
-                    refreshProfileData();
-                    document.getElementById('profApiKey').value='';
-                } else Swal.fire('失敗', '綁定失敗', 'error');
+                if(res.success) { Swal.fire('成功', res.message, 'success'); refreshProfileData(); document.getElementById('profApiKey').value=''; } 
+                else Swal.fire('失敗', '綁定失敗', 'error');
             });
         }
 
         function loadLeaderboardData() { 
             const container = document.getElementById('leaderboardTableContainer'); 
-            
-            if (globalLeaderboardData && globalLeaderboardData.length > 0) {
-                renderRank();
-            } else {
-                container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; 
-            }
-            
+            if (globalLeaderboardData && globalLeaderboardData.length > 0) { renderRank(); } else { container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; }
+            if(!navigator.onLine) return document.getElementById('leaderboardTableContainer').innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--danger-color);">離線中，無法讀取排行榜</p>';
             apiCall('getLeaderboardData').then(res => { 
-                if (res.success && res.data) {
-                    globalLeaderboardData = res.data;
-                    if(document.getElementById('leaderboardView').classList.contains('active')) renderRank(); 
-                } else if (!globalLeaderboardData || globalLeaderboardData.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">伺服器無回應</p>';
-                }
+                if (res.success && res.data) { globalLeaderboardData = res.data; if(document.getElementById('leaderboardView').classList.contains('active')) renderRank(); } 
+                else if (!globalLeaderboardData || globalLeaderboardData.length === 0) { container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">伺服器無回應</p>'; }
             }); 
         }
 
         function renderRank() {
-            const rankType = document.getElementById('rankSelector').value; 
-            const cohortType = document.getElementById('cohortSelector').value; 
-            const container = document.getElementById('leaderboardTableContainer'); 
-
+            const rankType = document.getElementById('rankSelector').value; const cohortType = document.getElementById('cohortSelector').value; const container = document.getElementById('leaderboardTableContainer'); 
             let filteredData = globalLeaderboardData.filter(p => {
-                if (cohortType === 'peer' && window.userTargetYear) {
-                    if (p.targetYear !== window.userTargetYear) return false;
-                }
+                if (cohortType === 'peer' && window.userTargetYear) { if (p.targetYear !== window.userTargetYear) return false; }
                 if (rankType === 'all') return true; 
                 if (rankType === 'king' && p.level >= 26) return true;
                 if (rankType === 'silver' && p.level >= 11 && p.level <= 25) return true;
                 if (rankType === 'bronze' && p.level <= 10) return true;
                 return false;
             });
-
             if(filteredData.length > 0) { 
                 let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>Level</th><th>經驗值 (XP)</th></tr>'; 
                 filteredData.forEach((d, i) => { 
-                    const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; 
-                    const isMe = String(d.username).trim().toLowerCase() === String(currentUser).trim().toLowerCase(); 
+                    const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; const isMe = String(d.username).trim().toLowerCase() === String(currentUser).trim().toLowerCase(); 
                     const bgColor = isMe ? (isDarkMode ? 'rgba(16,185,129,0.1)' : '#d1fae5') : (isDarkMode ? 'transparent' : (i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent')); 
                     const borderStyle = isMe ? 'border: 2px solid var(--secondary-color);' : ''; 
-                    
                     let badgeHtml = d.badges ? `<span style="font-size:0.8em; margin-left:5px;" title="歷史成就">${d.badges}</span>` : '';
                     const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>${badgeHtml}` : `${d.username}${badgeHtml}`; 
-                    
                     html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`; 
                 }); 
                 container.innerHTML = html + '</table>'; 
-            } else { 
-                container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">此階級/屆別尚無玩家資料，趕快去刷題搶佔第一！</p>'; 
-            } 
+            } else { container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">此階級/屆別尚無玩家資料，趕快去刷題搶佔第一！</p>'; } 
         }
 
-        // 🎯 實作 3：鍵盤快捷鍵支援
+        // 🎯 實作 4：鍵盤快捷鍵 (防呆檢查)
         document.addEventListener('keydown', (e) => {
             if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-
-            if (document.getElementById('vocabBookView').classList.contains('active') && 
-                document.getElementById('vocabFlashcardArea').style.display === 'block') {
-                if (e.code === 'Space') {
-                    e.preventDefault(); 
-                    document.getElementById('vbContainer').classList.toggle('flipped');
-                } else if (e.code === 'ArrowLeft') {
-                    if (!document.getElementById('vbPrev').disabled) document.getElementById('vbPrev').click();
-                } else if (e.code === 'ArrowRight') {
-                    if (!document.getElementById('vbNext').disabled) document.getElementById('vbNext').click();
-                }
+            if (document.getElementById('vocabBookView').classList.contains('active') && document.getElementById('vocabFlashcardArea').style.display === 'block') {
+                if (e.code === 'Space') { e.preventDefault(); document.getElementById('vbContainer').classList.toggle('flipped'); } 
+                else if (e.code === 'ArrowLeft') { if (!document.getElementById('vbPrev').disabled) document.getElementById('vbPrev').click(); } 
+                else if (e.code === 'ArrowRight') { if (!document.getElementById('vbNext').disabled) document.getElementById('vbNext').click(); }
             }
-            
-            if (document.getElementById('reviewPage').classList.contains('active') && 
-                document.getElementById('flashcardModeContainer').style.display === 'block') {
-                if (e.code === 'Space') {
-                    e.preventDefault();
-                    const fc = document.getElementById('fcContainer');
-                    if (fc) fc.classList.toggle('flipped');
-                } else if (e.code === 'ArrowLeft') {
-                    if (!document.getElementById('fcPrev').disabled) document.getElementById('fcPrev').click();
-                } else if (e.code === 'ArrowRight') {
-                    if (!document.getElementById('fcNext').disabled) document.getElementById('fcNext').click();
-                }
+            if (document.getElementById('reviewPage').classList.contains('active') && document.getElementById('flashcardModeContainer').style.display === 'block') {
+                if (e.code === 'Space') { e.preventDefault(); const fc = document.getElementById('fcContainer'); if (fc) fc.classList.toggle('flipped'); } 
+                else if (e.code === 'ArrowLeft') { if (!document.getElementById('fcPrev').disabled) document.getElementById('fcPrev').click(); } 
+                else if (e.code === 'ArrowRight') { if (!document.getElementById('fcNext').disabled) document.getElementById('fcNext').click(); }
             }
         });
-
     </script>
 </body>
 </html>
