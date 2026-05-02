@@ -291,6 +291,7 @@
 
         <div class="nav-menu-overlay" id="navMenuOverlay" onclick="toggleMenu()"></div>
 
+        <!-- 在原有的選單中加入這行 -->
         <div class="nav-menu" id="navMenu">
             <div class="nav-menu-header">
                 <div class="nav-info">
@@ -300,7 +301,11 @@
             </div>
             
             <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
+            <!-- 🌟 新增這行：安裝 App 按鈕 (預設隱藏，等 PWA 準備好才顯示) -->
+            <button class="nav-btn" id="installAppBtn" style="display: none; color: #10b981; font-weight: 800;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
+            
             <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
+            <!-- ... 後面保留你原本的按鈕 ... -->
             <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')">📚 記憶系統</button>
             <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
             <button class="nav-btn" onclick="showView('leaderboardView')">🏆 排行榜</button>
