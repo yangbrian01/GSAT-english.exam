@@ -134,6 +134,49 @@ window.onload = async () => {
     if (AppState.auth.user) { showView('setupView', true); } else { showView('loginView'); }
 };
 
+// 🎯 這裡補回被我手殘刪掉的年級更新彈跳視窗
+function showGradeUpdatePopup() {
+    Swal.fire({
+        title: '🚀 系統大升級：賽季天梯啟動！',
+        html: `
+            <div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">
+                各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴我們你<b>現在的年級</b>：
+            </div>
+            <select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;">
+                <option value="0">高三 (Senior 3)</option>
+                <option value="1">高二 (Senior 2)</option>
+                <option value="2">高一 (Senior 1)</option>
+                <option value="3">國三 (Junior 3)</option>
+                <option value="4">國二 (Junior 2)</option>
+                <option value="5">國一 (Junior 1)</option>
+                <option value="-1">已畢業 (隱藏排行榜)</option>
+            </select>
+        `,
+        confirmButtonText: '進入新賽季！',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        preConfirm: () => {
+            const g = document.getElementById('swal-upgrade-grade').value;
+            if (!g) { Swal.showValidationMessage('請選擇年級！'); }
+            return g;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading('資料轉移中...');
+            let tYear = calculateTargetYear(result.value);
+            apiCall('updateUserCredentials', { username: AppState.auth.user, newTargetYear: tYear }).then(r => {
+                Swal.close();
+                if(r.success) {
+                    localStorage.setItem('gradeUpdated_' + AppState.auth.user, 'true');
+                    AppState.profile.targetYear = tYear;
+                    Swal.fire('升級成功！', '快去排行榜看看你的同屆對手吧！', 'success');
+                    showView('profileView'); 
+                } else { Swal.fire('錯誤', r.message, 'error'); }
+            });
+        }
+    });
+}
+
 function renderGlobalProfile(resProf) {
     AppState.profile.cache = resProf;
     const xp = parseInt(resProf.totalXP) || 0;
@@ -238,7 +281,7 @@ function showView(viewId, isFromInit = false) {
     window.scrollTo(0, 0);
 }
 
-// 歷屆試題相關邏輯
+// 歷屆試題邏輯
 async function fetchExamData(year) {
     document.getElementById('examLobby').style.display = 'none'; document.getElementById('examPreRoom').style.display = 'none'; document.getElementById('examLoading').style.display = 'block';
     try {
@@ -456,7 +499,7 @@ async function processExamSubmission() {
     showView('examResultView');
 }
 
-// 一般測驗邏輯
+// 🎯 一般測驗邏輯
 function startGame(isReview = false) { 
     AppState.quiz.isSubmitting = false; AppState.quiz.isReviewMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; 
     if (isReview) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: AppState.auth.user }).then(res => processQuizData(res)); } 
@@ -572,6 +615,7 @@ function processSubmit() {
 
 function drawChart(correct, wrong) { const ctx = document.getElementById('scoreChart'); if (window.myChart) window.myChart.destroy(); window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, wrong], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] }, options: { responsive: true, cutout: '75%', plugins: { legend: { display: false } } } }); }
 
+// 🎯 單字本與 AI 字典
 function loadVocabFavorites() { 
     AppState.vocab.level = 0; document.getElementById('vocabHomeGrid').style.display = 'none'; 
     const renderFavs = (list) => {
@@ -599,9 +643,11 @@ function changeVocabCard(delta) { const newIdx = AppState.vocab.cardIndex + delt
 function toggleFavOnCard(word, meaning) { const btn = document.getElementById('cardFavBtn'); const isFav = AppState.vocab.favorites.has(word); if (isFav) { AppState.vocab.favorites.delete(word); btn.textContent = '🤍'; btn.style.color = '#cbd5e1'; } else { AppState.vocab.favorites.add(word); btn.textContent = '❤️'; btn.style.color = '#ef4444'; } apiCall('toggleFavorite', { username: AppState.auth.user, word: word, meaning: meaning, isAdding: !isFav }); }
 function loadAiForCard(pureWord) { const btn = document.getElementById(`aiBtn-${pureWord}`); const block = document.getElementById(`aiBlock-${pureWord}`); const spinner = document.getElementById(`aiSpinner-${pureWord}`); const content = document.getElementById(`aiContent-${pureWord}`); if (btn) btn.style.display = 'none'; block.style.display = 'block'; if (content.innerHTML !== '') return; apiCall('aiDictionary', { username: AppState.auth.user, word: pureWord }).then(res => { spinner.style.display = 'none'; if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>📌 意思：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🌱 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 例句：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:var(--text-muted); margin-top:5px;">⚡ 快取秒讀</div>' : ''}`; content.style.display = 'block'; } else { content.innerHTML = `<span style="color:var(--danger-color);">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; } }); }
 
+// 🎯 AI 功能區
 function gradeAiEssay() { const text = document.getElementById('essayInput').value.trim(); const topic = document.getElementById('essayTopicInput').value.trim(); if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block'; apiCall('aiEssayGrading', { username: AppState.auth.user, topic: topic, essayText: text }).then(res => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; if (res.success && res.data && res.data.scores) { document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`; document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`; document.getElementById('resEssayOverall').textContent = res.data.overallComment; document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`; document.getElementById('a-content').textContent = res.data.scores.content.analysis; document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`; document.getElementById('a-org').textContent = res.data.scores.organization.analysis; document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`; document.getElementById('a-lang').textContent = res.data.scores.language.analysis; document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`; document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis; document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`; document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis; document.getElementById('resEssaySuggestions').textContent = res.data.suggestions; document.getElementById('resEssayKey').innerHTML = (res.data.keyImprovements || "").replace(/\n/g, '<br>'); document.getElementById('essayResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
 function askAiTutor() { const context = document.getElementById('tutorContextInput').value.trim(); const doubt = document.getElementById('tutorDoubtInput').value.trim(); if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning'); const btn = document.getElementById('btnAskTutor'); btn.disabled = true; document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block'; apiCall('aiTutor', { username: AppState.auth.user, question: context, doubt: doubt }).then(res => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; if (res.success && res.data) { document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>'); document.getElementById('tutorResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('呼叫老師失敗', res.message, 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
 
+// 🎯 記憶系統區
 function setupReviewUI() { let dueCount = 0, pendingCount = 0; AppState.review.cards.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; else document.getElementById('startReviewBtn').style.display = 'none'; AppState.review.currentIndex = 0; renderReviewUI(); }
 function loadIncorrectQuestions() { document.getElementById('flashcardModeContainer').style.display = 'none'; document.getElementById('listModeContainer').style.display = 'none'; document.getElementById('startReviewBtn').style.display = 'none'; const area = document.getElementById('singleFlashcardArea'); if (AppState.review.cards && AppState.review.cards.length > 0) { document.getElementById('flashcardModeContainer').style.display = 'block'; setupReviewUI(); } else { document.getElementById('flashcardModeContainer').style.display = 'block'; area.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取記憶庫中...</p></div>'; } apiCall('getIncorrectQuestions', { username: AppState.auth.user }).then(res => { if (res.success) { AppState.review.cards = res.questions || []; if(document.getElementById('reviewPage').classList.contains('active')) { if (AppState.review.cards.length > 0) { setupReviewUI(); } else { document.getElementById('dueCountLabel').textContent = '0'; document.getElementById('pendingCountLabel').textContent = '0'; area.innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 600;">記憶庫已清空，無錯題紀錄 🎉</p>'; } } } }).catch(err => { if (!AppState.review.cards || AppState.review.cards.length === 0) { area.innerHTML = `<p style="text-align:center; padding: 20px; color: var(--danger-color); font-weight: 600;">網路連線失敗</p>`; } }); }
 function toggleFlashcardMode() { AppState.review.isFlashcardMode = !AppState.review.isFlashcardMode; renderReviewUI(); }
@@ -610,9 +656,75 @@ function renderSingleFlashcard() { try { if (AppState.review.cards.length === 0)
 function changeFlashcard(delta) { const newIdx = AppState.review.currentIndex + delta; if (newIdx >= 0 && newIdx < AppState.review.cards.length) { AppState.review.currentIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
 function renderListMode() { let html = ''; AppState.review.cards.forEach((q, i) => { const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; const hasChinese = /[\u4E00-\u9FFF]/.test(String(q.question || '')); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const cleanWord = getPureWord(enWord); const safeEnWord = cleanWord.replace(/'/g, "\\'"); html += `<div class="review-list-item" style="opacity: ${q.isDue ? '1' : '0.6'};"><div style="flex: 1;"><strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br><span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${cleanWord}</span></div><button class="list-speak-btn" onclick="speakWord('${safeEnWord}')">🔊</button></div>`; }); document.getElementById('listModeContainer').innerHTML = html; }
 
+// 🎯 帳號與安全區 (這裡補回被刪掉的超重要 Function)
 function handleRegister() { const u=document.getElementById('regUsername').value.trim(); const p=document.getElementById('regPassword').value; const gradeOffset = document.getElementById('regGrade').value; if(u.length<3||p.length<4) return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); showLoading('註冊中'); let tYear = calculateTargetYear(gradeOffset); apiCall('registerUser',{username:u, password:p, targetYear: tYear}).then(res=>{ if(res.success){Swal.fire('成功','請登入','success');showView('loginView');document.getElementById('loginUsername').value=u;} else Swal.fire('失敗',res.message,'error'); }); }
 function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){AppState.auth.user=res.user;AppState.auth.token=res.token;localStorage.setItem('user',u);localStorage.setItem('token',res.token);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
 function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){AppState.auth.user=null;localStorage.clear();showView('loginView');}}); }
 
+function handleAvatarFile(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            const MAX_SIZE = 400; let width = img.width; let height = img.height;
+            if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+            canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
+            const base64Data = canvas.toDataURL('image/jpeg', 0.9);
+            document.getElementById('profileAvatarPreview').innerHTML = `<img src="${base64Data}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`;
+            showLoading('上傳至雲端空間中...');
+            apiCall('uploadAvatarToDrive', { username: AppState.auth.user, base64Img: base64Data }).then(r => {
+                Swal.close();
+                if(r.success) {
+                    Swal.fire('成功', '大頭貼已上傳並產生網址！', 'success');
+                    if(AppState.profile.cache) AppState.profile.cache.avatar = r.url; 
+                } else Swal.fire('失敗', r.message, 'error');
+            });
+        }; img.src = e.target.result;
+    }; reader.readAsDataURL(file);
+}
+
+function handleCredentialUpdate() {
+    const newU = document.getElementById('profNewUsername').value.trim();
+    const newP = document.getElementById('profNewPassword').value;
+    const newG = document.getElementById('profNewGrade').value;
+
+    if (!newU && !newP && !newG) return;
+    if (newU && newU.length < 3) return Swal.fire('錯誤', '新帳號至少3碼', 'warning');
+    if (newP && newP.length < 4) return Swal.fire('錯誤', '新密碼至少4碼', 'warning');
+
+    let tYear = null;
+    if (newG !== "") { tYear = calculateTargetYear(newG); }
+
+    showLoading('更新中...');
+    apiCall('updateUserCredentials', { username: AppState.auth.user, newUsername: newU, newPassword: newP, newTargetYear: tYear }).then(res => {
+        if(res.success) {
+            Swal.fire('成功', '帳號資料已更新', 'success');
+            AppState.auth.user = res.newUsername;
+            localStorage.setItem('user', AppState.auth.user);
+            document.getElementById('profNewUsername').value = '';
+            document.getElementById('profNewPassword').value = '';
+            document.getElementById('profNewGrade').value = '';
+            if (tYear !== null) AppState.profile.targetYear = tYear;
+            refreshProfileData();
+        } else Swal.fire('失敗', res.message, 'error');
+    });
+}
+
+function handleApiKeyUpdate() {
+    const k = document.getElementById('profApiKey').value.trim();
+    if (!k || !k.startsWith('AIza')) return Swal.fire('格式錯誤', '請輸入有效的 API Key (以 AIza 開頭)', 'warning');
+    showLoading('綁定中...');
+    apiCall('updateApiKey', { username: AppState.auth.user, apiKey: k }).then(res => {
+        if(res.success) {
+            Swal.fire('成功', res.message, 'success');
+            refreshProfileData();
+            document.getElementById('profApiKey').value='';
+        } else Swal.fire('失敗', '綁定失敗', 'error');
+    });
+}
+
+// 🎯 排行榜區
 function loadLeaderboardData() { const container = document.getElementById('leaderboardTableContainer'); if (AppState.sys.leaderboard && AppState.sys.leaderboard.length > 0) { renderRank(); } else { container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; } apiCall('getLeaderboardData').then(res => { if (res.success && res.data) { AppState.sys.leaderboard = res.data; if(document.getElementById('leaderboardView').classList.contains('active')) renderRank(); } else if (!AppState.sys.leaderboard || AppState.sys.leaderboard.length === 0) { container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">伺服器無回應</p>'; } }); }
 function renderRank() { const rankType = document.getElementById('rankSelector').value; const cohortType = document.getElementById('cohortSelector').value; const container = document.getElementById('leaderboardTableContainer'); let filteredData = AppState.sys.leaderboard.filter(p => { if (cohortType === 'peer' && window.userTargetYear) { if (p.targetYear !== window.userTargetYear) return false; } if (rankType === 'all') return true; if (rankType === 'king' && p.level >= 26) return true; if (rankType === 'silver' && p.level >= 11 && p.level <= 25) return true; if (rankType === 'bronze' && p.level <= 10) return true; return false; }); if(filteredData.length > 0) { let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>Level</th><th>經驗值 (XP)</th></tr>'; filteredData.forEach((d, i) => { const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; const isMe = String(d.username).trim().toLowerCase() === String(AppState.auth.user).trim().toLowerCase(); const bgColor = isMe ? (AppState.sys.isDarkMode ? 'rgba(16,185,129,0.1)' : '#d1fae5') : (AppState.sys.isDarkMode ? 'transparent' : (i === 0 ? '#ffedd5' : i === 1 ? '#fef9c3' : i === 2 ? '#e0f2fe' : 'transparent')); const borderStyle = isMe ? 'border: 2px solid var(--secondary-color);' : ''; let badgeHtml = d.badges ? `<span style="font-size:0.8em; margin-left:5px;" title="歷史成就">${d.badges}</span>` : ''; const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>${badgeHtml}` : `${d.username}${badgeHtml}`; html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`; }); container.innerHTML = html + '</table>'; } else { container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">此階級/屆別尚無玩家資料，趕快去刷題搶佔第一！</p>'; } }
