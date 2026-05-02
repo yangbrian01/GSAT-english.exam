@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vocabmaster-v2';
+const CACHE_NAME = 'vocabmaster-v3'; // 🎯 升級版本號，強制更新快取
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -14,7 +14,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // 使用 try-catch 避免單一檔案失敗導致整個快取失敗
+      // 確保就算有單個靜態資源抓不到，也不會讓整個 Service Worker 當掉
       return Promise.allSettled(
         ASSETS_TO_CACHE.map(url => cache.add(url).catch(err => console.warn(`Cache failed for ${url}`, err)))
       );
@@ -35,10 +35,30 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return; 
+  // 🎯 關鍵修復：如果是 API 請求 (POST)，直接放行，且加上 catch 避免 SW 當機
+  if (event.request.method !== 'GET' || event.request.url.includes('script.google.com')) {
+      event.respondWith(
+          fetch(event.request).catch(err => {
+              console.warn('API fetch failed, probably offline:', err);
+              // 如果是要求 JSON，回傳一個假的 JSON 避免前端 JSON.parse 報錯
+              return new Response(JSON.stringify({ success: false, message: '目前處於離線狀態' }), {
+                  headers: { 'Content-Type': 'application/json' }
+              });
+          })
+      );
+      return; 
+  } 
+
+  // 🎯 靜態資源 (HTML, CSS, JS, 圖片) 的快取策略：先找 Cache，找不到再去網路抓
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+    caches.match(event.request).then(cachedResponse => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).catch(() => {
+        // 如果連網路都斷了，又沒有快取，回傳離線提示頁面 (這裡簡化回傳空響應)
+        console.warn('Offline and resource not in cache:', event.request.url);
+      });
     })
   );
 });
