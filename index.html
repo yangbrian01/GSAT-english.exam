@@ -612,10 +612,33 @@
         const API_URL = 'https://script.google.com/macros/s/AKfycbyXAx1jgdExUKrNHWpd4v8crV0KI4QXVMGr4Kzht8OG314UfxZKlPbLKlDYc_YqTVM2/exec';
         
         const showLoading = (text) => { Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); };
+        // 🛡️ 修復 2：在所有請求中自動附上 sessionToken
         async function apiCall(action, data = {}) {
             try { 
-                let res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action, data }) });
-                return await res.json();
+                // 每次請求都嘗試從 localStorage 抓取最新的 token 並附上
+                data.sessionToken = localStorage.getItem('token') || sessionToken || null;
+                
+                let res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                    body: JSON.stringify({ action, data }) 
+                });
+                
+                let result = await res.json();
+                
+                // 攔截並處理 Token 失效的狀況
+                if (result.success === false && result.message.includes('登入驗證失效')) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '連線逾時',
+                        text: result.message,
+                        confirmButtonText: '重新登入'
+                    }).then(() => {
+                        handleLogout(); // 強制踢回登入畫面
+                    });
+                }
+                
+                return result;
             } catch (e) { 
                 return { success: false, message: "網路連線異常，請檢查網路狀態或確認伺服器是否有正確部署新版本！" }; 
             }
