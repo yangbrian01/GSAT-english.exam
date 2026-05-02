@@ -222,23 +222,41 @@
         }
 
         @media (max-width: 768px) {
-            .navbar { padding: 12px 20px; flex-wrap: wrap; }
-            .nav-brand { margin-right: auto; }
+            /* 1. 修正頂部 Navbar 擠成一團 */
+            .navbar { padding: 12px 15px; flex-wrap: wrap; }
+            .nav-brand { margin-right: auto; font-size: 1.3em; }
             .nav-right-group { margin-left: auto; }
-            .season-nav-container { order: 3; width: 100%; flex-direction: row; margin-top: 10px; justify-content: center; }
+            .season-nav-container { order: 3; width: 100%; flex-wrap: wrap; margin-top: 12px; justify-content: center; gap: 8px; }
             
-            .main-content { padding: 30px 15px; }
+            /* 縮小倒數標籤，並允許在小螢幕自動換行折疊 */
+            .season-nav-banner, .gsat-countdown-pill { font-size: 0.85em; padding: 6px 12px; width: 100%; text-align: center; }
+            
+            /* 2. 避免深色模式按鈕擋住「開始測驗」等底部按鈕 */
+            .main-content { padding: 25px 15px 100px 15px; overflow-x: hidden; } /* 底部增加 100px 留白給月亮按鈕 */
             .flex-row { flex-direction: column; gap: 10px; }
+            
+            /* 3. 單字庫與閃卡介面縮小 */
             .vocab-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .vocab-cat-btn { padding: 15px 5px; font-size: 0.9em; }
             .az-grid { grid-template-columns: repeat(6, 1fr); }
-            .fc-word { font-size: 1.8em; }
+            .fc-word { font-size: 1.6em; } /* 防止單字太長爆框 */
+            .fc-nav { margin-bottom: 15px; }
+            .fc-nav-btn { width: 40px; height: 40px; font-size: 1.1em; } /* 按鈕縮小一點點 */
             .spell-visual-text { font-size: 1.6em; }
-            .theme-toggle-float { bottom: 20px; right: 20px; width: 50px; height: 50px; }
+            
+            /* 4. 縮小月亮按鈕，不要那麼擋路 */
+            .theme-toggle-float { bottom: 20px; right: 20px; width: 45px; height: 45px; font-size: 1.2em; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+            
+            /* 5. 考試計時列優化 */
             .exam-timer-bar { padding: 12px 15px; top: 0 !important; }
             .exam-timer-text { font-size: 1.5em; }
             
             .nav-menu { width: 100%; right: -100%; }
+            
+            /* 6. 徹底解決開場動畫字體衝出螢幕的問題 */
+            .splash-logo { font-size: 2.8em !important; letter-spacing: -1px !important; }
+            .splash-subtitle { font-size: 0.7em !important; letter-spacing: 4px !important; }
+            .splash-laser-line { width: 150px !important; }
         }
     </style>
 </head>
