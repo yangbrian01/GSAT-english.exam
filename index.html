@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VocabMaster 專業版 | 學測英文</title>
     
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#6366f1">
-    <link rel="apple-touch-icon" href="icon.png">
+    <!-- 🎯 移植落點分析的 PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VocabMaster">
+    <!-- 🎯 使用絕對不會破圖的 CDN 高畫質 Icon -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135679.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3135/3135679.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -56,7 +59,6 @@
         @keyframes splashFloat { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes laserExpand { 0% { width: 0px; opacity: 0; } 30% { opacity: 1; } 100% { width: 220px; opacity: 1; } }
 
-        /* 🔴 離線橫幅樣式 */
         #offlineBanner { display: none; background-color: var(--danger-color); color: white; text-align: center; padding: 8px; font-weight: bold; position: sticky; top: 0; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
@@ -459,7 +461,6 @@
                 <h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800; font-size: 1.8em; margin-bottom: 20px;"></h3>
                 <div id="profileLevelDisplay" style="margin-bottom: 20px;"></div>
                 
-                <!-- 🟩 GitHub 風格熱力圖容器 -->
                 <div id="profileHeatmap"></div>
 
                 <div id="profileStatsDisplay" style="margin-top: 20px;"></div>
@@ -509,40 +510,48 @@
 
     <script>
         // ==========================================
-        // PWA 安裝邏輯 (BeforeInstallPrompt)
+        // 🚀 PWA 終極版安裝邏輯 (動態生成 Manifest)
         // ==========================================
-        let deferredPrompt;
+        (function initPWA() {
+            const appIconUrl = "https://cdn-icons-png.flaticon.com/512/3135/3135679.png"; 
+            const manifestJSON = {
+                "name": "VocabMaster Premium",
+                "short_name": "VocabMaster",
+                "start_url": window.location.href.split('?')[0], 
+                "display": "standalone", 
+                "theme_color": "#6366f1", 
+                "background_color": "#f8fafc",
+                "icons": [
+                    { "src": appIconUrl, "sizes": "192x192", "type": "image/png" },
+                    { "src": appIconUrl, "sizes": "512x512", "type": "image/png" }
+                ]
+            };
+            const manifestString = JSON.stringify(manifestJSON);
+            const manifestUrl = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(manifestString);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestUrl;
+            document.head.appendChild(link);
+        })();
 
+        let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
-            // 阻止 Chrome 自動顯示預設的安裝提示
             e.preventDefault();
-            // 儲存事件，以便稍後觸發
             deferredPrompt = e;
-            // 顯示我們自己做的安裝按鈕
             const installBtn = document.getElementById('installAppBtn');
             if(installBtn) installBtn.style.display = 'block';
         });
 
         async function installPWA() {
             if (deferredPrompt) {
-                // 顯示安裝對話框
                 deferredPrompt.prompt();
-                // 等待使用者回應
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('使用者接受安裝 PWA');
-                } else {
-                    console.log('使用者拒絕安裝 PWA');
-                }
-                // 清除 prompt，因為它只能用一次
                 deferredPrompt = null;
-                // 隱藏安裝按鈕
                 document.getElementById('installAppBtn').style.display = 'none';
             } else {
-                // 如果是 iOS，它不支援 beforeinstallprompt 事件，需要手動引導
                 Swal.fire({
                     title: '📱 安裝說明',
-                    html: '<b>🍎 iOS (iPhone/iPad)：</b><br>請點擊下方分享按鈕 ⍗，選擇「加入主畫面」<br><br><b>🤖 Android / 💻 電腦：</b><br>請從瀏覽器選單選擇「安裝應用程式」',
+                    html: '請點擊瀏覽器的 <b>「安裝應用程式」</b> 或分享按鈕的 <b>「加到主畫面」</b>',
                     icon: 'info',
                     confirmButtonText: '了解'
                 });
@@ -587,7 +596,6 @@
         }
         function toggleTheme() { isDarkMode = !isDarkMode; localStorage.setItem('darkMode', isDarkMode); applyTheme(); }
         
-        // 註冊 Service Worker (確保 PWA 運作)
         if ('serviceWorker' in navigator) { 
             window.addEventListener('load', () => { 
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed: ', err)); 
@@ -598,7 +606,6 @@
         
         const showLoading = (text) => { Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); };
         
-        // 🚀 斷網攔截 & 背景同步：離線恢復後自動將成績上傳
         function syncOfflineData() {
             document.getElementById('offlineBanner').style.display = 'none';
             let queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
@@ -1241,6 +1248,7 @@
             document.getElementById('flashcardModeContainer').style.display = 'none'; 
             document.getElementById('listModeContainer').style.display = 'none'; 
             document.getElementById('startReviewBtn').style.display = 'none'; 
+            
             const area = document.getElementById('singleFlashcardArea');
             
             if (reviewCardsData && reviewCardsData.length > 0) {
@@ -1483,6 +1491,7 @@
                 else if (e.code === 'ArrowRight') { if (!document.getElementById('fcNext').disabled) document.getElementById('fcNext').click(); }
             }
         });
+
     </script>
 </body>
 </html>
