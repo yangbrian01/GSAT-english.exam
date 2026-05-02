@@ -587,6 +587,7 @@
     </main>
 
     <script>
+        // 🎯 SWR 全域快取記憶體
         window.globalProfileCache = null;
         window.userCurrentLevel = null; 
         window.isSavingProfile = false; 
@@ -627,6 +628,7 @@
         
         const showLoading = (text) => { Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); };
         
+        // 🛡️ API 呼叫：包含 Token 攔截與逾時登出處理
         async function apiCall(action, data = {}) {
             try { 
                 data.sessionToken = localStorage.getItem('token') || sessionToken || null;
@@ -664,6 +666,11 @@
         window.onload = async () => { 
             applyTheme(); 
             
+            // 🎯 UX 優化：首頁載入時自動填入上次的帳號
+            if (localStorage.getItem('user')) {
+                document.getElementById('loginUsername').value = localStorage.getItem('user');
+            }
+
             const promises = [];
             promises.push(new Promise(resolve => setTimeout(resolve, 1200))); 
 
@@ -671,7 +678,7 @@
             promises.push(sysPromise);
 
             let profPromise = null;
-            if (currentUser) {
+            if (currentUser && sessionToken) {
                 profPromise = apiCall('getProfileData', { username: currentUser });
                 promises.push(profPromise);
                 
@@ -715,7 +722,7 @@
                 document.getElementById('gsatCountdown').style.display = 'block';
             }
 
-            if (currentUser) {
+            if (currentUser && sessionToken) {
                 const resProf = await profPromise;
                 if(resProf && resProf.success) { 
                     renderGlobalProfile(resProf); 
@@ -725,7 +732,7 @@
             const splash = document.getElementById('splashScreen');
             if(splash) splash.classList.add('hidden');
             
-            if (currentUser) { showView('setupView', true); } 
+            if (currentUser && sessionToken) { showView('setupView', true); } 
             else { showView('loginView'); }
         };
 
@@ -1621,8 +1628,38 @@
             }); 
         }
 
-        function handleLogin() { const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value; showLoading('登入中'); apiCall('loginUser',{username:u, password:p}).then(res=>{if(res.success){currentUser=res.user;sessionToken=res.token;localStorage.setItem('user',u);localStorage.setItem('token',res.token);Swal.close();showView('setupView');applyTheme(); }else Swal.fire('失敗',res.message,'error');}); }
-        function handleLogout() { Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{if(r.isConfirmed){currentUser=null;localStorage.clear();showView('loginView');}}); }
+        function handleLogin() { 
+            const u=document.getElementById('loginUsername').value.trim(); 
+            const p=document.getElementById('loginPassword').value; 
+            showLoading('登入中'); 
+            apiCall('loginUser',{username:u, password:p}).then(res=>{
+                if(res.success){
+                    currentUser=res.user;
+                    sessionToken=res.token;
+                    localStorage.setItem('user',u); 
+                    localStorage.setItem('token',res.token);
+                    Swal.close();
+                    showView('setupView');
+                    applyTheme(); 
+                } else Swal.fire('失敗',res.message,'error');
+            }); 
+        }
+        
+        // 🎯 登出時只清 Token，保留帳號
+        function handleLogout() { 
+            Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{
+                if(r.isConfirmed){
+                    const savedUser = currentUser;
+                    currentUser = null;
+                    sessionToken = null;
+                    localStorage.removeItem('token'); 
+                    localStorage.setItem('user', savedUser); 
+                    
+                    showView('loginView');
+                    document.getElementById('loginUsername').value = savedUser; 
+                }
+            }); 
+        }
 
         function handleAvatarFile(event) {
             const file = event.target.files[0]; if (!file) return;
@@ -1741,6 +1778,36 @@
                 container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">此階級/屆別尚無玩家資料，趕快去刷題搶佔第一！</p>'; 
             } 
         }
+
+        // 🎯 實作 3：鍵盤快捷鍵支援
+        document.addEventListener('keydown', (e) => {
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+            if (document.getElementById('vocabBookView').classList.contains('active') && 
+                document.getElementById('vocabFlashcardArea').style.display === 'block') {
+                if (e.code === 'Space') {
+                    e.preventDefault(); 
+                    document.getElementById('vbContainer').classList.toggle('flipped');
+                } else if (e.code === 'ArrowLeft') {
+                    if (!document.getElementById('vbPrev').disabled) document.getElementById('vbPrev').click();
+                } else if (e.code === 'ArrowRight') {
+                    if (!document.getElementById('vbNext').disabled) document.getElementById('vbNext').click();
+                }
+            }
+            
+            if (document.getElementById('reviewPage').classList.contains('active') && 
+                document.getElementById('flashcardModeContainer').style.display === 'block') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    const fc = document.getElementById('fcContainer');
+                    if (fc) fc.classList.toggle('flipped');
+                } else if (e.code === 'ArrowLeft') {
+                    if (!document.getElementById('fcPrev').disabled) document.getElementById('fcPrev').click();
+                } else if (e.code === 'ArrowRight') {
+                    if (!document.getElementById('fcNext').disabled) document.getElementById('fcNext').click();
+                }
+            }
+        });
 
     </script>
 </body>
