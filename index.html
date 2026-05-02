@@ -103,11 +103,80 @@
         .quick-btn:hover { transform: scale(1.1); }
         
         .hamburger-btn { display: block; background: none; border: none; font-size: 1.8em; color: var(--text-main); cursor: pointer; padding: 0 5px; }
-        .nav-menu { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--nav-bg); flex-direction: column; align-items: stretch; padding: 0 0 15px 0; border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .nav-menu.show { display: flex; }
-        .nav-info { display: flex; align-items: center; gap: 8px; padding: 15px 20px; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; flex-wrap: wrap; background: var(--bg-color); }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; padding: 14px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
-        .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); }
+
+        /* 🎯 抽屜式側邊選單樣式 */
+        .nav-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .nav-menu-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .nav-menu { 
+            position: fixed; 
+            top: 0; 
+            right: -320px; /* 隱藏在右側畫面外 */
+            width: 320px; 
+            height: 100%;
+            background: var(--nav-bg); 
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column; 
+            align-items: stretch; 
+            padding: 0 0 15px 0; 
+            box-shadow: -4px 0 15px rgba(0,0,0,0.1); 
+            z-index: 1001;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto; /* 允許垂直滾動 */
+        }
+        .nav-menu.show { 
+            right: 0; /* 滑入畫面 */
+        }
+
+        .nav-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .nav-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        
+        .close-menu-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.2s;
+        }
+        .close-menu-btn:hover {
+            color: var(--danger-color);
+        }
+
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; padding: 16px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
+        .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); padding-left: 25px;}
 
         .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; overflow: visible !important; }
         
@@ -258,6 +327,9 @@
             .theme-toggle-float { bottom: 20px; right: 20px; width: 50px; height: 50px; }
             .exam-timer-bar { padding: 12px 15px; top: 0 !important; }
             .exam-timer-text { font-size: 1.5em; }
+            
+            /* 📱 手機版時，選單佔滿整個螢幕 */
+            .nav-menu { width: 100%; right: -100%; }
         }
     </style>
 </head>
@@ -290,13 +362,22 @@
                 <span id="quickXP" class="quick-item desktop-only" style="color: var(--primary-color);"></span>
                 <button class="quick-btn" title="回首頁" onclick="showView('setupView')">🏠</button>
             </div>
-            <button class="hamburger-btn" onclick="document.getElementById('navMenu').classList.toggle('show')">☰</button>
+            <!-- 🎯 修改漢堡按鈕的點擊事件，改為呼叫 toggleMenu() -->
+            <button class="hamburger-btn" onclick="toggleMenu()">☰</button>
         </div>
 
+        <!-- 🎯 新增選單背景遮罩 -->
+        <div class="nav-menu-overlay" id="navMenuOverlay" onclick="toggleMenu()"></div>
+
+        <!-- 🎯 抽屜式側邊選單 -->
         <div class="nav-menu" id="navMenu">
-            <div class="nav-info">
-                <span id="navWelcome" style="font-weight: 600; font-size: 0.9em; color: var(--primary-color);"></span>
+            <div class="nav-menu-header">
+                <div class="nav-info">
+                    <span id="navWelcome" style="font-weight: 600; font-size: 1.1em; color: var(--primary-color);"></span>
+                </div>
+                <button class="close-menu-btn" onclick="toggleMenu()">✖</button>
             </div>
+            
             <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
             <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
             <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')">📚 記憶系統</button>
@@ -306,15 +387,13 @@
             <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
             <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
             
-            <!-- 👇 新增的 Yang Technology 家族產品區塊 👇 -->
             <div style="height: 1px; background-color: var(--border-color); margin: 5px 0;"></div>
             <div style="padding: 10px 20px 5px 20px; font-size: 0.75em; font-weight: 800; color: var(--text-muted); letter-spacing: 1.5px;">YANG TECHNOLOGY 家族</div>
             <button class="nav-btn" onclick="window.open('https://yangbrian01.github.io/exam_analysis', '_blank')">📊 學測落點分析 ↗</button>
             <button class="nav-btn" onclick="window.open('https://yangbrian01.github.io/ai-quiz-generator/', '_blank')">⚡ AI 測驗生成器 ↗</button>
             <div style="height: 1px; background-color: var(--border-color); margin: 5px 0;"></div>
-            <!-- 👆 新增結束 👆 -->
 
-            <button class="nav-btn" style="color: var(--danger-color);" onclick="handleLogout()">登出</button>
+            <button class="nav-btn" style="color: var(--danger-color); margin-bottom: 20px;" onclick="handleLogout()">登出</button>
         </div>
     </nav>
 
@@ -512,6 +591,7 @@
     </main>
 
     <script>
+        // 🎯 SWR 全域快取記憶體 (Single Source of Truth)
         window.globalProfileCache = null;
         window.userCurrentLevel = null; 
         window.isSavingProfile = false; 
@@ -568,6 +648,7 @@
             return getBaseAcadYear() + 1 + offset;
         }
 
+        // 🚀 開場動畫：SWR 架構預載
         window.onload = async () => { 
             applyTheme(); 
             
@@ -635,12 +716,14 @@
             else { showView('loginView'); }
         };
 
+        // 🎯 核心：樂觀更新與全域 UI 同步引擎
         function renderGlobalProfile(resProf) {
             window.globalProfileCache = resProf;
             
             const xp = parseInt(resProf.totalXP) || 0;
             const level = Math.floor(Math.sqrt(xp / 10)) + 1;
             
+            // 處理升級動畫 (確保只播一次)
             if (window.userCurrentLevel !== null && window.userCurrentLevel !== undefined && level > window.userCurrentLevel) {
                 Swal.fire({
                     title: '🎊 恭喜升級！ 🎊',
@@ -654,10 +737,12 @@
             }
             window.userCurrentLevel = level;
 
+            // 1. 更新 Navbar
             document.getElementById('quickLevel').textContent = `Lv. ${level}`;
             document.getElementById('quickXP').textContent = `${xp} XP`;
             window.userTargetYear = resProf.targetYear;
 
+            // 2. 更新 Profile View
             document.getElementById('profileUsernameDisplay').textContent = currentUser; 
             const av = resProf.avatar || '👤'; 
             const avDiv = document.getElementById('profileAvatarPreview'); 
@@ -706,11 +791,26 @@
             }
         }
 
+        // 🎯 靜默背景刷新器 (帶鎖保護機制)
         function refreshProfileData() {
+            // 如果我們正在存檔 (交卷中)，絕對不可以去抓舊資料來覆蓋！
             if (!currentUser || currentUser === '訪客' || window.isSavingProfile) return;
             apiCall('getProfileData', { username: currentUser }).then(res => { 
                 if(res.success && !window.isSavingProfile) { renderGlobalProfile(res); } 
             }); 
+        }
+
+        // 🎯 控制側邊選單開關的函式
+        function toggleMenu() {
+            const menu = document.getElementById('navMenu');
+            const overlay = document.getElementById('navMenuOverlay');
+            if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+                overlay.classList.remove('show');
+            } else {
+                menu.classList.add('show');
+                overlay.classList.add('show');
+            }
         }
 
         function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim() : ''; }
@@ -721,7 +821,12 @@
         const VIEW_IDS = ['loginView', 'registerView', 'setupView', 'quizView', 'resultView', 'reviewPage', 'vocabBookView', 'pastExamsView', 'examTakingView', 'examResultView', 'aiEssayView', 'aiTutorView', 'profileView', 'leaderboardView'];
         
         function showView(viewId, isFromInit = false) {
-            document.getElementById('navMenu').classList.remove('show');
+            // 🎯 切換畫面時自動關閉側邊選單
+            const menu = document.getElementById('navMenu');
+            const overlay = document.getElementById('navMenuOverlay');
+            if(menu) menu.classList.remove('show');
+            if(overlay) overlay.classList.remove('show');
+            
             VIEW_IDS.forEach(id => document.getElementById(id).classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
 
@@ -731,6 +836,7 @@
                 if(viewId === 'quizView' || viewId === 'examTakingView') document.getElementById('topNavbar').style.display = 'none';
                 document.getElementById('quickName').textContent = currentUser;
                 
+                // 每次切換畫面時，靜默在背景抓新資料
                 if (viewId !== 'quizView' && viewId !== 'examTakingView' && !isFromInit) {
                     refreshProfileData();
                 }
@@ -738,6 +844,7 @@
                 document.getElementById('topNavbar').style.display = 'none'; 
             }
 
+            // SWR 畫面切換：如果快取有，先瞬間渲染！
             if (viewId === 'profileView' && window.globalProfileCache) {
                 renderGlobalProfile(window.globalProfileCache);
             }
@@ -784,7 +891,7 @@
         function startFullExam() {
             if (!currentExamData) return Swal.fire('錯誤', '沒有考卷資料！', 'error');
             
-            window.isSubmitting = false; 
+            window.isSubmitting = false; // 解除連點鎖
             document.getElementById('inExamTitleDisplay').textContent = currentExamData.title;
             examAnswersStorage = {};
             examEndTime = Date.now() + 100 * 60 * 1000; 
@@ -978,7 +1085,7 @@
         }
 
         async function processExamSubmission() {
-            if (window.isSubmitting) return; 
+            if (window.isSubmitting) return; // 🛡️ 防手抖連點鎖
             window.isSubmitting = true;
 
             showLoading('正在為您閱卷與結算分數 (包含 AI 手寫批改)...');
@@ -1127,15 +1234,16 @@
                 if(gainedXP > 0) {
                     let mockSubmitData = []; for(let i=0; i<gainedXP; i++) mockSubmitData.push({ isCorrect: true, level: 1 });
                     
+                    // 🎯 樂觀更新 XP，並同步到 Navbar 和個人檔案
                     if (window.globalProfileCache) {
                         window.globalProfileCache.totalXP = parseInt(window.globalProfileCache.totalXP || 0) + gainedXP;
                         renderGlobalProfile(window.globalProfileCache); 
                     }
 
-                    window.isSavingProfile = true; 
+                    window.isSavingProfile = true; // 🔒 鎖死，避免這時候偷抓到舊資料
                     apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: mockSubmitData, isReviewMode: false }).then(() => {
-                        window.isSavingProfile = false; 
-                        refreshProfileData(); 
+                        window.isSavingProfile = false; // 🔓 解鎖
+                        refreshProfileData(); // 重新抓取確認資料
                     });
                 }
             }
@@ -1144,7 +1252,7 @@
         }
 
         function startGame(isReview = false) { 
-            window.isSubmitting = false; 
+            window.isSubmitting = false; // 🎯 新測驗開始，解開防抖鎖
             isReviewQuizMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; if (isReviewQuizMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: currentUser }).then(res => processQuizData(res)); } else { const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: sessionToken, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); } 
         }
         function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; } quizData = res.questions; totalQuestions = res.totalQuestions; if (quizData.length > 0) { currentQuestionIndex = 0; userAnswers = {}; document.getElementById('totalQNum').textContent = totalQuestions; showView('quizView'); renderQuestion(0); } }
@@ -1177,6 +1285,7 @@
         function updateNavButtons() { const isLast = currentQuestionIndex === quizData.length - 1; document.getElementById('prevButton').disabled = currentQuestionIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
         
         function submitQuiz() { 
+            // 🎯 防手抖連點機制：第一時間鎖死按鈕
             document.getElementById('nextButton').disabled = true; 
             
             const q = quizData[currentQuestionIndex]; 
@@ -1194,7 +1303,7 @@
         }
         
         function processSubmit() { 
-            if (window.isSubmitting) return; 
+            if (window.isSubmitting) return; // 🛡️ 防止被其他來源重複觸發
             window.isSubmitting = true;
 
             try {
@@ -1246,6 +1355,7 @@
                 if (correctCount === totalQuestions && totalQuestions >= 5 && !isReviewQuizMode && currentUser !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } 
                 else if (isReviewQuizMode && correctCount > 0) { Swal.fire('記憶升級！', `成功推進了 ${correctCount} 題的進度！`, 'success'); } 
                 
+                // 🎯 樂觀更新 (Optimistic UI)：XP與個人檔案秒步同步！
                 if (currentUser !== '訪客' && window.globalProfileCache) {
                     if (!isReviewQuizMode) {
                         let oldAns = parseInt(window.globalProfileCache.totalAnswered) || 0;
@@ -1261,7 +1371,7 @@
                             window.globalProfileCache.correctRate = ((window.globalProfileCache.totalCorrect / window.globalProfileCache.totalAnswered) * 100).toFixed(2) + '%';
                         }
                     }
-                    renderGlobalProfile(window.globalProfileCache); 
+                    renderGlobalProfile(window.globalProfileCache); // 呼叫全域更新引擎！
                 }
 
                 const xpDisplay = document.getElementById('xpGainedDisplay'); 
@@ -1279,10 +1389,10 @@
                 drawChart(correctCount, totalQuestions - correctCount); 
                 
                 if (currentUser !== '訪客') { 
-                    window.isSavingProfile = true; 
+                    window.isSavingProfile = true; // 🔒 鎖死背景更新
                     apiCall('saveQuizResult', { username: currentUser, quizSubmissionData: submitData, isReviewMode: isReviewQuizMode }).then(() => {
-                        window.isSavingProfile = false; 
-                        refreshProfileData(); 
+                        window.isSavingProfile = false; // 🔓 解鎖
+                        refreshProfileData(); // 重新向伺服器要最新的確認資料
                     }); 
                 } 
             } catch (e) {
@@ -1514,7 +1624,7 @@
                 if (cohortType === 'peer' && window.userTargetYear) {
                     if (p.targetYear !== window.userTargetYear) return false;
                 }
-                if (rankType === 'all') return true; // 🎯 全區總榜完美防呆！
+                if (rankType === 'all') return true; 
                 if (rankType === 'king' && p.level >= 26) return true;
                 if (rankType === 'silver' && p.level >= 11 && p.level <= 25) return true;
                 if (rankType === 'bronze' && p.level <= 10) return true;
@@ -1522,7 +1632,6 @@
             });
 
             if(filteredData.length > 0) { 
-                // 🎯 這裡改回你最想要的 Level 與 XP！
                 let html = '<table class="data-table"><tr><th>排名</th><th style="text-align:left;">玩家</th><th>Level</th><th>經驗值 (XP)</th></tr>'; 
                 filteredData.forEach((d, i) => { 
                     const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1; 
@@ -1533,7 +1642,6 @@
                     let badgeHtml = d.badges ? `<span style="font-size:0.8em; margin-left:5px;" title="歷史成就">${d.badges}</span>` : '';
                     const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>${badgeHtml}` : `${d.username}${badgeHtml}`; 
                     
-                    // 🎯 讀取正確的 d.level 與 d.totalXP
                     html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`; 
                 }); 
                 container.innerHTML = html + '</table>'; 
@@ -1541,6 +1649,7 @@
                 container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">此階級/屆別尚無玩家資料，趕快去刷題搶佔第一！</p>'; 
             } 
         }
+
     </script>
 </body>
 </html>
