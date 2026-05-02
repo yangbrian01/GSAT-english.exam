@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="VocabMaster">
-    <!-- 🎯 使用絕對不會破圖的 CDN 高畫質 Icon -->
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135679.png">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3135/3135679.png">
+    <!-- 🎯 改成指向你自己的 icon.png -->
+    <link rel="apple-touch-icon" href="./icon.png">
+    <link rel="icon" type="image/png" href="./icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -513,7 +513,7 @@
         // 🚀 PWA 終極版安裝邏輯 (動態生成 Manifest)
         // ==========================================
         (function initPWA() {
-            const appIconUrl = "https://cdn-icons-png.flaticon.com/512/3135/3135679.png"; 
+            const appIconUrl = "./icon.png"; 
             const manifestJSON = {
                 "name": "VocabMaster Premium",
                 "short_name": "VocabMaster",
