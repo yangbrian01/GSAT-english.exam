@@ -1,0 +1,22 @@
+{
+  "name": "VocabMaster Premium",
+  "short_name": "VocabMaster",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#6366f1",
+  "orientation": "portrait",
+  "description": "專業的高中英文學測字彙與歷屆試題訓練系統",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
