@@ -1,21 +1,28 @@
-const CACHE_NAME = 'vocabmaster-v1';
+const CACHE_NAME = 'vocabmaster-v2';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './manifest.json',
+  './icon.png',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11',
   'https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap'
 ];
 
-// 安裝時快取靜態資源
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS_TO_CACHE))
+    caches.open(CACHE_NAME).then(cache => {
+      // 使用 try-catch 避免單一檔案失敗導致整個快取失敗
+      return Promise.allSettled(
+        ASSETS_TO_CACHE.map(url => cache.add(url).catch(err => console.warn(`Cache failed for ${url}`, err)))
+      );
+    })
   );
   self.skipWaiting();
 });
 
-// 啟動時清除舊快取
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
@@ -27,10 +34,11 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// 攔截網路請求，若斷網則回傳快取
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return; // API POST 請求不快取
+  if (event.request.method !== 'GET') return; 
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
   );
 });
