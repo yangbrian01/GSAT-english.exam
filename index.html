@@ -39,10 +39,16 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; transition: background-color 0.3s, color 0.3s;}
 
-        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out; }
-        #splashScreen.hidden { opacity: 0; pointer-events: none; }
-        .splash-logo { font-size: 4em; font-weight: 900; letter-spacing: -2px; color: var(--primary-color); animation: fadeIn 1s ease-out forwards; }
-        .splash-subtitle { font-size: 0.9em; font-weight: 700; color: var(--text-muted); letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; animation: fadeIn 1.5s ease-out forwards; }
+        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); background-image: radial-gradient(circle at center, rgba(59, 130, 246, 0.08) 0%, transparent 60%); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.7s, transform 0.7s, filter 0.7s, visibility 0.7s; }
+        #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.15); filter: blur(15px); }
+        .splash-content { display: flex; flex-direction: column; align-items: center; animation: splashFloat 1.2s forwards; }
+        .splash-logo { font-size: 4.5em; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 2px; background: linear-gradient(110deg, var(--text-main) 0%, var(--text-muted) 35%, var(--primary-color) 50%, var(--text-muted) 65%, var(--text-main) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerShine 2.5s linear infinite; }
+        .splash-subtitle { font-size: 0.85em; font-weight: 700; color: var(--text-muted); letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.7; }
+        .splash-laser-line { width: 0px; height: 2px; background: var(--primary-color); box-shadow: 0 0 12px var(--primary-color); animation: laserExpand 1.5s forwards; }
+
+        @keyframes shimmerShine { to { background-position: 200% center; } }
+        @keyframes splashFloat { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes laserExpand { 0% { width: 0px; opacity: 0; } 30% { opacity: 1; } 100% { width: 220px; opacity: 1; } }
 
         #offlineBanner { display: none; background-color: var(--danger-color); color: white; text-align: center; padding: 8px; font-weight: bold; position: sticky; top: 0; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
@@ -193,30 +199,55 @@
         .heatmap-cell[data-level="4"] { background-color: rgba(16, 185, 129, 1); box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
         .heatmap-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.8em; color: var(--text-muted); margin-top: 8px;}
 
-        /* 💬 聊天室專用 CSS (LINE 風格) */
-        .chat-container { display: flex; flex-direction: column; height: 500px; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        /* 💬 聊天室專用 CSS (LINE 風格 + 操作整合) */
+        .chat-container { display: flex; flex-direction: column; height: 500px; background: #8ba9c7; border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; position: relative;}
         body.dark-mode .chat-container { background: #1e293b; border-color: #334155; }
-        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-        .chat-msg-wrapper { display: flex; flex-direction: column; position: relative; margin-bottom: 8px; }
-        .chat-msg { max-width: 70%; padding: 10px 14px; font-size: 0.95em; line-height: 1.4; word-break: break-word; position: relative; cursor: pointer; transition: 0.2s; }
-        .chat-msg:active { filter: brightness(0.9); }
-        .chat-msg.me { align-self: flex-end; background: #3b82f6; color: white; border-radius: 18px; border-top-right-radius: 4px; }
-        .chat-msg.other { align-self: flex-start; background: #f1f5f9; color: var(--text-main); border-radius: 18px; border-top-left-radius: 4px; margin-left: 45px; border: 1px solid var(--border-color); }
-        body.dark-mode .chat-msg.other { background: #334155; border-color: #475569; }
-        .chat-msg.system { align-self: center; background: rgba(0,0,0,0.1); color: var(--text-muted); border-radius: 20px; font-size: 0.8em; padding: 4px 12px; margin: 10px 0; max-width: 85%; text-align: center; }
-        body.dark-mode .chat-msg.system { background: rgba(255,255,255,0.1); color: #cbd5e1; }
-        .chat-sender { font-size: 0.75em; color: var(--text-muted); margin-bottom: 4px; font-weight: 700; margin-left: 50px; }
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; overflow-x: hidden;}
+        
+        .msg-bubble-wrap { display: flex; flex-direction: column; position: relative; margin-bottom: 8px; }
+        .msg-bubble { max-width: 75%; padding: 10px 14px; font-size: 0.95em; line-height: 1.4; word-break: break-word; position: relative; user-select: none; -webkit-touch-callout: none; will-change: transform; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1); }
+        .msg-bubble.me { align-self: flex-end; background: #85e04f; color: #111; border-radius: 18px; border-top-right-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
+        .msg-bubble.other { align-self: flex-start; background: #ffffff; color: #111; border-radius: 18px; border-top-left-radius: 4px; margin-left: 45px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .msg-bubble.system { align-self: center; background: rgba(0,0,0,0.2); color: white; border-radius: 20px; font-size: 0.8em; padding: 4px 12px; margin: 10px 0; max-width: 85%; text-align: center; }
+        body.dark-mode .msg-bubble.other { background: #334155; color: #f1f5f9;}
+        
+        .chat-sender { font-size: 0.75em; color: #333; margin-bottom: 4px; font-weight: 700; margin-left: 50px; text-shadow: 1px 1px 2px rgba(255,255,255,0.5); }
+        body.dark-mode .chat-sender { color: #cbd5e1; text-shadow: none; }
+        
         .chat-time { font-size: 0.7em; opacity: 0.6; position: absolute; bottom: 2px; white-space: nowrap; }
-        .chat-msg.me .chat-time { right: 100%; margin-right: 8px; text-align: right; color: var(--text-muted); }
-        .chat-msg.other .chat-time { left: 100%; margin-left: 8px; color: var(--text-muted); }
-        .chat-avatar { position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(0,0,0,0.1); background: white; display: flex; justify-content: center; align-items: center; font-size: 1.5em;}
-        .chat-date-sep { text-align: center; color: var(--text-muted); font-size: 0.8em; margin: 15px 0 10px 0; font-weight: bold; }
-        .chat-input-area { display: flex; padding: 12px; background: var(--nav-bg); border-top: 1px solid var(--border-color); align-items: center; }
-        .chat-input { flex: 1; padding: 12px 18px; border: 1px solid var(--border-color); border-radius: 25px; font-size: 1em; outline: none; background: var(--card-bg); color: var(--text-main); transition: 0.2s; }
-        .chat-input:focus { border-color: var(--primary-color); }
-        .chat-send-btn { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; font-size: 1.2em; }
-        .chat-send-btn:hover { transform: scale(1.1); background: var(--primary-hover); }
+        .msg-bubble.me .chat-time { right: 100%; margin-right: 8px; text-align: right; color: #fff;}
+        .msg-bubble.other .chat-time { left: 100%; margin-left: 8px; color: #fff;}
+        body.dark-mode .chat-time { color: #cbd5e1 !important; }
+        
+        .chat-avatar { position: absolute; left: 0; top: 0; width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(0,0,0,0.1); background: white; display: flex; justify-content: center; align-items: center; font-size: 1.5em; z-index: 2;}
+        .chat-date-sep { text-align: center; color: rgba(255,255,255,0.9); font-size: 0.8em; margin: 15px 0 10px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-weight: bold; }
+        
+        .reply-quote-box { background: rgba(0,0,0,0.1); padding: 6px 10px; border-radius: 6px; font-size: 0.85em; color: #333; margin-bottom: 6px; border-left: 3px solid rgba(0,0,0,0.3); }
+        body.dark-mode .reply-quote-box { color: #e2e8f0; background: rgba(255,255,255,0.1); }
+        
+        .reactions-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; position: absolute; bottom: -12px; right: 10px; z-index: 5;}
+        .msg-bubble.other .reactions-wrap { right: auto; left: 10px; }
+        .reaction-pill { background: #fff; border: 1px solid #e9ecef; border-radius: 12px; padding: 2px 6px; font-size: 0.8em; display: inline-flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s; color: #111;}
+        .reaction-pill.active { background: #e0f2fe; border-color: #bae6fd; font-weight: bold; color: var(--admin-blue); }
 
+        .chat-input-area { display: flex; padding: 10px; background: var(--nav-bg); border-top: 1px solid var(--border-color); align-items: center; position: relative; z-index: 10;}
+        .chat-input { flex: 1; padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 1em; outline: none; background: var(--bg-color); color: var(--text-main); transition: 0.2s; margin:0;}
+        .chat-send-btn { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; font-size: 1.2em; padding:0;}
+        
+        .reply-preview-bar { display: none; background: #e0f2fe; padding: 8px 12px; border-radius: 8px 8px 0 0; border-left: 4px solid var(--primary-color); font-size: 0.85em; justify-content: space-between; align-items: center; margin-bottom: -5px; z-index: 5; color: #1e293b;}
+        body.dark-mode .reply-preview-bar { background: #334155; color: #f1f5f9; }
+
+        .context-menu { position: absolute; background: #fff; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid #edf2f4; width: max-content;}
+        body.dark-mode .context-menu { background: var(--card-bg); border-color: var(--border-color); }
+        .context-menu .emoji-row { display: flex; gap: 8px; padding: 10px 15px; border-bottom: 1px solid #edf2f4; font-size: 22px; justify-content: center;}
+        body.dark-mode .context-menu .emoji-row { border-color: var(--border-color); }
+        .context-menu .emoji-row span { cursor: pointer; transition: transform 0.2s; display: inline-block; padding: 2px; }
+        .context-menu .emoji-row span:hover { transform: scale(1.3); }
+        .context-menu .action-row { padding: 12px 15px; font-size: 0.9em; font-weight: bold; color: var(--primary-color); text-align: center; cursor: pointer; }
+        .context-menu .action-row:hover { background: var(--bg-color); }
+        .context-menu .action-row.danger { color: var(--danger-color); }
+
+        /* 🖨️ 列印樣式支援 */
         @media print {
             .navbar, .theme-toggle-float, .nav-menu, #navButtonsArea, .fc-nav, #startReviewBtn, #offlineBanner { display: none !important; }
             body, .main-content { background: white !important; color: black !important; }
@@ -253,8 +284,6 @@
             .exam-timer-bar { padding: 12px 15px; top: 0 !important; }
             .exam-timer-text { font-size: 1.5em; }
             .nav-menu { width: 100%; right: -100%; }
-            .splash-logo { font-size: 2.8em !important; letter-spacing: -1px !important; }
-            .splash-subtitle { font-size: 0.7em !important; letter-spacing: 4px !important; }
         }
     </style>
 </head>
@@ -264,6 +293,7 @@
         <div class="splash-content">
             <div class="splash-logo">VocabMaster</div>
             <div class="splash-subtitle">Premium Edition</div>
+            <div class="splash-laser-line"></div>
         </div>
     </div>
 
@@ -392,12 +422,11 @@
 
         <div id="examResultView" class="view-section view-container" style="max-width: 800px;">
             <div style="text-align: center; margin-bottom: 30px;">
-                <h2 id="examResultTitle" style="margin-bottom: 5px;">選擇題初步結算</h2>
+                <h2 id="examResultTitle" style="margin-bottom: 5px;">選擇題結算</h2>
                 <div style="font-size: 5em; font-weight: 900; color: var(--secondary-color);" id="examLevelScore">-- 級分</div>
                 <p style="color: var(--text-main); font-size: 1.2em; margin-top: 10px; font-weight: bold;" id="examRawScore"></p>
-                <div id="examXPReward" style="font-size: 1.5em; font-weight: 800; color: #d97706; margin-top: 15px;"></div>
             </div>
-            <div id="examDetailResults" style="text-align: left; margin-bottom: 20px;"></div>
+            <div id="examDetailResults" style="text-align: left; margin-bottom: 20px; background: var(--card-bg); border-radius: var(--radius-md); padding: 15px; border: 2px solid var(--border-color);"></div>
             <button class="btn btn-primary" onclick="showView('pastExamsView')">返回大廳</button>
         </div>
 
@@ -473,7 +502,6 @@
             <div id="tutorResult" class="ai-result-box"><div class="ai-title">👨‍🏫 老師講解</div><div id="resTutorExplanation" style="line-height: 1.8; color: var(--text-main);"></div></div>
         </div>
 
-        <!-- 獨立的：學習數據分析分頁 -->
         <div id="analyticsView" class="view-section view-container">
             <h2>📈 學習數據分析</h2>
             <div class="profile-card">
@@ -486,10 +514,8 @@
             </div>
         </div>
 
-        <!-- 獨立的：戰隊大廳分頁 -->
         <div id="teamView" class="view-section view-container" style="max-width: 800px;">
             <h2>🤝 戰隊大廳</h2>
-            
             <div id="teamNoTeamArea">
                 <p class="subtitle">與同儕一起組隊刷題，爭奪賽季排行榜榮耀！</p>
                 <div class="flex-row">
@@ -518,16 +544,32 @@
                 </div>
 
                 <div class="chat-container">
+                    <div class="reply-preview-bar" id="chatReplyPreview">
+                        <div>回覆給 <strong id="replyTargetName" style="color:var(--primary-color);"></strong>：<span id="replyTargetText" style="color:var(--text-muted);"></span></div>
+                        <span style="cursor:pointer; font-size:20px; color:#adb5bd; line-height:1;" onclick="cancelReply()">×</span>
+                    </div>
                     <div id="chatMessageBoard" class="chat-box"></div>
                     <div class="chat-input-area">
-                        <input type="text" id="chatInputBox" class="chat-input" placeholder="說點什麼..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <input type="text" id="chatInputBox" class="chat-input" placeholder="左滑/右滑/點擊訊息可回覆..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
                         <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
                     </div>
+                </div>
+                
+                <div id="chatContextMenu" class="context-menu">
+                    <div class="emoji-row">
+                        <span onclick="sendReaction('👍')">👍</span>
+                        <span onclick="sendReaction('❤️')">❤️</span>
+                        <span onclick="sendReaction('😂')">😂</span>
+                        <span onclick="sendReaction('🔥')">🔥</span>
+                        <span onclick="sendReaction('❓')">❓</span>
+                    </div>
+                    <div class="action-row" onclick="triggerReplyFromMenu()">↩️ 回覆此訊息</div>
+                    <div class="action-row" id="chatMenuEditBtn" onclick="triggerEditFromMenu()" style="display:none;">✏️ 編輯訊息</div>
+                    <div class="action-row danger" id="chatMenuUnsendBtn" onclick="triggerUnsendFromMenu()" style="display:none;">🗑️ 收回訊息</div>
                 </div>
             </div>
         </div>
 
-        <!-- 瘦身過後的：個人檔案與設定分頁 -->
         <div id="profileView" class="view-section view-container">
             <h2>👤 個人檔案與設定</h2>
             <div class="profile-card" style="text-align: center;">
@@ -593,49 +635,21 @@
     </main>
 
     <script>
-        // ==========================================
-        // 🚀 PWA 終極版安裝邏輯
-        // ==========================================
         (function initPWA() {
             const appIconUrl = "https://cdn-icons-png.flaticon.com/512/3135/3135679.png"; 
-            const manifestJSON = {
-                "name": "VocabMaster Premium",
-                "short_name": "VocabMaster",
-                "start_url": window.location.href.split('?')[0], 
-                "display": "standalone", 
-                "theme_color": "#6366f1", 
-                "background_color": "#f8fafc",
-                "icons": [
-                    { "src": appIconUrl, "sizes": "192x192", "type": "image/png" },
-                    { "src": appIconUrl, "sizes": "512x512", "type": "image/png" }
-                ]
-            };
-            const manifestString = JSON.stringify(manifestJSON);
-            const manifestUrl = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(manifestString);
-            const link = document.createElement('link');
-            link.rel = 'manifest'; link.href = manifestUrl; document.head.appendChild(link);
+            const manifestJSON = { "name": "VocabMaster Premium", "short_name": "VocabMaster", "start_url": window.location.href.split('?')[0], "display": "standalone", "theme_color": "#6366f1", "background_color": "#f8fafc", "icons": [ { "src": appIconUrl, "sizes": "192x192", "type": "image/png" }, { "src": appIconUrl, "sizes": "512x512", "type": "image/png" } ] };
+            const manifestUrl = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestJSON));
+            const link = document.createElement('link'); link.rel = 'manifest'; link.href = manifestUrl; document.head.appendChild(link);
         })();
 
         let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); deferredPrompt = e;
-            const installBtn = document.getElementById('installAppBtn');
-            if(installBtn) installBtn.style.display = 'block';
-        });
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; const installBtn = document.getElementById('installAppBtn'); if(installBtn) installBtn.style.display = 'block'; });
 
         async function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                await deferredPrompt.userChoice;
-                deferredPrompt = null; document.getElementById('installAppBtn').style.display = 'none';
-            } else {
-                Swal.fire({ title: '📱 安裝說明', html: '請點擊瀏覽器的 <b>「安裝應用程式」</b> 或分享按鈕的 <b>「加到主畫面」</b>', icon: 'info', confirmButtonText: '了解' });
-            }
+            if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; document.getElementById('installAppBtn').style.display = 'none'; } 
+            else { Swal.fire({ title: '📱 安裝說明', html: '請點擊瀏覽器的 <b>「安裝應用程式」</b> 或分享按鈕的 <b>「加到主畫面」</b>', icon: 'info', confirmButtonText: '了解' }); }
         }
 
-        // ==========================================
-        // 核心狀態管理與 API 引擎
-        // ==========================================
         const AppState = {
             auth: { user: localStorage.getItem('user'), token: localStorage.getItem('token') },
             profile: { cache: null, level: null, targetYear: null, isSaving: false },
@@ -643,7 +657,8 @@
             exam: { data: null, timer: null, endTime: 0, answers: {} },
             review: { cards: [], currentIndex: 0, isFlashcardMode: true },
             vocab: { level: 0, list: [], letterList: [], cardIndex: 0, favorites: new Set(), cache: [] },
-            sys: { leaderboard: [], teamLeaderboard: [], isDarkMode: localStorage.getItem('darkMode') === 'true', touchStartX: 0, touchEndX: 0, currentTeam: null }
+            sys: { leaderboard: [], teamLeaderboard: [], isDarkMode: localStorage.getItem('darkMode') === 'true', currentTeam: null },
+            chat: { history: [], replyingTo: null, contextMsgId: null, isSyncing: false }
         };
 
         function applyTheme() {
@@ -653,37 +668,16 @@
         function toggleTheme() { AppState.sys.isDarkMode = !AppState.sys.isDarkMode; localStorage.setItem('darkMode', AppState.sys.isDarkMode); applyTheme(); }
         
         function showView(viewId, isInit = false) {
-            document.querySelectorAll('.view-section').forEach(view => {
-                view.classList.remove('active');
-            });
-            
-            const targetView = document.getElementById(viewId);
-            if (targetView) {
-                targetView.classList.add('active');
-            }
-
+            document.querySelectorAll('.view-section').forEach(view => { view.classList.remove('active'); });
+            const targetView = document.getElementById(viewId); if (targetView) { targetView.classList.add('active'); }
             const navbar = document.getElementById('topNavbar');
-            if (navbar) {
-                if (viewId === 'loginView' || viewId === 'registerView') {
-                    navbar.style.display = 'none';
-                } else {
-                    navbar.style.display = 'flex';
-                }
-            }
-
-            const menu = document.getElementById('navMenu');
-            const overlay = document.getElementById('navMenuOverlay');
-            if (menu && menu.classList.contains('show')) {
-                menu.classList.remove('show');
-                if (overlay) overlay.classList.remove('show');
-            }
-
+            if (navbar) { if (viewId === 'loginView' || viewId === 'registerView') { navbar.style.display = 'none'; } else { navbar.style.display = 'flex'; } }
+            const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay');
+            if (menu && menu.classList.contains('show')) { menu.classList.remove('show'); if (overlay) overlay.classList.remove('show'); }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        if ('serviceWorker' in navigator) { 
-            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed: ', err)); }); 
-        }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed: ', err)); }); }
 
         const API_URL = 'https://script.google.com/macros/s/AKfycbyXAx1jgdExUKrNHWpd4v8crV0KI4QXVMGr4Kzht8OG314UfxZKlPbLKlDYc_YqTVM2/exec';
         const showLoading = (text) => { Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); };
@@ -728,23 +722,16 @@
             let profPromise = null;
             if (AppState.auth.user && AppState.auth.token) {
                 profPromise = apiCall('getProfileData', { username: AppState.auth.user }); promises.push(profPromise);
-                promises.push(apiCall('getLeaderboardData').then(res => { 
-                    if(res.success && res.data) { AppState.sys.leaderboard = res.data; AppState.sys.teamLeaderboard = res.teamData || []; } 
-                }));
-                promises.push(apiCall('getIncorrectQuestions', { username: AppState.auth.user }).then(res => { 
-                    if(res.success && res.questions) { AppState.review.cards = res.questions; localStorage.setItem('offlineIncorrect', JSON.stringify(res.questions)); }
-                }));
-                promises.push(apiCall('getFavorites', { username: AppState.auth.user }).then(res => {
-                    if(res.success) { AppState.vocab.cache = res.words; AppState.vocab.favorites.clear(); res.words.forEach(w => AppState.vocab.favorites.add(w.word)); }
-                }));
+                promises.push(apiCall('getLeaderboardData').then(res => { if(res.success && res.data) { AppState.sys.leaderboard = res.data; AppState.sys.teamLeaderboard = res.teamData || []; } }));
+                promises.push(apiCall('getIncorrectQuestions', { username: AppState.auth.user }).then(res => { if(res.success && res.questions) { AppState.review.cards = res.questions; localStorage.setItem('offlineIncorrect', JSON.stringify(res.questions)); } }));
+                promises.push(apiCall('getFavorites', { username: AppState.auth.user }).then(res => { if(res.success) { AppState.vocab.cache = res.words; AppState.vocab.favorites.clear(); res.words.forEach(w => AppState.vocab.favorites.add(w.word)); } }));
                 if (navigator.onLine) { apiCall('getAllQuestions', { numQuestions: 1500, mode: 'mixed', quizType: '1' }).then(res => { if (res.success) localStorage.setItem('offlineVocab', JSON.stringify(res)); }); }
             }
 
             await Promise.all(promises);
             const resSys = await sysPromise;
             let season = getCurrentSeason(); let examDate;
-            if (resSys && resSys.success && resSys.gsatDate) { season = resSys.season; examDate = new Date(resSys.gsatDate); } 
-            else { examDate = new Date(season + 1911, 0, 16); }
+            if (resSys && resSys.success && resSys.gsatDate) { season = resSys.season; examDate = new Date(resSys.gsatDate); } else { examDate = new Date(season + 1911, 0, 16); }
             
             document.getElementById('currentSeasonText').textContent = season.toString(); examDate.setHours(0, 0, 0, 0); 
             let diffDays = Math.floor((examDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)); 
@@ -757,16 +744,25 @@
             }
 
             const splash = document.getElementById('splashScreen'); 
-            if(splash) {
-                splash.style.opacity = '0';
-                setTimeout(() => splash.classList.add('hidden'), 500);
-            }
+            if(splash) { setTimeout(() => splash.classList.add('hidden'), 500); }
             if (AppState.auth.user && AppState.auth.token) { showView('setupView', true); } else { showView('loginView'); }
         };
 
         // ==========================================
         // UI 渲染與圖表邏輯
         // ==========================================
+        
+        function drawChart(correct, incorrect) {
+            const ctx = document.getElementById('scoreChart');
+            if(!ctx) return;
+            if(window.myScoreChart) window.myScoreChart.destroy();
+            window.myScoreChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['答對', '答錯'], datasets: [{ data: [correct, incorrect], backgroundColor: ['#10b981', '#ef4444'] }] },
+                options: { cutout: '75%', plugins: { legend: { display: false } } }
+            });
+        }
+
         function showGradeUpdatePopup() {
             Swal.fire({
                 title: '🚀 系統大升級：賽季天梯啟動！',
@@ -798,25 +794,14 @@
                 html += `<div class="heatmap-cell" data-level="${level}" title="${key}: 賺取了 ${xp} XP"></div>`;
             });
             html += '</div></div><div class="heatmap-legend">休息 <div class="heatmap-cell" data-level="0"></div><div class="heatmap-cell" data-level="1"></div><div class="heatmap-cell" data-level="2"></div><div class="heatmap-cell" data-level="3"></div><div class="heatmap-cell" data-level="4"></div> 爆肝</div></div>';
-            
-            const heatmapDiv = document.getElementById('profileHeatmap');
-            if (heatmapDiv) heatmapDiv.innerHTML = html;
+            const heatmapDiv = document.getElementById('profileHeatmap'); if (heatmapDiv) heatmapDiv.innerHTML = html;
         }
 
         function renderRadarChart() {
             const ctx = document.getElementById('radarChart'); if (!ctx) return; 
-            const stats = {
-                vocab: Math.min(100, 40 + (AppState.profile.level * 2)),
-                listen: Math.min(100, 30 + (AppState.profile.level * 1.5)),
-                spell: Math.min(100, 20 + (AppState.profile.level * 3)),
-                grammar: 65, reading: 70
-            };
+            const stats = { vocab: Math.min(100, 40 + (AppState.profile.level * 2)), listen: Math.min(100, 30 + (AppState.profile.level * 1.5)), spell: Math.min(100, 20 + (AppState.profile.level * 3)), grammar: 65, reading: 70 };
             if (window.myRadarChart) window.myRadarChart.destroy();
-            window.myRadarChart = new Chart(ctx, {
-                type: 'radar',
-                data: { labels: ['字彙量', '聽力理解', '拼寫準確度', '文法概念', '閱讀邏輯'], datasets: [{ label: '學科能力雷達', data: [stats.vocab, stats.listen, stats.spell, stats.grammar, stats.reading], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgba(59, 130, 246, 1)', pointBackgroundColor: 'rgba(59, 130, 246, 1)', }] },
-                options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } } }
-            });
+            window.myRadarChart = new Chart(ctx, { type: 'radar', data: { labels: ['字彙量', '聽力理解', '拼寫準確度', '文法概念', '閱讀邏輯'], datasets: [{ label: '學科能力雷達', data: [stats.vocab, stats.listen, stats.spell, stats.grammar, stats.reading], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgba(59, 130, 246, 1)', pointBackgroundColor: 'rgba(59, 130, 246, 1)', }] }, options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } } } });
         }
 
         function renderGlobalProfile(resProf) {
@@ -859,48 +844,33 @@
             const dashboardArea = document.getElementById('teamDashboardArea');
             
             if (resProf.teamName) {
-                noTeamArea.style.display = 'none';
-                dashboardArea.style.display = 'block';
+                noTeamArea.style.display = 'none'; dashboardArea.style.display = 'block';
                 document.getElementById('dashTeamName').textContent = resProf.teamName;
                 document.getElementById('dashTeamCode').textContent = resProf.teamCode || '讀取中...';
-                
                 AppState.sys.currentTeam = resProf.teamName;
                 loadTeamChat();
-                if (!window.chatPollInterval) {
-                    window.chatPollInterval = setInterval(loadTeamChat, 8000); 
-                }
+                if (!window.chatPollInterval) { window.chatPollInterval = setInterval(loadTeamChat, 8000); }
             } else {
-                noTeamArea.style.display = 'block';
-                dashboardArea.style.display = 'none';
+                noTeamArea.style.display = 'block'; dashboardArea.style.display = 'none';
                 AppState.sys.currentTeam = null;
-                if (window.chatPollInterval) {
-                    clearInterval(window.chatPollInterval);
-                    window.chatPollInterval = null;
-                }
+                if (window.chatPollInterval) { clearInterval(window.chatPollInterval); window.chatPollInterval = null; }
             }
 
             if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + AppState.auth.user)) { showGradeUpdatePopup(); }
         }
 
         // ==========================================
-        // 戰隊系統與聊天室
+        // 戰隊系統與 LINE 風格聊天室
         // ==========================================
         function handleCreateTeam() {
             if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
             const tName = document.getElementById('profCreateTeamName').value.trim();
             if (!tName) return Swal.fire('錯誤', '請輸入戰隊名稱', 'warning');
-            
             showLoading('建立戰隊中...');
             apiCall('createTeam', { username: AppState.auth.user, teamName: tName }).then(res => {
                 if (res.success) {
-                    Swal.fire({
-                        title: '戰隊建立成功！',
-                        html: `您的專屬戰隊代碼為：<br><br><strong style="font-size:2.5em; color:var(--primary-color); letter-spacing: 5px;">${res.code}</strong><br><br><span style="font-size:0.9em; color:var(--text-muted);">快把代碼分享給同學讓他們加入吧！</span>`,
-                        icon: 'success'
-                    });
-                    document.getElementById('profCreateTeamName').value = '';
-                    refreshProfileData();
-                    showView('teamView'); 
+                    Swal.fire({ title: '戰隊建立成功！', html: `專屬戰隊代碼：<br><br><strong style="font-size:2.5em; color:var(--primary-color); letter-spacing: 5px;">${res.code}</strong>`, icon: 'success' });
+                    document.getElementById('profCreateTeamName').value = ''; refreshProfileData(); showView('teamView'); 
                 } else Swal.fire('失敗', res.message, 'error');
             });
         }
@@ -909,185 +879,223 @@
             if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
             const tCode = document.getElementById('profJoinTeamCode').value.trim().toUpperCase();
             if (!tCode) return Swal.fire('錯誤', '請輸入戰隊代碼', 'warning');
-            
             showLoading('加入戰隊中...');
             apiCall('joinTeam', { username: AppState.auth.user, teamCode: tCode }).then(res => {
-                if (res.success) {
-                    Swal.fire('成功', res.message, 'success');
-                    document.getElementById('profJoinTeamCode').value = '';
-                    refreshProfileData();
-                    showView('teamView'); 
-                } else Swal.fire('失敗', res.message, 'error');
+                if (res.success) { Swal.fire('成功', res.message, 'success'); document.getElementById('profJoinTeamCode').value = ''; refreshProfileData(); showView('teamView'); } else Swal.fire('失敗', res.message, 'error');
             });
         }
 
         function handleLeaveTeam() {
-            Swal.fire({
-                title: '確定要退出戰隊嗎？',
-                text: '如果戰隊剩下 0 人，將會被系統自動解散喔！',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    showLoading('處理中...');
-                    apiCall('leaveTeam', { username: AppState.auth.user }).then(res => {
-                        if (res.success) {
-                            Swal.fire('已退出', '', 'success');
-                            refreshProfileData();
-                        }
-                    });
-                }
+            Swal.fire({ title: '確定退出戰隊？', text: '戰隊剩下 0 人將會被系統自動解散！', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444' }).then((result) => {
+                if (result.isConfirmed) { showLoading('處理中...'); apiCall('leaveTeam', { username: AppState.auth.user }).then(res => { if (res.success) { Swal.fire('已退出', '', 'success'); refreshProfileData(); } }); }
             });
         }
         
         function copyTeamCode() {
             const code = document.getElementById('dashTeamCode').innerText;
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(code).then(() => {
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: '代碼已複製！', showConfirmButton: false, timer: 1500 });
-                });
-            }
+            if (navigator.clipboard) { navigator.clipboard.writeText(code).then(() => { Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: '代碼已複製！', showConfirmButton: false, timer: 1500 }); }); }
         }
 
         function formatChatDate(rawTimeStr) {
-            const d = new Date(rawTimeStr);
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
+            const d = new Date(rawTimeStr); const today = new Date(); const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
             if (d.toDateString() === today.toDateString()) return '今天';
             if (d.toDateString() === yesterday.toDateString()) return '昨天';
             return `${d.getMonth() + 1}/${d.getDate()}`;
         }
 
-        function showMsgOptions(rawTime, sender, isMe) {
-            let html = '';
-            if (isMe) {
-                html += `<button class="btn btn-outline" style="margin-bottom:10px; border-color:var(--primary-color); color:var(--primary-color);" onclick="Swal.close(); promptEditMsg('${rawTime}')">✏️ 編輯訊息</button>`;
-                html += `<button class="btn btn-outline" style="margin-bottom:10px; border-color:var(--danger-color); color:var(--danger-color);" onclick="Swal.close(); unsendMsg('${rawTime}')">🗑️ 收回訊息</button>`;
+        // 聊天室滑動與點擊互動
+        let touchStartX = 0, touchStartY = 0, swipingMsg = null;
+        const chatBoxElem = document.getElementById('chatMessageBoard');
+
+        chatBoxElem.addEventListener('touchstart', (e) => {
+            const bubble = e.target.closest('.msg-bubble');
+            if (!bubble || bubble.classList.contains('system')) return;
+            touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+            swipingMsg = bubble;
+        }, {passive: true});
+
+        chatBoxElem.addEventListener('touchmove', (e) => {
+            if (!touchStartX || !swipingMsg) return;
+            let diffX = e.touches[0].clientX - touchStartX;
+            let diffY = e.touches[0].clientY - touchStartY;
+            if (Math.abs(diffX) > Math.abs(diffY)) { 
+                let moveX = diffX; if (moveX > 60) moveX = 60; if (moveX < -60) moveX = -60;
+                swipingMsg.style.transform = `translateX(${moveX}px)`;
             }
-            html += `<button class="btn btn-outline" style="margin-bottom:10px;" onclick="Swal.close(); promptReplyMsg('${sender}')">↩️ 回覆 ${sender}</button>`;
-            html += `<div style="display:flex; justify-content:center; gap:15px; font-size:1.5em; cursor:pointer; margin-top:10px;">
-                        <span onclick="Swal.close(); sendReaction('👍')">👍</span>
-                        <span onclick="Swal.close(); sendReaction('❤️')">❤️</span>
-                        <span onclick="Swal.close(); sendReaction('😂')">😂</span>
-                        <span onclick="Swal.close(); sendReaction('🔥')">🔥</span>
-                     </div>`;
-            Swal.fire({ title: '訊息選項', html: html, showConfirmButton: false, showCancelButton: true, cancelButtonText: '取消', background: 'var(--card-bg)' });
+        }, {passive: true});
+
+        chatBoxElem.addEventListener('touchend', (e) => {
+            if (!swipingMsg || !touchStartX) return;
+            let diffX = e.changedTouches[0].clientX - touchStartX;
+            swipingMsg.style.transform = 'translateX(0)';
+            if (Math.abs(diffX) > 40) {
+                const textNode = swipingMsg.querySelector('.msg-text');
+                const rawText = textNode ? textNode.innerText : '';
+                if(rawText !== '此訊息已收回') triggerReply(swipingMsg.dataset.id, swipingMsg.dataset.sender, rawText);
+            }
+            touchStartX = 0; swipingMsg = null;
+        });
+
+        chatBoxElem.addEventListener('click', (e) => {
+            const bubble = e.target.closest('.msg-bubble');
+            if (!bubble || bubble.classList.contains('system')) {
+                document.getElementById('chatContextMenu').style.display = 'none'; return;
+            }
+            const textNode = bubble.querySelector('.msg-text');
+            if(textNode && textNode.innerText === '此訊息已收回') return;
+
+            AppState.chat.contextMsgId = bubble.dataset.id;
+            const isMe = bubble.dataset.sender === AppState.auth.user;
+            
+            document.getElementById('chatMenuEditBtn').style.display = isMe ? 'block' : 'none';
+            document.getElementById('chatMenuUnsendBtn').style.display = isMe ? 'block' : 'none';
+            
+            const menu = document.getElementById('chatContextMenu');
+            menu.style.display = 'flex';
+            
+            const rect = bubble.getBoundingClientRect();
+            menu.style.top = Math.max(10, rect.bottom + 5) + 'px';
+            menu.style.left = isMe ? Math.max(10, rect.right - menu.offsetWidth) + 'px' : Math.min(window.innerWidth - menu.offsetWidth - 10, rect.left) + 'px';
+            
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('#chatContextMenu') && !e.target.closest('.msg-bubble')) {
+                document.getElementById('chatContextMenu').style.display = 'none';
+            }
+        });
+
+        function triggerReply(msgId, sender, text) {
+            AppState.chat.replyingTo = { id: msgId, sender: sender, text: text.substring(0, 15) + (text.length > 15 ? '...' : '') };
+            document.getElementById('chatReplyPreview').style.display = 'flex';
+            document.getElementById('replyTargetName').innerText = sender;
+            document.getElementById('replyTargetText').innerText = AppState.chat.replyingTo.text;
+            document.getElementById('chatInputBox').focus();
         }
 
-        function promptReplyMsg(sender) {
-            const input = document.getElementById('chatInputBox');
-            input.value = `[回覆 @${sender}] `;
-            input.focus();
+        function triggerReplyFromMenu() {
+            document.getElementById('chatContextMenu').style.display = 'none';
+            if (!AppState.chat.contextMsgId) return;
+            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            if (msg) triggerReply(msg.id, msg.sender, msg.text);
+        }
+
+        function cancelReply() { AppState.chat.replyingTo = null; document.getElementById('chatReplyPreview').style.display = 'none'; }
+
+        function triggerEditFromMenu() {
+            document.getElementById('chatContextMenu').style.display = 'none';
+            if (!AppState.chat.contextMsgId) return;
+            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            if (!msg) return;
+            Swal.fire({ title: '編輯訊息', input: 'text', inputValue: msg.text.replace(' (已編輯)',''), showCancelButton: true, confirmButtonText: '儲存', cancelButtonText: '取消' }).then(r => {
+                if (r.isConfirmed && r.value) {
+                    msg.text = r.value + " (已編輯)";
+                    syncChatUI(AppState.chat.history);
+                    apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg });
+                }
+            });
+        }
+
+        function triggerUnsendFromMenu() {
+            document.getElementById('chatContextMenu').style.display = 'none';
+            if (!AppState.chat.contextMsgId) return;
+            Swal.fire({ title:'收回訊息？', text:'(兩小時內的訊息才能收回)', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444' }).then(r => {
+                if(r.isConfirmed) {
+                    const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+                    if(msg) {
+                        msg.text = "此訊息已收回"; msg.reactions = {};
+                        syncChatUI(AppState.chat.history);
+                        apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'unsend', payload: { id: AppState.chat.contextMsgId } }).then(res => { if(!res.success) { Swal.fire('收回失敗', res.message, 'error'); loadTeamChat(); } });
+                    }
+                }
+            });
         }
 
         function sendReaction(emoji) {
-            if (!AppState.sys.currentTeam || !navigator.onLine) return;
-            apiCall('sendTeamMessage', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, message: emoji }).then(() => loadTeamChat());
+            document.getElementById('chatContextMenu').style.display = 'none';
+            if (!AppState.chat.contextMsgId || !AppState.sys.currentTeam || !navigator.onLine) return;
+            let msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            if (!msg) return;
+            if (!msg.reactions) msg.reactions = {};
+            if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
+            const uIdx = msg.reactions[emoji].indexOf(AppState.auth.user);
+            if (uIdx > -1) msg.reactions[emoji].splice(uIdx, 1); else msg.reactions[emoji].push(AppState.auth.user);
+            syncChatUI(AppState.chat.history);
+            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg });
         }
 
-        function promptEditMsg(rawTime) {
-            Swal.fire({
-                title: '編輯訊息',
-                input: 'text',
-                inputPlaceholder: '輸入新的訊息內容',
-                showCancelButton: true,
-                confirmButtonText: '儲存',
-                cancelButtonText: '取消'
-            }).then(r => {
-                if (r.isConfirmed && r.value) {
-                    apiCall('editTeamMessage', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, rawTime: rawTime, newMessage: r.value }).then(res => {
-                        if(res.success) loadTeamChat(); else Swal.fire('失敗', res.message, 'error');
-                    });
-                }
-            });
-        }
+        function syncChatUI(messages) {
+            const board = chatBoxElem;
+            const isAtBottom = board.scrollHeight - board.scrollTop <= board.clientHeight + 50;
+            let html = ''; let lastDateStr = '';
 
-        function unsendMsg(rawTime) {
-            Swal.fire({ title:'收回訊息？', text:'(兩小時內的訊息才能收回)', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444' }).then(r => {
-                if(r.isConfirmed) {
-                    apiCall('unsendTeamMessage', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, rawTime: rawTime }).then(res => {
-                        if(res.success) loadTeamChat();
-                        else Swal.fire('失敗', res.message, 'error');
-                    });
+            messages.forEach(m => {
+                const msgDateStr = formatChatDate(m.rawTime);
+                if (msgDateStr !== lastDateStr) { html += `<div class="chat-date-sep">${msgDateStr}</div>`; lastDateStr = msgDateStr; }
+                
+                if (m.sender === 'System') {
+                    html += `<div class="msg-bubble system">${m.text}</div>`;
+                } else {
+                    const isMe = m.sender === AppState.auth.user;
+                    let avHtml = '';
+                    if (!isMe) {
+                        if (m.avatar && (m.avatar.startsWith('data:image') || m.avatar.startsWith('http'))) { avHtml = `<img src="${m.avatar}" class="chat-avatar">`; } 
+                        else { avHtml = `<div class="chat-avatar">${m.avatar || '👤'}</div>`; }
+                    }
+                    
+                    const isUnsent = m.text === '此訊息已收回';
+                    const opacityStyle = isUnsent ? 'opacity: 0.6; font-style: italic;' : '';
+                    let replyHtml = '';
+                    if (m.replyTo && !isUnsent) replyHtml = `<div class="reply-quote-box"><strong>${m.replyTo.sender}</strong>: ${m.replyTo.text}</div>`;
+                    
+                    let rxHtml = '';
+                    if (m.reactions && !isUnsent) {
+                        for(let e in m.reactions) {
+                            if(m.reactions[e].length > 0) {
+                                const hasMe = m.reactions[e].includes(AppState.auth.user);
+                                rxHtml += `<span class="reaction-pill ${hasMe?'active':''}">${e} ${m.reactions[e].length}</span>`;
+                            }
+                        }
+                    }
+                    if(rxHtml) rxHtml = `<div class="reactions-wrap">${rxHtml}</div>`;
+
+                    html += `
+                        <div class="msg-bubble-wrap">
+                            <div class="msg-bubble ${isMe ? 'me' : 'other'}" style="${opacityStyle}" data-id="${m.id}" data-sender="${m.sender}">
+                                ${avHtml}
+                                ${!isMe && !isUnsent ? `<div class="chat-sender">${m.sender}</div>` : ''}
+                                ${replyHtml}
+                                <div class="msg-text">${m.text}</div>
+                                <div class="chat-time">${m.time}</div>
+                                ${rxHtml}
+                            </div>
+                        </div>
+                    `;
                 }
             });
+            board.innerHTML = html || '<div style="text-align:center; color:rgba(255,255,255,0.7); margin-top:20px; font-weight:bold;">尚無對話，來打聲招呼吧！</div>';
+            if (isAtBottom) board.scrollTop = board.scrollHeight;
         }
 
         function loadTeamChat() {
-            if (!AppState.sys.currentTeam || !navigator.onLine) return;
-            apiCall('getTeamMessages', { teamName: AppState.sys.currentTeam }).then(res => {
-                if (res.success) {
-                    const board = document.getElementById('chatMessageBoard');
-                    const isAtBottom = board.scrollHeight - board.scrollTop <= board.clientHeight + 50;
-                    
-                    let html = '';
-                    let lastDateStr = '';
-
-                    res.messages.forEach(m => {
-                        const msgDateStr = formatChatDate(m.rawTime);
-                        if (msgDateStr !== lastDateStr) {
-                            html += `<div class="chat-date-sep">${msgDateStr}</div>`;
-                            lastDateStr = msgDateStr;
-                        }
-
-                        if (m.sender === 'System') {
-                            html += `<div class="chat-msg system">${m.text}</div>`;
-                        } else {
-                            const isMe = m.sender === AppState.auth.user;
-                            let avHtml = '';
-                            if (!isMe) {
-                                if (m.avatar && (m.avatar.startsWith('data:image') || m.avatar.startsWith('http'))) {
-                                    avHtml = `<img src="${m.avatar}" class="chat-avatar">`;
-                                } else {
-                                    avHtml = `<div class="chat-avatar" style="background:white; display:flex; justify-content:center; align-items:center; font-size:1.5em;">${m.avatar || '👤'}</div>`;
-                                }
-                            }
-                            
-                            const isUnsent = m.text === '此訊息已收回';
-                            const opacityStyle = isUnsent ? 'opacity: 0.6; font-style: italic;' : '';
-                            const clickEvent = !isUnsent ? `onclick="showMsgOptions('${m.rawTime}', '${m.sender}', ${isMe})"` : '';
-
-                            html += `
-                                <div class="chat-msg-wrapper" ${clickEvent}>
-                                    <div class="chat-msg ${isMe ? 'me' : 'other'}" style="${opacityStyle}" title="點擊展開選項">
-                                        ${avHtml}
-                                        ${!isMe ? `<div class="chat-sender">${m.sender}</div>` : ''}
-                                        ${m.text}
-                                        <div class="chat-time">${m.time}</div>
-                                        ${isMe && !isUnsent ? `<button class="chat-unsend-btn" onclick="event.stopPropagation(); unsendMsg('${m.rawTime}')">[收回]</button>` : ''}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    });
-                    board.innerHTML = html || '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-weight:bold;">尚無對話，來打聲招呼吧！</div>';
-                    
-                    if (isAtBottom) board.scrollTop = board.scrollHeight;
-                }
+            if (!AppState.sys.currentTeam || !navigator.onLine || AppState.chat.isSyncing) return;
+            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'get' }).then(res => {
+                if (res.success) { AppState.chat.history = res.messages; syncChatUI(AppState.chat.history); }
             });
         }
 
         function sendChatMessage() {
-            const input = document.getElementById('chatInputBox');
-            const msg = input.value.trim();
-            if (!msg || !AppState.sys.currentTeam || !navigator.onLine) return;
-            
+            const input = document.getElementById('chatInputBox'); const msgText = input.value.trim();
+            if (!msgText || !AppState.sys.currentTeam || !navigator.onLine) return;
             input.value = ''; 
-            const board = document.getElementById('chatMessageBoard');
-            board.innerHTML += `
-                <div class="chat-msg-wrapper">
-                    <div class="chat-msg me" style="opacity: 0.7;">
-                        ${msg} <div class="chat-time">傳送中...</div>
-                    </div>
-                </div>
-            `;
-            board.scrollTop = board.scrollHeight;
-
-            apiCall('sendTeamMessage', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, message: msg }).then(() => {
-                loadTeamChat(); 
-            });
+            
+            const newMsg = { id: 'msg_' + Date.now() + Math.floor(Math.random()*1000), sender: AppState.auth.user, text: msgText, time: Utilities.formatDate(new Date(), "Asia/Taipei", "HH:mm") || new Date().toLocaleTimeString('zh-TW', {hour12:false, hour:'2-digit', minute:'2-digit'}), rawTime: new Date().toISOString(), reactions: {} };
+            if (AppState.chat.replyingTo) { newMsg.replyTo = AppState.chat.replyingTo; cancelReply(); }
+            
+            AppState.chat.history.push(newMsg); syncChatUI(AppState.chat.history); chatBoxElem.scrollTop = chatBoxElem.scrollHeight;
+            AppState.chat.isSyncing = true;
+            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'send', payload: newMsg }).finally(() => { AppState.chat.isSyncing = false; loadTeamChat(); });
         }
 
         // ==========================================
@@ -1184,16 +1192,8 @@
             
             apiCall('loginUser', { username: u, password: p }).then(res => {
                 if(res.success){
-                    AppState.auth.user = res.user; 
-                    AppState.auth.token = res.token; 
-                    localStorage.setItem('user', u); 
-                    localStorage.setItem('token', res.token); 
-                    Swal.close(); 
-                    showView('setupView'); 
-                    applyTheme(); 
-                } else {
-                    Swal.fire('失敗', res.message, 'error');
-                }
+                    AppState.auth.user = res.user; AppState.auth.token = res.token; localStorage.setItem('user', u); localStorage.setItem('token', res.token); Swal.close(); showView('setupView'); applyTheme(); 
+                } else { Swal.fire('失敗', res.message, 'error'); }
             }); 
         }
 
@@ -1210,18 +1210,12 @@
             let tYear = null; if (newG !== "") { tYear = calculateTargetYear(newG); }
             showLoading('更新中...');
             
-            apiCall('updateUserCredentials', { 
-                username: AppState.auth.user, newUsername: newU, newPassword: newP, newTargetYear: tYear 
-            }).then(res => {
+            apiCall('updateUserCredentials', { username: AppState.auth.user, newUsername: newU, newPassword: newP, newTargetYear: tYear }).then(res => {
                 if(res.success) {
                     Swal.fire('成功', '帳號資料已更新', 'success'); 
-                    AppState.auth.user = res.newUsername; 
-                    localStorage.setItem('user', res.newUsername);
-                    document.getElementById('profNewUsername').value = ''; 
-                    document.getElementById('profNewPassword').value = ''; 
-                    document.getElementById('profNewGrade').value = '';
-                    if (tYear !== null) AppState.profile.targetYear = tYear; 
-                    refreshProfileData();
+                    AppState.auth.user = res.newUsername; localStorage.setItem('user', res.newUsername);
+                    document.getElementById('profNewUsername').value = ''; document.getElementById('profNewPassword').value = ''; document.getElementById('profNewGrade').value = '';
+                    if (tYear !== null) AppState.profile.targetYear = tYear; refreshProfileData();
                 } else Swal.fire('失敗', res.message, 'error');
             });
         }
@@ -1229,14 +1223,9 @@
         function handleLogout() { 
             Swal.fire({title:'登出？', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r=>{
                 if(r.isConfirmed){
-                    const savedUser = AppState.auth.user; 
-                    AppState.auth.user = null; 
-                    AppState.auth.token = null; 
-                    localStorage.removeItem('token'); 
-                    localStorage.setItem('user', savedUser); 
+                    const savedUser = AppState.auth.user; AppState.auth.user = null; AppState.auth.token = null; localStorage.removeItem('token'); localStorage.setItem('user', savedUser); 
                     if (window.chatPollInterval) { clearInterval(window.chatPollInterval); window.chatPollInterval = null; }
-                    showView('loginView'); 
-                    document.getElementById('loginUsername').value = savedUser; 
+                    showView('loginView'); document.getElementById('loginUsername').value = savedUser; 
                 }
             }); 
         }
@@ -1244,22 +1233,14 @@
         // ==========================================
         // 測驗與交卷邏輯
         // ==========================================
-        
-        // 🚀 關鍵修復：補上遺失的發音底層函式
         function playCurrentWordAudio(isSlow) {
             if (!AppState.quiz.data || AppState.quiz.data.length === 0) return;
             const q = AppState.quiz.data[AppState.quiz.currentIndex];
-            if (q && q.correctWord) {
-                const cleanWord = getPureWord(q.correctWord);
-                speakWord(cleanWord, isSlow ? 0.4 : 0.85);
-            }
+            if (q && q.correctWord) { const cleanWord = getPureWord(q.correctWord); speakWord(cleanWord, isSlow ? 0.4 : 0.85); }
         }
 
         function startGame(isReview = false) { 
-            AppState.quiz.isSubmitting = false; 
-            AppState.quiz.isReviewMode = isReview; 
-            const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; 
-            
+            AppState.quiz.isSubmitting = false; AppState.quiz.isReviewMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; 
             if (!navigator.onLine) {
                 if (AppState.quiz.isReviewMode) {
                     let cache = JSON.parse(localStorage.getItem('offlineIncorrect') || '[]');
@@ -1268,23 +1249,15 @@
                 } else {
                     let cache = JSON.parse(localStorage.getItem('offlineVocab') || 'null');
                     if(!cache) return Swal.fire('離線中', '尚未快取單字庫，請先連線一次！', 'warning');
-                    let num = parseInt(document.getElementById('numQuestionsInput').value);
-                    let qs = cache.questions;
-                    processQuizData({ success: true, questions: qs.slice(0, num), totalQuestions: num });
+                    let num = parseInt(document.getElementById('numQuestionsInput').value); let qs = cache.questions; processQuizData({ success: true, questions: qs.slice(0, num), totalQuestions: num });
                 }
                 return;
             }
-
-            if (AppState.quiz.isReviewMode) { 
-                showLoading('生成記憶複習卷...'); 
-                apiCall('getReviewQuestions', { username: AppState.auth.user }).then(res => processQuizData(res)); 
-            } else { 
-                const num = parseInt(document.getElementById('numQuestionsInput').value); 
-                const diff = document.getElementById('difficultySelect').value; 
+            if (AppState.quiz.isReviewMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: AppState.auth.user }).then(res => processQuizData(res)); } 
+            else { 
+                const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; 
                 if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); 
-                
-                showLoading('抽取題目中...'); 
-                apiCall('getAllQuestions', { numQuestions: num, sessionToken: AppState.auth.token, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); 
+                showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: AppState.auth.token, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); 
             } 
         }
 
@@ -1292,23 +1265,16 @@
             if (AppState.quiz.isSubmitting) return; 
             AppState.quiz.isSubmitting = true;
             try {
-                document.getElementById('nextButton').disabled = false; 
-                let correctCount = 0; let gainedXP = 0; const submitData = []; 
-                const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
+                document.getElementById('nextButton').disabled = false; let correctCount = 0; let gainedXP = 0; const submitData = []; const detailDiv = document.getElementById('detailResults'); detailDiv.innerHTML = ''; 
                 
                 AppState.quiz.data.forEach((q, i) => { 
                     let uAns = AppState.quiz.answers[q.id] || ''; let isCorr = false; let displayUAns = uAns; 
-                    
                     if (q.qType === 'spell') { 
                         const pureWord = getSpellBaseWord(q.correctAnswer); let tempTypedIndex = 0; let reconstructedAnswer = ""; 
                         for(let j=0; j<pureWord.length; j++) { 
                             let c = pureWord[j]; 
-                            if (/[^a-zA-Z]/.test(c)) { reconstructedAnswer += c; } 
-                            else { 
-                                let start = j, end = j; 
-                                while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; 
-                                while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; 
-                                const wordLen = end - start + 1; 
+                            if (/[^a-zA-Z]/.test(c)) { reconstructedAnswer += c; } else { 
+                                let start = j, end = j; while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; const wordLen = end - start + 1; 
                                 if (wordLen <= 2 || j === start || j === end) { reconstructedAnswer += c; } else { reconstructedAnswer += (tempTypedIndex < uAns.length) ? uAns[tempTypedIndex] : "_"; tempTypedIndex++; } 
                             } 
                         } 
@@ -1316,34 +1282,23 @@
                     } else { isCorr = (uAns === q.correctAnswer); } 
                     
                     if (isCorr) { correctCount++; let base = parseInt(q.level) || 1; let bonus = q.qType === 'listen' ? 2 : (q.qType === 'spell' ? 5 : 0); gainedXP += (base + bonus); } 
-                    
                     submitData.push({ questionId: q.id, qType: q.qType, level: q.level, questionText: q.qType === 'listen' ? '(🎧 純聽力題)' : q.questionText, userAnswer: displayUAns, correctAnswer: q.correctAnswer, correctWord: q.correctWord, correctMeaning: q.correctMeaning, isCorrect: isCorr }); 
                     const safeEnWord = getPureWord(q.correctWord).replace(/'/g, "\\'"); 
                     const displayTitle = q.qType === 'listen' ? `🎧 聽力題：<span style="color:var(--primary-color);">${q.correctWord}</span> <button onclick="speakWord('${safeEnWord}')" style="background:none;border:none;cursor:pointer;font-size:1.1em;vertical-align:middle;padding:0 5px;" title="重新聽一次">🔊</button>` : q.questionText; 
                     detailDiv.innerHTML += `<div style="padding: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); border-radius: 8px;"><h4 style="margin-bottom: 8px; color: var(--text-main); line-height: 1.4;">${i+1}. ${displayTitle} <span style="color:${isCorr?'#10b981':'#ef4444'}; margin-left:5px;">${isCorr?'✔':'✘'}</span></h4><p style="font-size: 0.9em; color: var(--text-muted);">正解: <strong style="color:var(--text-main);">${q.correctAnswer}</strong> ${!isCorr && displayUAns ? ` | 你答: <span style="color:#ef4444;">${displayUAns}</span>` : ''}</p></div>`; 
                 }); 
                 
-                let hasBonus = false; 
-                if (correctCount === AppState.quiz.total && AppState.quiz.total >= 10 && !AppState.quiz.isReviewMode) { hasBonus = true; } 
-                
+                let hasBonus = false; if (correctCount === AppState.quiz.total && AppState.quiz.total >= 10 && !AppState.quiz.isReviewMode) { hasBonus = true; } 
                 if (correctCount === AppState.quiz.total && AppState.quiz.total >= 5 && !AppState.quiz.isReviewMode && AppState.auth.user !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } 
                 else if (AppState.quiz.isReviewMode && correctCount > 0) { Swal.fire('記憶引擎啟動！', `SM-2 已將 ${correctCount} 題推進下一個複習階段！`, 'success'); } 
                 
                 if (AppState.auth.user !== '訪客' && AppState.profile.cache) {
                     if (!AppState.quiz.isReviewMode) {
-                        let oldAns = parseInt(AppState.profile.cache.totalAnswered) || 0;
-                        let oldCorr = parseInt(AppState.profile.cache.totalCorrect) || 0;
-                        let oldXP = parseInt(AppState.profile.cache.totalXP) || 0;
-                        AppState.profile.cache.totalAnswered = oldAns + AppState.quiz.total;
-                        AppState.profile.cache.totalCorrect = oldCorr + correctCount;
-                        let finalXP = gainedXP + (hasBonus ? 20 : 0);
-                        AppState.profile.cache.totalXP = oldXP + finalXP;
-                        
-                        let log = {}; try { log = JSON.parse(AppState.profile.cache.activityLog || '{}'); } catch(e){}
-                        let todayStr = new Date().toLocaleDateString('en-CA', {timeZone: 'Asia/Taipei'});
-                        log[todayStr] = (log[todayStr] || 0) + finalXP;
-                        AppState.profile.cache.activityLog = JSON.stringify(log);
-
+                        let oldAns = parseInt(AppState.profile.cache.totalAnswered) || 0; let oldCorr = parseInt(AppState.profile.cache.totalCorrect) || 0; let oldXP = parseInt(AppState.profile.cache.totalXP) || 0;
+                        AppState.profile.cache.totalAnswered = oldAns + AppState.quiz.total; AppState.profile.cache.totalCorrect = oldCorr + correctCount;
+                        let finalXP = gainedXP + (hasBonus ? 20 : 0); AppState.profile.cache.totalXP = oldXP + finalXP;
+                        let log = {}; try { log = JSON.parse(AppState.profile.cache.activityLog || '{}'); } catch(e){} let todayStr = new Date().toLocaleDateString('en-CA', {timeZone: 'Asia/Taipei'});
+                        log[todayStr] = (log[todayStr] || 0) + finalXP; AppState.profile.cache.activityLog = JSON.stringify(log);
                         if(AppState.profile.cache.totalAnswered > 0) { AppState.profile.cache.correctRate = ((AppState.profile.cache.totalCorrect / AppState.profile.cache.totalAnswered) * 100).toFixed(2) + '%'; }
                     }
                     renderGlobalProfile(AppState.profile.cache); 
@@ -1351,8 +1306,7 @@
 
                 const xpDisplay = document.getElementById('xpGainedDisplay'); 
                 if (!AppState.quiz.isReviewMode && AppState.auth.user !== '訪客' && (gainedXP > 0 || hasBonus)) { 
-                    if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } 
-                    else { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`; } 
+                    if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } else { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`; } 
                     xpDisplay.style.display = 'block'; 
                 } else { xpDisplay.style.display = 'none'; } 
                 
@@ -1361,13 +1315,8 @@
                 
                 if (AppState.auth.user !== '訪客') { 
                     const payload = { username: AppState.auth.user, quizSubmissionData: submitData, isReviewMode: AppState.quiz.isReviewMode };
-                    if (navigator.onLine) {
-                        AppState.profile.isSaving = true; 
-                        apiCall('saveQuizResult', payload).then(() => { AppState.profile.isSaving = false; refreshProfileData(); }); 
-                    } else {
-                        let queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
-                        queue.push(payload); localStorage.setItem('offlineQueue', JSON.stringify(queue));
-                    }
+                    if (navigator.onLine) { AppState.profile.isSaving = true; apiCall('saveQuizResult', payload).then(() => { AppState.profile.isSaving = false; refreshProfileData(); }); } 
+                    else { let queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]'); queue.push(payload); localStorage.setItem('offlineQueue', JSON.stringify(queue)); }
                 } 
             } catch (e) { Swal.fire('發生錯誤', '交卷結算時發生異常：' + e.message, 'error'); console.error(e); }
         }
@@ -1375,43 +1324,17 @@
         // ==========================================
         // 其他輔助函數與事件監聽
         // ==========================================
-        function refreshProfileData() {
-            if (!AppState.auth.user || AppState.auth.user === '訪客' || AppState.profile.isSaving || !navigator.onLine) return;
-            apiCall('getProfileData', { username: AppState.auth.user }).then(res => { 
-                if(res.success && !AppState.profile.isSaving) { renderGlobalProfile(res); } 
-            }); 
-        }
-
-        function toggleMenu() {
-            const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay');
-            if (menu.classList.contains('show')) { menu.classList.remove('show'); overlay.classList.remove('show'); } 
-            else { menu.classList.add('show'); overlay.classList.add('show'); }
-        }
-
-        function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s+\(?\b(adj|adv|n|v|prep|conj|pron|phr|vi|vt|num|art)\b.*$/i, '').trim() : ''; }
+        function refreshProfileData() { if (!AppState.auth.user || AppState.auth.user === '訪客' || AppState.profile.isSaving || !navigator.onLine) return; apiCall('getProfileData', { username: AppState.auth.user }).then(res => { if(res.success && !AppState.profile.isSaving) { renderGlobalProfile(res); } }); }
+        function toggleMenu() { const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay'); if (menu.classList.contains('show')) { menu.classList.remove('show'); overlay.classList.remove('show'); } else { menu.classList.add('show'); overlay.classList.add('show'); } }
+        function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s*\([a-zA-Z.]+\)\s*/g, '').trim() : ''; }
         function getSpellBaseWord(rawWord) { let w = getPureWord(rawWord); w = w.replace(/\(.*?\)/g, ''); w = w.split('/')[0]; return w.trim(); }
         function speakWord(text, rate = 0.85) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = rate; window.speechSynthesis.speak(u); }
 
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'p') {
-                if (document.getElementById('vocabBookView').classList.contains('active') || document.getElementById('reviewPage').classList.contains('active')) {
-                    e.preventDefault(); window.print();
-                }
-            }
-
+            if (e.ctrlKey && e.key === 'p') { if (document.getElementById('vocabBookView').classList.contains('active') || document.getElementById('reviewPage').classList.contains('active')) { e.preventDefault(); window.print(); } }
             if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-            
-            if (document.getElementById('vocabBookView').classList.contains('active') && document.getElementById('vocabFlashcardArea').style.display === 'block') {
-                if (e.code === 'Space') { e.preventDefault(); document.getElementById('vbContainer').classList.toggle('flipped'); } 
-                else if (e.code === 'ArrowLeft') { if (!document.getElementById('vbPrev').disabled) document.getElementById('vbPrev').click(); } 
-                else if (e.code === 'ArrowRight') { if (!document.getElementById('vbNext').disabled) document.getElementById('vbNext').click(); }
-            }
-            
-            if (document.getElementById('reviewPage').classList.contains('active') && document.getElementById('flashcardModeContainer').style.display === 'block') {
-                if (e.code === 'Space') { e.preventDefault(); const fc = document.getElementById('fcContainer'); if (fc) fc.classList.toggle('flipped'); } 
-                else if (e.code === 'ArrowLeft') { if (!document.getElementById('fcPrev').disabled) document.getElementById('fcPrev').click(); } 
-                else if (e.code === 'ArrowRight') { if (!document.getElementById('fcNext').disabled) document.getElementById('fcNext').click(); }
-            }
+            if (document.getElementById('vocabBookView').classList.contains('active') && document.getElementById('vocabFlashcardArea').style.display === 'block') { if (e.code === 'Space') { e.preventDefault(); document.getElementById('vbContainer').classList.toggle('flipped'); } else if (e.code === 'ArrowLeft') { if (!document.getElementById('vbPrev').disabled) document.getElementById('vbPrev').click(); } else if (e.code === 'ArrowRight') { if (!document.getElementById('vbNext').disabled) document.getElementById('vbNext').click(); } }
+            if (document.getElementById('reviewPage').classList.contains('active') && document.getElementById('flashcardModeContainer').style.display === 'block') { if (e.code === 'Space') { e.preventDefault(); const fc = document.getElementById('fcContainer'); if (fc) fc.classList.toggle('flipped'); } else if (e.code === 'ArrowLeft') { if (!document.getElementById('fcPrev').disabled) document.getElementById('fcPrev').click(); } else if (e.code === 'ArrowRight') { if (!document.getElementById('fcNext').disabled) document.getElementById('fcNext').click(); } }
         });
 
         function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; } AppState.quiz.data = res.questions; AppState.quiz.total = res.totalQuestions; if (AppState.quiz.data.length > 0) { AppState.quiz.currentIndex = 0; AppState.quiz.answers = {}; document.getElementById('totalQNum').textContent = AppState.quiz.total; showView('quizView'); renderQuestion(0); } }
@@ -1457,7 +1380,6 @@
         async function fetchExamData(year) { if(!navigator.onLine) return Swal.fire('離線中', '歷屆試題需要網路連線才能下載喔！', 'warning'); document.getElementById('examLobby').style.display = 'none'; document.getElementById('examPreRoom').style.display = 'none'; document.getElementById('examLoading').style.display = 'block'; try { const url = `https://yangbrian01.github.io/GSAT-english.exam/assets/exams/${year}.json?t=${new Date().getTime()}`; const response = await fetch(url); if (!response.ok) throw new Error(`考卷 (${year}.json) 還沒準備好喔！`); AppState.exam.data = await response.json(); document.getElementById('examLoading').style.display = 'none'; document.getElementById('examTitle').textContent = AppState.exam.data.title || `${year} 學年度 英文考科`; document.getElementById('examPreRoom').style.display = 'block'; } catch (e) { document.getElementById('examLoading').style.display = 'none'; document.getElementById('examLobby').style.display = 'grid'; Swal.fire('讀取失敗', e.message, 'error'); } }
         function backToExamLobby() { AppState.exam.data = null; clearInterval(AppState.exam.timer); if(document.getElementById('examPreRoom')) document.getElementById('examPreRoom').style.display = 'none'; if(document.getElementById('examLobby')) document.getElementById('examLobby').style.display = 'grid'; if(document.getElementById('examLoading')) document.getElementById('examLoading').style.display = 'none'; }
         
-        // 🚀 修復：補上真實的對答案批改邏輯
         function forceSubmitExam() {
             Swal.fire({
                 title: '確定要提前交卷嗎？',
@@ -1475,8 +1397,9 @@
             });
         }
 
+        // 🚀 真實考卷結算邏輯
         function processExamSubmission() {
-            showLoading('選擇題批改中...');
+            showLoading('選擇題自動批改中...');
             
             let rawScore = 0;
             let totalQuestions = 0;
@@ -1485,9 +1408,10 @@
             if (AppState.exam.data && AppState.exam.data.examData) {
                 AppState.exam.data.examData.forEach(part => {
                     const processQ = (q) => {
+                        if (!q.answer) return; // 沒答案不計分 (如作文題)
                         totalQuestions++;
                         let userAns = AppState.exam.answers[q.id] || '';
-                        let correctAns = q.answer || ''; // 假設 JSON 內有 answer 欄位可供對照
+                        let correctAns = q.answer || ''; 
                         
                         let isCorrect = false;
                         if (userAns && correctAns) {
@@ -1495,12 +1419,16 @@
                         }
                         
                         if (isCorrect) rawScore++;
+                        
+                        // 抓取你在 JSON 寫的詳解 (analyze, detail 或 explanation)
+                        let expText = q.analyze || q.detail || q.explanation || '';
 
                         detailHtml += `
-                            <div style="padding: 12px; border-bottom: 1px dashed var(--border-color);">
-                                <strong style="color:var(--text-main);">第 ${q.id} 題：</strong>
-                                ${isCorrect ? '<span style="color:var(--secondary-color); font-weight:bold;">✅ 答對</span>' : '<span style="color:var(--danger-color); font-weight:bold;">❌ 答錯</span>'}
-                                <br><span style="font-size: 0.9em; color: var(--text-muted);">你的答案: ${userAns || '未作答'} | 參考解答: ${correctAns || '依大考中心為準'}</span>
+                            <div style="padding: 15px; border-bottom: 2px dashed var(--border-color); margin-bottom: 10px;">
+                                <strong style="color:var(--text-main); font-size:1.1em;">第 ${q.id} 題：</strong>
+                                ${isCorrect ? '<span style="color:var(--secondary-color); font-weight:bold; margin-left:10px;">✅ 答對</span>' : '<span style="color:var(--danger-color); font-weight:bold; margin-left:10px;">❌ 答錯</span>'}
+                                <br><span style="font-size: 0.95em; color: var(--text-main); display:inline-block; margin-top:5px;">你的答案: <span style="${isCorrect?'color:var(--secondary-color)':'color:var(--danger-color)'}">${userAns || '未作答'}</span> | 參考解答: <span style="color:var(--secondary-color);">${correctAns}</span></span>
+                                ${expText ? `<div style="margin-top:10px; padding:10px; background:var(--bg-color); border-left:3px solid var(--primary-color); font-size:0.9em; color:var(--text-muted); border-radius:4px;">💡 <strong>解析：</strong><br>${expText.replace(/\/n|\n/g, '<br>')}</div>` : ''}
                             </div>
                         `;
                     };
@@ -1522,7 +1450,7 @@
                 Swal.close();
                 showView('examResultView');
                 document.getElementById('examLevelScore').textContent = `${finalLevel} 級分`; 
-                document.getElementById('examRawScore').textContent = `原始分數：${rawScore} / ${totalQuestions} 題 (此為選擇題初步批改，手寫與作文需交給 AI 老師)`; 
+                document.getElementById('examRawScore').textContent = `原始分數：${rawScore} / ${totalQuestions} 題 (此為選擇題批改結果)`; 
                 document.getElementById('examDetailResults').innerHTML = detailHtml;
             }, 800);
         }
@@ -1533,7 +1461,6 @@
         function renderExamPaper() { const container = document.getElementById('examPaperContent'); let html = ''; if(AppState.exam.data && AppState.exam.data.examData) { AppState.exam.data.examData.forEach(part => { html += `<h2 class="exam-section-title">${part.section}</h2>`; if(part.questions && !part.topics && !part.article) { part.questions.forEach(q => { html += buildExamQuestionHtml(q); }); } if(part.topics) { part.topics.forEach(topic => { let groupId = 'topic_' + (topic.id ? topic.id.replace(/\W/g, '_') : Math.floor(Math.random()*1000)); html += buildPassageSection(topic, groupId); }); } if(part.article && !part.topics) { let groupId = 'part_' + Math.floor(Math.random()*1000); html += buildPassageSection(part, groupId); } if(part.translation) { html += `<div class="exam-topic-split"><div class="exam-topic-left" style="border:none;"><h3 style="margin-bottom:15px;">中譯英</h3>`; part.translation.forEach(t => { html += `<p style="font-weight:bold; margin-bottom:10px;">${t.id}. ${t.chinese}</p><textarea class="exam-text-input" id="exam_ans_${t.id}" onchange="AppState.exam.answers['${t.id}'] = this.value" placeholder="請在此輸入英文翻譯..."></textarea>`; }); html += `</div></div>`; } if(part.essay) { html += `<div class="exam-topic-split" style="flex-direction:column;"><h3 style="margin-bottom:10px;">英文作文: ${part.essay.topic}</h3><p style="margin-bottom:15px; color:var(--text-muted);">${part.essay.description}</p>`; if(part.essay.imageUrls) { html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`; part.essay.imageUrls.forEach(img => html += `<img src="${img}" style="max-width:30%; border-radius:8px;">`); html += `</div>`; } html += `<textarea class="exam-text-input" id="exam_ans_essay" style="min-height:250px;" onchange="AppState.exam.answers['essay'] = this.value" placeholder="請在此撰寫您的英文作文..."></textarea></div>`; } }); } container.innerHTML = html; }
         function buildExamQuestionHtml(q, sharedOptions, groupId) { let qTitleText = q.question ? q.question.replace(/\/n|\n/g, '<br>') : '請依據左文選出 / 填寫最適當的答案：'; let qHtml = `<div class="exam-q-block"><div class="exam-q-title">${q.id}. ${qTitleText}</div>`; if(q.questionImageUrl) qHtml += `<img src="${q.questionImageUrl}" style="max-width:100%; border-radius:8px; margin-bottom:10px;">`; if (q.answers) { Object.keys(q.answers).forEach(k => { qHtml += `<div style="margin-bottom: 10px; display:flex; align-items:center; gap: 10px;"><strong style="font-size: 1.1em; color:var(--primary-color);">${k}.</strong> <input type="text" class="exam-text-input" style="margin-bottom: 0;" placeholder="輸入第 ${k} 格答案" onchange="AppState.exam.answers['${k}'] = this.value"></div>`; }); } else if (q.options) { q.options.forEach((opt, idx) => { let optContent = opt; if(q.optionImageUrls && q.optionImageUrls[idx]) { optContent = `<span>${opt}</span><br><img src="${q.optionImageUrls[idx]}" style="max-width:150px; margin-top:5px; border-radius:5px;">`; } let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt; qHtml += `<label class="exam-radio-label"><input type="radio" name="exam_q_${q.id}" value="${val}" onchange="AppState.exam.answers['${q.id}'] = this.value"> <span>${optContent}</span></label>`; }); } else if (sharedOptions && sharedOptions.length > 0) { qHtml += `<select class="exam-text-input shared-dropdown-${groupId}" onchange="handleSharedDropdownChange('${groupId}', '${q.id}', this)" style="cursor:pointer; background-color: var(--card-bg);"><option value="">請選擇...</option>`; sharedOptions.forEach(opt => { let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt.split(' ')[0]; qHtml += `<option value="${val}">${opt}</option>`; }); qHtml += `</select>`; } else { qHtml += `<input type="text" class="exam-text-input" placeholder="輸入答案 (如 ADE 或單字)" onchange="AppState.exam.answers['${q.id}'] = this.value">`; } return qHtml + `</div>`; }
         function handleSharedDropdownChange(groupId, qId, selectElem) { AppState.exam.answers[qId] = selectElem.value; let selects = document.querySelectorAll(`.shared-dropdown-${groupId}`); let selectedValues = []; selects.forEach(s => { if(s.value) selectedValues.push(s.value); }); selects.forEach(s => { let options = s.querySelectorAll('option'); options.forEach(opt => { if (opt.value === "") return; if (selectedValues.includes(opt.value) && s.value !== opt.value) { opt.disabled = true; opt.style.color = '#94a3b8'; } else { opt.disabled = false; opt.style.color = ''; } }); }); }
-        function getQuestionScoreInfo(qId) { let id = parseInt(qId); if (isNaN(id)) return { max: 0, type: 'none' }; if (id >= 1 && id <= 30) return { max: 1, type: 'single' }; if (id >= 31 && id <= 46) return { max: 2, type: 'single' }; if (id === 47 || id === 48 || id === 50) return { max: 2, type: 'fill' }; if (id === 49) return { max: 4, type: 'multi', opts: 5 }; return { max: 0, type: 'none' }; }
 
     </script>
 </body>
