@@ -294,6 +294,8 @@
             <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage')">📚 記憶系統</button>
             <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
             <button class="nav-btn" onclick="showView('leaderboardView')">🏆 排行榜</button>
+            <button class="nav-btn" onclick="showView('analyticsView')">📈 學習數據</button>
+            <button class="nav-btn" onclick="showView('teamView')">🤝 戰隊大廳</button>
             <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
             <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
             <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
@@ -456,28 +458,53 @@
             <div id="tutorResult" class="ai-result-box"><div class="ai-title">👨‍🏫 老師講解</div><div id="resTutorExplanation" style="line-height: 1.8; color: var(--text-main);"></div></div>
         </div>
 
+        <div id="analyticsView" class="view-section view-container">
+            <h2>📈 學習數據分析</h2>
+            <div class="profile-card">
+                <div id="profileStatsDisplay"></div>
+                <div id="profileHeatmap"></div>
+                <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <h4 style="margin-bottom: 10px; color: var(--text-main);">🌟 AI 學科能力雷達</h4>
+                    <canvas id="radarChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="teamView" class="view-section view-container">
+            <h2>🤝 戰隊大廳</h2>
+            <p class="subtitle">與同儕一起組隊刷題，爭奪賽季排行榜榮耀！</p>
+            <div class="profile-card">
+                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">目前狀態</h3>
+                <div id="profCurrentTeam" style="font-weight:bold; color:var(--secondary-color); margin-bottom:20px; font-size:1.2em; background:var(--bg-color); padding:15px; border-radius:8px; text-align:center;">尚未加入任何戰隊</div>
+
+                <div class="flex-row">
+                    <div style="flex: 1; border: 2px solid var(--border-color); padding: 15px; border-radius: var(--radius-md);">
+                        <h4 style="margin-bottom: 10px;">🛡️ 建立新戰隊</h4>
+                        <input type="text" id="profCreateTeamName" placeholder="輸入要建立的戰隊名稱" style="margin-bottom: 10px;">
+                        <button class="btn btn-primary" onclick="handleCreateTeam()">建立並取得代碼</button>
+                    </div>
+                    <div style="flex: 1; border: 2px solid var(--border-color); padding: 15px; border-radius: var(--radius-md);">
+                        <h4 style="margin-bottom: 10px;">🔑 加入戰隊</h4>
+                        <input type="text" id="profJoinTeamCode" placeholder="輸入6碼戰隊代碼" style="text-transform: uppercase; margin-bottom: 10px;">
+                        <button class="btn btn-secondary" onclick="handleJoinTeamByCode()">驗證代碼並加入</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="profileView" class="view-section view-container">
             <h2>👤 個人檔案與設定</h2>
             <div class="profile-card" style="text-align: center;">
                 <div class="avatar-preview" id="profileAvatarPreview">👤</div>
                 <h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800; font-size: 1.8em; margin-bottom: 20px;"></h3>
                 <div id="profileLevelDisplay" style="margin-bottom: 20px;"></div>
-                
-                <div id="profileHeatmap"></div>
-                <div id="profileStatsDisplay" style="margin-top: 20px;"></div>
-
-                <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-                    <h4 style="margin-bottom: 10px; color: var(--text-main);">🌟 AI 學科能力雷達</h4>
-                    <canvas id="radarChart" width="400" height="300"></canvas>
-                </div>
-
                 <div class="input-group" style="text-align: left; margin-top:20px;"><label>更換大頭貼照</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">上傳您的專屬大頭貼照。</p></div>
             </div>
             
             <div class="profile-card">
                 <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">🎓 學籍與帳號安全</h3>
                 <div class="input-group">
-                    <label>目前年級狀態 (系統將自動更新)</label>
+                    <label>目前年級狀態</label>
                     <div id="profCurrentGrade" style="font-weight:bold; color:var(--primary-color); margin-bottom:10px; font-size:1.1em; background:var(--bg-color); padding:10px; border-radius:8px;">讀取中...</div>
                     <select id="profNewGrade" style="padding: 10px; background-color: var(--card-bg); color: var(--text-main); border: 2px solid var(--border-color); border-radius: var(--radius-md);">
                         <option value="">-- 手動校正年級 (選填) --</option>
@@ -496,16 +523,18 @@
             </div>
 
             <div class="profile-card">
-                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">🤝 我的戰隊</h3>
-                <div class="input-group">
-                    <label>目前所屬戰隊</label>
-                    <div id="profCurrentTeam" style="font-weight:bold; color:var(--secondary-color); margin-bottom:10px; font-size:1.1em; background:var(--bg-color); padding:10px; border-radius:8px;">尚未加入任何戰隊</div>
-                    <input type="text" id="profNewTeam" placeholder="輸入要加入/建立的戰隊名稱">
-                    <button class="btn btn-outline" style="margin-top: 10px;" onclick="handleJoinTeam()">加入戰隊</button>
+                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">🧠 AI 服務配額與金鑰</h3>
+                <div id="quotaInfoBox">
+                    <div class="quota-box"><span>🤖 解題家教</span><strong id="qTutor">今日已用: 0 / 2 次</strong></div>
+                    <div class="quota-box"><span>✍️ 作文批改</span><strong id="qEssay">今日已用: 0 / 1 篇</strong></div>
+                    <p class="input-desc" style="color: #d97706; margin-bottom: 15px;">※ 系統每日重置配額。字典查詢不扣配額。</p>
                 </div>
+                <div class="input-group" style="margin-top: 20px;">
+                    <label style="color: var(--primary-color);">綁定專屬 Gemini API Key</label>
+                    <input type="text" id="profApiKey" placeholder="輸入你的 API Key (以 AIza 開頭...)">
+                </div>
+                <button class="btn btn-outline" onclick="handleApiKeyUpdate()">綁定 API Key</button>
             </div>
-
-            <div class="profile-card"><h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">🧠 AI 服務配額與金鑰</h3><div id="quotaInfoBox"><div class="quota-box"><span>🤖 解題家教</span><strong id="qTutor">今日已用: 0 / 2 次</strong></div><div class="quota-box"><span>✍️ 作文批改</span><strong id="qEssay">今日已用: 0 / 1 篇</strong></div><p class="input-desc" style="color: #d97706; margin-bottom: 15px;">※ 系統配額為全免費提供，每日重置。字典查詢不扣配額。</p></div><div class="input-group" style="margin-top: 20px;"><label style="color: var(--primary-color);">綁定專屬 Gemini API Key 解鎖無限額度</label><p class="input-desc">前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--primary-color); text-decoration:underline;">Google AI Studio</a> 申請金鑰，你就能無限次數使用！</p><input type="text" id="profApiKey" placeholder="輸入你的 API Key (以 AIza 開頭...)"></div><button class="btn btn-outline" onclick="handleApiKeyUpdate()">綁定 API Key</button></div>
         </div>
 
         <div id="leaderboardView" class="view-section view-container" style="max-width: 800px;">
@@ -587,7 +616,6 @@
         }
         function toggleTheme() { AppState.sys.isDarkMode = !AppState.sys.isDarkMode; localStorage.setItem('darkMode', AppState.sys.isDarkMode); applyTheme(); }
         
-        // 🚀 關鍵修復：補上遺失的 showView 函式 🚀
         function showView(viewId, isInit = false) {
             document.querySelectorAll('.view-section').forEach(view => {
                 view.classList.remove('active');
@@ -730,7 +758,9 @@
                 html += `<div class="heatmap-cell" data-level="${level}" title="${key}: 賺取了 ${xp} XP"></div>`;
             });
             html += '</div></div><div class="heatmap-legend">休息 <div class="heatmap-cell" data-level="0"></div><div class="heatmap-cell" data-level="1"></div><div class="heatmap-cell" data-level="2"></div><div class="heatmap-cell" data-level="3"></div><div class="heatmap-cell" data-level="4"></div> 爆肝</div></div>';
-            document.getElementById('profileHeatmap').innerHTML = html;
+            
+            const heatmapDiv = document.getElementById('profileHeatmap');
+            if (heatmapDiv) heatmapDiv.innerHTML = html;
         }
 
         function renderRadarChart() {
@@ -794,16 +824,35 @@
         // ==========================================
         // 戰隊系統與排行榜邏輯
         // ==========================================
-        function handleJoinTeam() {
-            if(!navigator.onLine) return Swal.fire('離線中', '加入戰隊需要網路連線。', 'error');
-            const teamName = document.getElementById('profNewTeam').value.trim();
-            if (!teamName) return Swal.fire('錯誤', '請輸入戰隊名稱', 'warning');
+        function handleCreateTeam() {
+            if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
+            const tName = document.getElementById('profCreateTeamName').value.trim();
+            if (!tName) return Swal.fire('錯誤', '請輸入戰隊名稱', 'warning');
+            
+            showLoading('建立戰隊中...');
+            apiCall('createTeam', { username: AppState.auth.user, teamName: tName }).then(res => {
+                if (res.success) {
+                    Swal.fire({
+                        title: '戰隊建立成功！',
+                        html: `您的專屬戰隊代碼為：<br><br><strong style="font-size:2.5em; color:var(--primary-color); letter-spacing: 5px;">${res.code}</strong><br><br><span style="font-size:0.9em; color:var(--text-muted);">快把代碼分享給同學讓他們加入吧！</span>`,
+                        icon: 'success'
+                    });
+                    document.getElementById('profCreateTeamName').value = '';
+                    refreshProfileData();
+                } else Swal.fire('失敗', res.message, 'error');
+            });
+        }
+
+        function handleJoinTeamByCode() {
+            if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
+            const tCode = document.getElementById('profJoinTeamCode').value.trim().toUpperCase();
+            if (!tCode) return Swal.fire('錯誤', '請輸入戰隊代碼', 'warning');
             
             showLoading('加入戰隊中...');
-            apiCall('joinTeam', { username: AppState.auth.user, teamName: teamName }).then(res => {
+            apiCall('joinTeam', { username: AppState.auth.user, teamCode: tCode }).then(res => {
                 if (res.success) {
                     Swal.fire('成功', res.message, 'success');
-                    document.getElementById('profNewTeam').value = '';
+                    document.getElementById('profJoinTeamCode').value = '';
                     refreshProfileData();
                 } else Swal.fire('失敗', res.message, 'error');
             });
