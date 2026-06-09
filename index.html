@@ -587,6 +587,36 @@
         }
         function toggleTheme() { AppState.sys.isDarkMode = !AppState.sys.isDarkMode; localStorage.setItem('darkMode', AppState.sys.isDarkMode); applyTheme(); }
         
+        // 🚀 關鍵修復：補上遺失的 showView 函式 🚀
+        function showView(viewId, isInit = false) {
+            document.querySelectorAll('.view-section').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            const targetView = document.getElementById(viewId);
+            if (targetView) {
+                targetView.classList.add('active');
+            }
+
+            const navbar = document.getElementById('topNavbar');
+            if (navbar) {
+                if (viewId === 'loginView' || viewId === 'registerView') {
+                    navbar.style.display = 'none';
+                } else {
+                    navbar.style.display = 'flex';
+                }
+            }
+
+            const menu = document.getElementById('navMenu');
+            const overlay = document.getElementById('navMenuOverlay');
+            if (menu && menu.classList.contains('show')) {
+                menu.classList.remove('show');
+                if (overlay) overlay.classList.remove('show');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         if ('serviceWorker' in navigator) { 
             window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed: ', err)); }); 
         }
@@ -841,7 +871,7 @@
         }
 
         // ==========================================
-        // 🔑 驗證與設定邏輯 (修復：直接傳送密碼)
+        // 🔑 驗證與設定邏輯 
         // ==========================================
         function handleRegister() { 
             if(!navigator.onLine) return Swal.fire('離線中', '註冊需要網路連線。', 'error');
@@ -870,7 +900,6 @@
             
             apiCall('loginUser', { username: u, password: p }).then(res => {
                 if(res.success){
-                    // 🎯 修正：正確指向 AppState，解決登入卡頓
                     AppState.auth.user = res.user; 
                     AppState.auth.token = res.token; 
                     localStorage.setItem('user', u); 
@@ -1089,7 +1118,6 @@
             }
         });
 
-        // 剩餘的單字卡、AI、歷屆試題函式 (完全解壓縮排版)
         function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; } AppState.quiz.data = res.questions; AppState.quiz.total = res.totalQuestions; if (AppState.quiz.data.length > 0) { AppState.quiz.currentIndex = 0; AppState.quiz.answers = {}; document.getElementById('totalQNum').textContent = AppState.quiz.total; showView('quizView'); renderQuestion(0); } }
         document.addEventListener('selectionchange', () => { if (document.activeElement && document.activeElement.id === 'typingInput') updateSpellVisual(); });
         function initSpellTemplate(word) { const pureWord = getSpellBaseWord(word); AppState.quiz.spellTemplate = []; for(let i=0; i<pureWord.length; i++) { const char = pureWord[i]; if (/[^a-zA-Z]/.test(char)) { AppState.quiz.spellTemplate.push(char); } else { let start = i, end = i; while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; if (end - start + 1 <= 2 || i === start || i === end) AppState.quiz.spellTemplate.push(char); else AppState.quiz.spellTemplate.push('_'); } } }
