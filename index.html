@@ -18,7 +18,7 @@
 
     <style>
         :root {
-            --primary-color: #6366f1; --primary-hover: #4f46e5;
+            --primary-color: #3b82f6; --primary-hover: #2563eb;
             --secondary-color: #10b981; --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #1e293b; --text-muted: #64748b;
@@ -28,7 +28,7 @@
         }
 
         body.dark-mode {
-            --primary-color: #818cf8; --primary-hover: #6366f1;
+            --primary-color: #60a5fa; --primary-hover: #3b82f6;
             --secondary-color: #34d399; --bg-color: #0f172a;
             --card-bg: #1e293b;
             --text-main: #f1f5f9; --text-muted: #94a3b8;
@@ -39,12 +39,10 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; transition: background-color 0.3s, color 0.3s;}
 
-        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); background-image: radial-gradient(circle at center, rgba(99, 102, 241, 0.08) 0%, transparent 60%); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.7s, transform 0.7s, filter 0.7s, visibility 0.7s; }
-        #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.15); filter: blur(15px); }
-        .splash-content { display: flex; flex-direction: column; align-items: center; animation: splashFloat 1.2s forwards; }
-        .splash-logo { font-size: 4.5em; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 2px; background: linear-gradient(110deg, var(--text-main) 0%, var(--text-muted) 35%, var(--primary-color) 50%, var(--text-muted) 65%, var(--text-main) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerShine 2.5s linear infinite; }
-        .splash-subtitle { font-size: 0.85em; font-weight: 700; color: var(--text-muted); letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.7; }
-        .splash-laser-line { width: 0px; height: 2px; background: var(--primary-color); box-shadow: 0 0 12px var(--primary-color); animation: laserExpand 1.5s forwards; }
+        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out; }
+        #splashScreen.hidden { opacity: 0; pointer-events: none; }
+        .splash-logo { font-size: 4em; font-weight: 900; letter-spacing: -2px; color: var(--primary-color); animation: fadeIn 1s ease-out forwards; }
+        .splash-subtitle { font-size: 0.9em; font-weight: 700; color: var(--text-muted); letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; animation: fadeIn 1.5s ease-out forwards; }
 
         #offlineBanner { display: none; background-color: var(--danger-color); color: white; text-align: center; padding: 8px; font-weight: bold; position: sticky; top: 0; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
@@ -99,7 +97,7 @@
         .btn-success { background-color: var(--secondary-color); color: white; }
         .btn-outline { background: transparent; color: var(--text-muted); padding: 10px; border: 2px solid var(--border-color); }
 
-        .spinner { width: 35px; height: 35px; border: 3px solid rgba(99, 102, 241, 0.2); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+        .spinner { width: 35px; height: 35px; border: 3px solid rgba(59, 130, 246, 0.2); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-box { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 600; }
 
@@ -195,32 +193,30 @@
         .heatmap-cell[data-level="4"] { background-color: rgba(16, 185, 129, 1); box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
         .heatmap-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.8em; color: var(--text-muted); margin-top: 8px;}
 
-        /* 💬 聊天室專用 LINE 風格 CSS */
-        .chat-container { display: flex; flex-direction: column; height: 500px; background: #8ba9c7; border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        /* 💬 聊天室專用 CSS (LINE 風格) */
+        .chat-container { display: flex; flex-direction: column; height: 500px; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
         body.dark-mode .chat-container { background: #1e293b; border-color: #334155; }
         .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
         .chat-msg-wrapper { display: flex; flex-direction: column; position: relative; margin-bottom: 8px; }
-        .chat-msg { max-width: 70%; padding: 10px 14px; font-size: 0.95em; line-height: 1.4; word-break: break-word; position: relative; }
-        .chat-msg.me { align-self: flex-end; background: #85e04f; color: #111; border-radius: 18px; border-top-right-radius: 4px; }
-        .chat-msg.other { align-self: flex-start; background: #ffffff; color: #111; border-radius: 18px; border-top-left-radius: 4px; margin-left: 45px; }
-        .chat-msg.system { align-self: center; background: rgba(0,0,0,0.2); color: white; border-radius: 20px; font-size: 0.8em; padding: 4px 12px; margin: 10px 0; max-width: 85%; text-align: center; }
-        .chat-sender { font-size: 0.75em; color: #333; margin-bottom: 4px; font-weight: 700; margin-left: 50px; text-shadow: 1px 1px 2px rgba(255,255,255,0.5); }
-        body.dark-mode .chat-sender { color: #cbd5e1; text-shadow: none; }
+        .chat-msg { max-width: 70%; padding: 10px 14px; font-size: 0.95em; line-height: 1.4; word-break: break-word; position: relative; cursor: pointer; transition: 0.2s; }
+        .chat-msg:active { filter: brightness(0.9); }
+        .chat-msg.me { align-self: flex-end; background: #3b82f6; color: white; border-radius: 18px; border-top-right-radius: 4px; }
+        .chat-msg.other { align-self: flex-start; background: #f1f5f9; color: var(--text-main); border-radius: 18px; border-top-left-radius: 4px; margin-left: 45px; border: 1px solid var(--border-color); }
+        body.dark-mode .chat-msg.other { background: #334155; border-color: #475569; }
+        .chat-msg.system { align-self: center; background: rgba(0,0,0,0.1); color: var(--text-muted); border-radius: 20px; font-size: 0.8em; padding: 4px 12px; margin: 10px 0; max-width: 85%; text-align: center; }
+        body.dark-mode .chat-msg.system { background: rgba(255,255,255,0.1); color: #cbd5e1; }
+        .chat-sender { font-size: 0.75em; color: var(--text-muted); margin-bottom: 4px; font-weight: 700; margin-left: 50px; }
         .chat-time { font-size: 0.7em; opacity: 0.6; position: absolute; bottom: 2px; white-space: nowrap; }
-        .chat-msg.me .chat-time { right: 100%; margin-right: 8px; text-align: right; }
-        .chat-msg.other .chat-time { left: 100%; margin-left: 8px; }
-        .chat-unsend-btn { font-size: 0.7em; color: #ef4444; background: none; border: none; cursor: pointer; position: absolute; top: 0; right: 100%; margin-right: 8px; display: none; opacity: 0.7; }
-        .chat-msg-wrapper:hover .chat-unsend-btn { display: inline-block; }
-        .chat-unsend-btn:hover { opacity: 1; text-decoration: underline; }
-        .chat-avatar { position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(0,0,0,0.1); }
-        .chat-date-sep { text-align: center; color: rgba(255,255,255,0.9); font-size: 0.8em; margin: 15px 0 10px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-weight: bold; }
+        .chat-msg.me .chat-time { right: 100%; margin-right: 8px; text-align: right; color: var(--text-muted); }
+        .chat-msg.other .chat-time { left: 100%; margin-left: 8px; color: var(--text-muted); }
+        .chat-avatar { position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(0,0,0,0.1); background: white; display: flex; justify-content: center; align-items: center; font-size: 1.5em;}
+        .chat-date-sep { text-align: center; color: var(--text-muted); font-size: 0.8em; margin: 15px 0 10px 0; font-weight: bold; }
         .chat-input-area { display: flex; padding: 12px; background: var(--nav-bg); border-top: 1px solid var(--border-color); align-items: center; }
-        .chat-input { flex: 1; padding: 12px 18px; border: 1px solid var(--border-color); border-radius: 25px; font-size: 1em; outline: none; background: var(--bg-color); color: var(--text-main); transition: 0.2s; }
+        .chat-input { flex: 1; padding: 12px 18px; border: 1px solid var(--border-color); border-radius: 25px; font-size: 1em; outline: none; background: var(--card-bg); color: var(--text-main); transition: 0.2s; }
         .chat-input:focus { border-color: var(--primary-color); }
         .chat-send-btn { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; font-size: 1.2em; }
         .chat-send-btn:hover { transform: scale(1.1); background: var(--primary-hover); }
 
-        /* 🖨️ 列印樣式支援 */
         @media print {
             .navbar, .theme-toggle-float, .nav-menu, #navButtonsArea, .fc-nav, #startReviewBtn, #offlineBanner { display: none !important; }
             body, .main-content { background: white !important; color: black !important; }
@@ -259,8 +255,6 @@
             .nav-menu { width: 100%; right: -100%; }
             .splash-logo { font-size: 2.8em !important; letter-spacing: -1px !important; }
             .splash-subtitle { font-size: 0.7em !important; letter-spacing: 4px !important; }
-            .splash-laser-line { width: 150px !important; }
-            .chat-msg.me .chat-unsend-btn { display: inline-block; position: static; margin-top: 5px; text-align: right; }
         }
     </style>
 </head>
@@ -270,7 +264,6 @@
         <div class="splash-content">
             <div class="splash-logo">VocabMaster</div>
             <div class="splash-subtitle">Premium Edition</div>
-            <div class="splash-laser-line"></div>
         </div>
     </div>
 
@@ -399,9 +392,9 @@
 
         <div id="examResultView" class="view-section view-container" style="max-width: 800px;">
             <div style="text-align: center; margin-bottom: 30px;">
-                <h2 id="examResultTitle" style="margin-bottom: 5px;">批改結果</h2>
+                <h2 id="examResultTitle" style="margin-bottom: 5px;">選擇題初步結算</h2>
                 <div style="font-size: 5em; font-weight: 900; color: var(--secondary-color);" id="examLevelScore">-- 級分</div>
-                <p style="color: var(--text-muted); font-size: 1.1em; margin-top: 10px;" id="examRawScore"></p>
+                <p style="color: var(--text-main); font-size: 1.2em; margin-top: 10px; font-weight: bold;" id="examRawScore"></p>
                 <div id="examXPReward" style="font-size: 1.5em; font-weight: 800; color: #d97706; margin-top: 15px;"></div>
             </div>
             <div id="examDetailResults" style="text-align: left; margin-bottom: 20px;"></div>
@@ -480,6 +473,7 @@
             <div id="tutorResult" class="ai-result-box"><div class="ai-title">👨‍🏫 老師講解</div><div id="resTutorExplanation" style="line-height: 1.8; color: var(--text-main);"></div></div>
         </div>
 
+        <!-- 獨立的：學習數據分析分頁 -->
         <div id="analyticsView" class="view-section view-container">
             <h2>📈 學習數據分析</h2>
             <div class="profile-card">
@@ -492,6 +486,7 @@
             </div>
         </div>
 
+        <!-- 獨立的：戰隊大廳分頁 -->
         <div id="teamView" class="view-section view-container" style="max-width: 800px;">
             <h2>🤝 戰隊大廳</h2>
             
@@ -532,6 +527,7 @@
             </div>
         </div>
 
+        <!-- 瘦身過後的：個人檔案與設定分頁 -->
         <div id="profileView" class="view-section view-container">
             <h2>👤 個人檔案與設定</h2>
             <div class="profile-card" style="text-align: center;">
@@ -760,7 +756,11 @@
                 syncOfflineData(); 
             }
 
-            const splash = document.getElementById('splashScreen'); if(splash) splash.classList.add('hidden');
+            const splash = document.getElementById('splashScreen'); 
+            if(splash) {
+                splash.style.opacity = '0';
+                setTimeout(() => splash.classList.add('hidden'), 500);
+            }
             if (AppState.auth.user && AppState.auth.token) { showView('setupView', true); } else { showView('loginView'); }
         };
 
@@ -814,7 +814,7 @@
             if (window.myRadarChart) window.myRadarChart.destroy();
             window.myRadarChart = new Chart(ctx, {
                 type: 'radar',
-                data: { labels: ['字彙量', '聽力理解', '拼寫準確度', '文法概念', '閱讀邏輯'], datasets: [{ label: '學科能力雷達', data: [stats.vocab, stats.listen, stats.spell, stats.grammar, stats.reading], backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: 'rgba(99, 102, 241, 1)', pointBackgroundColor: 'rgba(99, 102, 241, 1)', }] },
+                data: { labels: ['字彙量', '聽力理解', '拼寫準確度', '文法概念', '閱讀邏輯'], datasets: [{ label: '學科能力雷達', data: [stats.vocab, stats.listen, stats.spell, stats.grammar, stats.reading], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgba(59, 130, 246, 1)', pointBackgroundColor: 'rgba(59, 130, 246, 1)', }] },
                 options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } } }
             });
         }
@@ -855,7 +855,6 @@
                 if (resProf.hasApiKey) { quotaInfoBox.innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${resProf.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${resProf.essayUsed} / 1 篇`; } 
             }
 
-            // 🌟 判斷並切換戰隊畫面邏輯
             const noTeamArea = document.getElementById('teamNoTeamArea');
             const dashboardArea = document.getElementById('teamDashboardArea');
             
@@ -884,7 +883,7 @@
         }
 
         // ==========================================
-        // 戰隊系統與排行榜邏輯
+        // 戰隊系統與聊天室
         // ==========================================
         function handleCreateTeam() {
             if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
@@ -951,16 +950,69 @@
             }
         }
 
-        // 📅 格式化聊天室日期
         function formatChatDate(rawTimeStr) {
             const d = new Date(rawTimeStr);
             const today = new Date();
             const yesterday = new Date(today);
             yesterday.setDate(yesterday.getDate() - 1);
-            
             if (d.toDateString() === today.toDateString()) return '今天';
             if (d.toDateString() === yesterday.toDateString()) return '昨天';
             return `${d.getMonth() + 1}/${d.getDate()}`;
+        }
+
+        function showMsgOptions(rawTime, sender, isMe) {
+            let html = '';
+            if (isMe) {
+                html += `<button class="btn btn-outline" style="margin-bottom:10px; border-color:var(--primary-color); color:var(--primary-color);" onclick="Swal.close(); promptEditMsg('${rawTime}')">✏️ 編輯訊息</button>`;
+                html += `<button class="btn btn-outline" style="margin-bottom:10px; border-color:var(--danger-color); color:var(--danger-color);" onclick="Swal.close(); unsendMsg('${rawTime}')">🗑️ 收回訊息</button>`;
+            }
+            html += `<button class="btn btn-outline" style="margin-bottom:10px;" onclick="Swal.close(); promptReplyMsg('${sender}')">↩️ 回覆 ${sender}</button>`;
+            html += `<div style="display:flex; justify-content:center; gap:15px; font-size:1.5em; cursor:pointer; margin-top:10px;">
+                        <span onclick="Swal.close(); sendReaction('👍')">👍</span>
+                        <span onclick="Swal.close(); sendReaction('❤️')">❤️</span>
+                        <span onclick="Swal.close(); sendReaction('😂')">😂</span>
+                        <span onclick="Swal.close(); sendReaction('🔥')">🔥</span>
+                     </div>`;
+            Swal.fire({ title: '訊息選項', html: html, showConfirmButton: false, showCancelButton: true, cancelButtonText: '取消', background: 'var(--card-bg)' });
+        }
+
+        function promptReplyMsg(sender) {
+            const input = document.getElementById('chatInputBox');
+            input.value = `[回覆 @${sender}] `;
+            input.focus();
+        }
+
+        function sendReaction(emoji) {
+            if (!AppState.sys.currentTeam || !navigator.onLine) return;
+            apiCall('sendTeamMessage', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, message: emoji }).then(() => loadTeamChat());
+        }
+
+        function promptEditMsg(rawTime) {
+            Swal.fire({
+                title: '編輯訊息',
+                input: 'text',
+                inputPlaceholder: '輸入新的訊息內容',
+                showCancelButton: true,
+                confirmButtonText: '儲存',
+                cancelButtonText: '取消'
+            }).then(r => {
+                if (r.isConfirmed && r.value) {
+                    apiCall('editTeamMessage', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, rawTime: rawTime, newMessage: r.value }).then(res => {
+                        if(res.success) loadTeamChat(); else Swal.fire('失敗', res.message, 'error');
+                    });
+                }
+            });
+        }
+
+        function unsendMsg(rawTime) {
+            Swal.fire({ title:'收回訊息？', text:'(兩小時內的訊息才能收回)', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444' }).then(r => {
+                if(r.isConfirmed) {
+                    apiCall('unsendTeamMessage', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, rawTime: rawTime }).then(res => {
+                        if(res.success) loadTeamChat();
+                        else Swal.fire('失敗', res.message, 'error');
+                    });
+                }
+            });
         }
 
         function loadTeamChat() {
@@ -975,8 +1027,6 @@
 
                     res.messages.forEach(m => {
                         const msgDateStr = formatChatDate(m.rawTime);
-                        
-                        // 插入日期分隔線
                         if (msgDateStr !== lastDateStr) {
                             html += `<div class="chat-date-sep">${msgDateStr}</div>`;
                             lastDateStr = msgDateStr;
@@ -986,8 +1036,6 @@
                             html += `<div class="chat-msg system">${m.text}</div>`;
                         } else {
                             const isMe = m.sender === AppState.auth.user;
-                            
-                            // 渲染頭像
                             let avHtml = '';
                             if (!isMe) {
                                 if (m.avatar && (m.avatar.startsWith('data:image') || m.avatar.startsWith('http'))) {
@@ -996,21 +1044,25 @@
                                     avHtml = `<div class="chat-avatar" style="background:white; display:flex; justify-content:center; align-items:center; font-size:1.5em;">${m.avatar || '👤'}</div>`;
                                 }
                             }
+                            
+                            const isUnsent = m.text === '此訊息已收回';
+                            const opacityStyle = isUnsent ? 'opacity: 0.6; font-style: italic;' : '';
+                            const clickEvent = !isUnsent ? `onclick="showMsgOptions('${m.rawTime}', '${m.sender}', ${isMe})"` : '';
 
                             html += `
-                                <div class="chat-msg-wrapper">
-                                    <div class="chat-msg ${isMe ? 'me' : 'other'}">
+                                <div class="chat-msg-wrapper" ${clickEvent}>
+                                    <div class="chat-msg ${isMe ? 'me' : 'other'}" style="${opacityStyle}" title="點擊展開選項">
                                         ${avHtml}
                                         ${!isMe ? `<div class="chat-sender">${m.sender}</div>` : ''}
                                         ${m.text}
                                         <div class="chat-time">${m.time}</div>
-                                        ${isMe && m.text !== '此訊息已收回' ? `<button class="chat-unsend-btn" onclick="unsendMsg('${m.rawTime}')">[收回]</button>` : ''}
+                                        ${isMe && !isUnsent ? `<button class="chat-unsend-btn" onclick="event.stopPropagation(); unsendMsg('${m.rawTime}')">[收回]</button>` : ''}
                                     </div>
                                 </div>
                             `;
                         }
                     });
-                    board.innerHTML = html || '<div style="text-align:center; color:rgba(255,255,255,0.7); margin-top:20px; font-weight:bold;">尚無對話，來打聲招呼吧！</div>';
+                    board.innerHTML = html || '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-weight:bold;">尚無對話，來打聲招呼吧！</div>';
                     
                     if (isAtBottom) board.scrollTop = board.scrollHeight;
                 }
@@ -1023,8 +1075,6 @@
             if (!msg || !AppState.sys.currentTeam || !navigator.onLine) return;
             
             input.value = ''; 
-            
-            // 樂觀 UI：瞬間呈現在畫面上
             const board = document.getElementById('chatMessageBoard');
             board.innerHTML += `
                 <div class="chat-msg-wrapper">
@@ -1040,17 +1090,9 @@
             });
         }
 
-        function unsendMsg(rawTime) {
-            Swal.fire({ title:'收回訊息？', text:'(兩小時內的訊息才能收回)', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444' }).then(r => {
-                if(r.isConfirmed) {
-                    apiCall('unsendTeamMessage', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, rawTime: rawTime }).then(res => {
-                        if(res.success) loadTeamChat();
-                        else Swal.fire('失敗', res.message, 'error');
-                    });
-                }
-            });
-        }
-
+        // ==========================================
+        // 排行榜邏輯
+        // ==========================================
         function loadLeaderboardData() { 
             const container = document.getElementById('leaderboardTableContainer'); 
             if (AppState.sys.leaderboard && AppState.sys.leaderboard.length > 0) { renderRank(); } else { container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">讀取排行榜中...</p></div>'; }
@@ -1202,6 +1244,17 @@
         // ==========================================
         // 測驗與交卷邏輯
         // ==========================================
+        
+        // 🚀 關鍵修復：補上遺失的發音底層函式
+        function playCurrentWordAudio(isSlow) {
+            if (!AppState.quiz.data || AppState.quiz.data.length === 0) return;
+            const q = AppState.quiz.data[AppState.quiz.currentIndex];
+            if (q && q.correctWord) {
+                const cleanWord = getPureWord(q.correctWord);
+                speakWord(cleanWord, isSlow ? 0.4 : 0.85);
+            }
+        }
+
         function startGame(isReview = false) { 
             AppState.quiz.isSubmitting = false; 
             AppState.quiz.isReviewMode = isReview; 
@@ -1404,11 +1457,11 @@
         async function fetchExamData(year) { if(!navigator.onLine) return Swal.fire('離線中', '歷屆試題需要網路連線才能下載喔！', 'warning'); document.getElementById('examLobby').style.display = 'none'; document.getElementById('examPreRoom').style.display = 'none'; document.getElementById('examLoading').style.display = 'block'; try { const url = `https://yangbrian01.github.io/GSAT-english.exam/assets/exams/${year}.json?t=${new Date().getTime()}`; const response = await fetch(url); if (!response.ok) throw new Error(`考卷 (${year}.json) 還沒準備好喔！`); AppState.exam.data = await response.json(); document.getElementById('examLoading').style.display = 'none'; document.getElementById('examTitle').textContent = AppState.exam.data.title || `${year} 學年度 英文考科`; document.getElementById('examPreRoom').style.display = 'block'; } catch (e) { document.getElementById('examLoading').style.display = 'none'; document.getElementById('examLobby').style.display = 'grid'; Swal.fire('讀取失敗', e.message, 'error'); } }
         function backToExamLobby() { AppState.exam.data = null; clearInterval(AppState.exam.timer); if(document.getElementById('examPreRoom')) document.getElementById('examPreRoom').style.display = 'none'; if(document.getElementById('examLobby')) document.getElementById('examLobby').style.display = 'grid'; if(document.getElementById('examLoading')) document.getElementById('examLoading').style.display = 'none'; }
         
-        // 🚀 修復：加入 forceSubmitExam 與 processExamSubmission
+        // 🚀 修復：補上真實的對答案批改邏輯
         function forceSubmitExam() {
             Swal.fire({
                 title: '確定要提前交卷嗎？',
-                text: '系統將會立刻為您結算成績！',
+                text: '系統將立刻為您的選擇題結算成績！',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
@@ -1423,14 +1476,55 @@
         }
 
         function processExamSubmission() {
-            showLoading('成績結算與 AI 批改中...');
-            // 由於全卷批改需要耗費大量時間與 AI 額度，這裡做一個輕量化的前端 Mock 展示
+            showLoading('選擇題批改中...');
+            
+            let rawScore = 0;
+            let totalQuestions = 0;
+            let detailHtml = '<div style="margin-bottom: 20px;">';
+
+            if (AppState.exam.data && AppState.exam.data.examData) {
+                AppState.exam.data.examData.forEach(part => {
+                    const processQ = (q) => {
+                        totalQuestions++;
+                        let userAns = AppState.exam.answers[q.id] || '';
+                        let correctAns = q.answer || ''; // 假設 JSON 內有 answer 欄位可供對照
+                        
+                        let isCorrect = false;
+                        if (userAns && correctAns) {
+                            isCorrect = String(userAns).trim().toUpperCase() === String(correctAns).trim().toUpperCase();
+                        }
+                        
+                        if (isCorrect) rawScore++;
+
+                        detailHtml += `
+                            <div style="padding: 12px; border-bottom: 1px dashed var(--border-color);">
+                                <strong style="color:var(--text-main);">第 ${q.id} 題：</strong>
+                                ${isCorrect ? '<span style="color:var(--secondary-color); font-weight:bold;">✅ 答對</span>' : '<span style="color:var(--danger-color); font-weight:bold;">❌ 答錯</span>'}
+                                <br><span style="font-size: 0.9em; color: var(--text-muted);">你的答案: ${userAns || '未作答'} | 參考解答: ${correctAns || '依大考中心為準'}</span>
+                            </div>
+                        `;
+                    };
+
+                    if (part.questions) part.questions.forEach(processQ);
+                    if (part.topics) part.topics.forEach(t => { if(t.questions) t.questions.forEach(processQ); });
+                    if (part.article && part.questions) part.questions.forEach(processQ);
+                });
+            }
+            detailHtml += '</div>';
+
+            let finalLevel = 0;
+            if (totalQuestions > 0) {
+                let percentage = rawScore / totalQuestions;
+                finalLevel = Math.round(percentage * 15);
+            }
+
             setTimeout(() => {
                 Swal.close();
                 showView('examResultView');
-                document.getElementById('examLevelScore').textContent = '15 級分'; 
-                document.getElementById('examRawScore').textContent = '恭喜完成模擬考！(詳細作文批改請使用大廳的「AI 作文批改」功能)'; 
-            }, 1500);
+                document.getElementById('examLevelScore').textContent = `${finalLevel} 級分`; 
+                document.getElementById('examRawScore').textContent = `原始分數：${rawScore} / ${totalQuestions} 題 (此為選擇題初步批改，手寫與作文需交給 AI 老師)`; 
+                document.getElementById('examDetailResults').innerHTML = detailHtml;
+            }, 800);
         }
 
         function startFullExam() { if (!AppState.exam.data) return Swal.fire('錯誤', '沒有考卷資料！', 'error'); AppState.quiz.isSubmitting = false; document.getElementById('inExamTitleDisplay').textContent = AppState.exam.data.title; AppState.exam.answers = {}; AppState.exam.endTime = Date.now() + 100 * 60 * 1000; renderExamPaper(); showView('examTakingView'); clearInterval(AppState.exam.timer); updateTimerDisplay(); AppState.exam.timer = setInterval(() => { let timeLeft = Math.round((AppState.exam.endTime - Date.now()) / 1000); if (timeLeft <= 0) { timeLeft = 0; clearInterval(AppState.exam.timer); Swal.fire('時間到！', '考試結束，系統將自動交卷', 'warning').then(() => { processExamSubmission(); }); } updateTimerDisplay(timeLeft); }, 1000); }
