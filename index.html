@@ -46,10 +46,6 @@
         .splash-subtitle { font-size: 0.85em; font-weight: 700; color: var(--text-muted); letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.7; }
         .splash-laser-line { width: 0px; height: 2px; background: var(--primary-color); box-shadow: 0 0 12px var(--primary-color); animation: laserExpand 1.5s forwards; }
 
-        @keyframes shimmerShine { to { background-position: 200% center; } }
-        @keyframes splashFloat { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes laserExpand { 0% { width: 0px; opacity: 0; } 30% { opacity: 1; } 100% { width: 220px; opacity: 1; } }
-
         #offlineBanner { display: none; background-color: var(--danger-color); color: white; text-align: center; padding: 8px; font-weight: bold; position: sticky; top: 0; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
@@ -198,6 +194,19 @@
         .heatmap-cell[data-level="3"] { background-color: rgba(16, 185, 129, 0.8); }
         .heatmap-cell[data-level="4"] { background-color: rgba(16, 185, 129, 1); box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
         .heatmap-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.8em; color: var(--text-muted); margin-top: 8px;}
+
+        /* 💬 聊天室專用 CSS */
+        .chat-container { display: flex; flex-direction: column; height: 400px; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-msg { max-width: 75%; padding: 10px 15px; border-radius: 18px; font-size: 0.95em; line-height: 1.4; position: relative; }
+        .chat-msg.me { align-self: flex-end; background: var(--primary-color); color: white; border-bottom-right-radius: 4px; }
+        .chat-msg.other { align-self: flex-start; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); border-bottom-left-radius: 4px; }
+        .chat-sender { font-size: 0.75em; opacity: 0.8; margin-bottom: 4px; font-weight: bold; }
+        .chat-time { font-size: 0.7em; opacity: 0.6; text-align: right; margin-top: 4px; }
+        .chat-input-area { display: flex; padding: 10px; background: var(--card-bg); border-top: 1px solid var(--border-color); }
+        .chat-input { flex: 1; padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 1em; outline: none; background: var(--bg-color); color: var(--text-main); }
+        .chat-send-btn { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .chat-send-btn:hover { transform: scale(1.1); }
 
         /* 🖨️ 列印樣式支援 */
         @media print {
@@ -470,23 +479,39 @@
             </div>
         </div>
 
-        <div id="teamView" class="view-section view-container">
+        <div id="teamView" class="view-section view-container" style="max-width: 800px;">
             <h2>🤝 戰隊大廳</h2>
-            <p class="subtitle">與同儕一起組隊刷題，爭奪賽季排行榜榮耀！</p>
-            <div class="profile-card">
-                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">目前狀態</h3>
-                <div id="profCurrentTeam" style="font-weight:bold; color:var(--secondary-color); margin-bottom:20px; font-size:1.2em; background:var(--bg-color); padding:15px; border-radius:8px; text-align:center;">尚未加入任何戰隊</div>
-
+            
+            <div id="teamNoTeamArea">
+                <p class="subtitle">與同儕一起組隊刷題，爭奪賽季排行榜榮耀！</p>
                 <div class="flex-row">
-                    <div style="flex: 1; border: 2px solid var(--border-color); padding: 15px; border-radius: var(--radius-md);">
+                    <div style="flex: 1; border: 2px solid var(--border-color); padding: 20px; border-radius: var(--radius-md); background: var(--card-bg);">
                         <h4 style="margin-bottom: 10px;">🛡️ 建立新戰隊</h4>
-                        <input type="text" id="profCreateTeamName" placeholder="輸入要建立的戰隊名稱" style="margin-bottom: 10px;">
+                        <input type="text" id="profCreateTeamName" placeholder="輸入要建立的戰隊名稱" style="margin-bottom: 15px;">
                         <button class="btn btn-primary" onclick="handleCreateTeam()">建立並取得代碼</button>
                     </div>
-                    <div style="flex: 1; border: 2px solid var(--border-color); padding: 15px; border-radius: var(--radius-md);">
+                    <div style="flex: 1; border: 2px solid var(--border-color); padding: 20px; border-radius: var(--radius-md); background: var(--card-bg);">
                         <h4 style="margin-bottom: 10px;">🔑 加入戰隊</h4>
-                        <input type="text" id="profJoinTeamCode" placeholder="輸入6碼戰隊代碼" style="text-transform: uppercase; margin-bottom: 10px;">
+                        <input type="text" id="profJoinTeamCode" placeholder="輸入6碼戰隊代碼" style="text-transform: uppercase; margin-bottom: 15px; font-family: monospace; letter-spacing: 2px; font-size: 1.1em;">
                         <button class="btn btn-secondary" onclick="handleJoinTeamByCode()">驗證代碼並加入</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="teamDashboardArea" style="display: none;">
+                <div class="profile-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h3 style="margin-bottom: 5px; color: var(--primary-color);">🛡️ <span id="dashTeamName"></span></h3>
+                        <p style="color: var(--text-muted); font-size: 0.9em;">戰隊邀請碼：<strong id="dashTeamCode" style="font-family: monospace; font-size: 1.2em; color: var(--text-main); background: var(--bg-color); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-color); user-select: all;"></strong></p>
+                    </div>
+                    <button class="btn btn-outline" style="width: auto; padding: 8px 15px; border-color: var(--danger-color); color: var(--danger-color);" onclick="handleLeaveTeam()">退出戰隊</button>
+                </div>
+
+                <div class="chat-container">
+                    <div id="chatMessageBoard" class="chat-box"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInputBox" class="chat-input" placeholder="說點什麼..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
                     </div>
                 </div>
             </div>
@@ -607,7 +632,7 @@
             exam: { data: null, timer: null, endTime: 0, answers: {} },
             review: { cards: [], currentIndex: 0, isFlashcardMode: true },
             vocab: { level: 0, list: [], letterList: [], cardIndex: 0, favorites: new Set(), cache: [] },
-            sys: { leaderboard: [], teamLeaderboard: [], isDarkMode: localStorage.getItem('darkMode') === 'true', touchStartX: 0, touchEndX: 0 }
+            sys: { leaderboard: [], teamLeaderboard: [], isDarkMode: localStorage.getItem('darkMode') === 'true', touchStartX: 0, touchEndX: 0, currentTeam: null }
         };
 
         function applyTheme() {
@@ -815,8 +840,30 @@
                 if (resProf.hasApiKey) { quotaInfoBox.innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${resProf.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${resProf.essayUsed} / 1 篇`; } 
             }
 
-            const teamDisplay = document.getElementById('profCurrentTeam');
-            if(teamDisplay) teamDisplay.textContent = resProf.teamName ? resProf.teamName : '尚未加入任何戰隊';
+            // 🌟 判斷並切換戰隊畫面邏輯
+            const noTeamArea = document.getElementById('teamNoTeamArea');
+            const dashboardArea = document.getElementById('teamDashboardArea');
+            
+            if (resProf.teamName) {
+                noTeamArea.style.display = 'none';
+                dashboardArea.style.display = 'block';
+                document.getElementById('dashTeamName').textContent = resProf.teamName;
+                document.getElementById('dashTeamCode').textContent = resProf.teamCode || '讀取中...';
+                
+                AppState.sys.currentTeam = resProf.teamName;
+                loadTeamChat();
+                if (!window.chatPollInterval) {
+                    window.chatPollInterval = setInterval(loadTeamChat, 8000); 
+                }
+            } else {
+                noTeamArea.style.display = 'block';
+                dashboardArea.style.display = 'none';
+                AppState.sys.currentTeam = null;
+                if (window.chatPollInterval) {
+                    clearInterval(window.chatPollInterval);
+                    window.chatPollInterval = null;
+                }
+            }
 
             if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + AppState.auth.user)) { showGradeUpdatePopup(); }
         }
@@ -839,6 +886,7 @@
                     });
                     document.getElementById('profCreateTeamName').value = '';
                     refreshProfileData();
+                    showView('teamView'); 
                 } else Swal.fire('失敗', res.message, 'error');
             });
         }
@@ -854,7 +902,73 @@
                     Swal.fire('成功', res.message, 'success');
                     document.getElementById('profJoinTeamCode').value = '';
                     refreshProfileData();
+                    showView('teamView'); 
                 } else Swal.fire('失敗', res.message, 'error');
+            });
+        }
+
+        function handleLeaveTeam() {
+            Swal.fire({
+                title: '確定要退出戰隊嗎？',
+                text: '如果戰隊剩下 0 人，將會被系統自動解散喔！',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoading('處理中...');
+                    apiCall('leaveTeam', { username: AppState.auth.user }).then(res => {
+                        if (res.success) {
+                            Swal.fire('已退出', '', 'success');
+                            refreshProfileData();
+                        }
+                    });
+                }
+            });
+        }
+
+        function loadTeamChat() {
+            if (!AppState.sys.currentTeam || !navigator.onLine) return;
+            apiCall('getTeamMessages', { teamName: AppState.sys.currentTeam }).then(res => {
+                if (res.success) {
+                    const board = document.getElementById('chatMessageBoard');
+                    const isAtBottom = board.scrollHeight - board.scrollTop <= board.clientHeight + 50;
+                    
+                    let html = '';
+                    res.messages.forEach(m => {
+                        const isMe = m.sender === AppState.auth.user;
+                        html += `
+                            <div class="chat-msg ${isMe ? 'me' : 'other'}">
+                                ${!isMe ? `<div class="chat-sender">${m.sender}</div>` : ''}
+                                ${m.text}
+                                <div class="chat-time">${m.time}</div>
+                            </div>
+                        `;
+                    });
+                    board.innerHTML = html || '<div style="text-align:center; color:var(--text-muted); margin-top:20px;">尚無對話，來打聲招呼吧！</div>';
+                    
+                    if (isAtBottom) board.scrollTop = board.scrollHeight;
+                }
+            });
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInputBox');
+            const msg = input.value.trim();
+            if (!msg || !AppState.sys.currentTeam || !navigator.onLine) return;
+            
+            input.value = ''; 
+            
+            const board = document.getElementById('chatMessageBoard');
+            board.innerHTML += `
+                <div class="chat-msg me" style="opacity: 0.7;">
+                    ${msg} <div class="chat-time">傳送中...</div>
+                </div>
+            `;
+            board.scrollTop = board.scrollHeight;
+
+            apiCall('sendTeamMessage', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, message: msg }).then(() => {
+                loadTeamChat(); 
             });
         }
 
@@ -999,6 +1113,7 @@
                     AppState.auth.token = null; 
                     localStorage.removeItem('token'); 
                     localStorage.setItem('user', savedUser); 
+                    if (window.chatPollInterval) { clearInterval(window.chatPollInterval); window.chatPollInterval = null; }
                     showView('loginView'); 
                     document.getElementById('loginUsername').value = savedUser; 
                 }
