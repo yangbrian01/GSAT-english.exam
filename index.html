@@ -46,10 +46,6 @@
         .splash-subtitle { font-size: 0.85em; font-weight: 700; color: var(--text-muted); letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.7; }
         .splash-laser-line { width: 0px; height: 2px; background: var(--primary-color); box-shadow: 0 0 12px var(--primary-color); animation: laserExpand 1.5s forwards; }
 
-        @keyframes shimmerShine { to { background-position: 200% center; } }
-        @keyframes splashFloat { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes laserExpand { 0% { width: 0px; opacity: 0; } 30% { opacity: 1; } 100% { width: 220px; opacity: 1; } }
-
         #offlineBanner { display: none; background-color: var(--danger-color); color: white; text-align: center; padding: 8px; font-weight: bold; position: sticky; top: 0; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
@@ -185,8 +181,10 @@
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95em;}
         .data-table th, .data-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: top;}
         
+        /* 🚀 修復：修正 SweetAlert2 的輸入框破版問題 */
         body.dark-mode .swal2-popup { background: var(--card-bg); color: var(--text-main); }
         body.dark-mode .swal2-title, body.dark-mode .swal2-html-container { color: var(--text-main); }
+        .swal2-input { width: 100% !important; max-width: 90% !important; box-sizing: border-box !important; margin: 1em auto !important; }
 
         .heatmap-wrapper { margin-top: 25px; text-align: left; border-top: 1px solid var(--border-color); padding-top: 15px; }
         .heatmap-scroll { overflow-x: auto; padding-bottom: 10px; }
@@ -214,34 +212,34 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
-        .chat-box { flex: 1; padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; overflow-x: hidden; background: var(--bg-color); }
+        .chat-box { flex: 1; padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; overflow-x: hidden; background: var(--bg-color); }
         .chat-box::-webkit-scrollbar { width: 5px; }
         .chat-box::-webkit-scrollbar-track { background: transparent; }
         .chat-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
         body.dark-mode .chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
 
-        .msg-bubble-wrap { display: flex; flex-direction: column; position: relative; margin-bottom: 5px; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .msg-bubble-wrap { display: flex; flex-direction: column; position: relative; margin-bottom: 12px; animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 🚀 完全獨立的外部回覆區塊 (完美復刻 S__6209541_0_2.jpg 質感) */
+        /* 🚀 完美分離的引言/回覆區塊 (復刻 Messenger/IG 質感) */
         .reply-quote-outside { display: flex; flex-direction: column; margin-bottom: 4px; width: 100%; position: relative; z-index: 1;}
-        .reply-quote-outside.me { align-items: flex-end; padding-right: 15px;}
+        .reply-quote-outside.me { align-items: flex-end; padding-right: 12px;}
         .reply-quote-outside.other { align-items: flex-start; padding-left: 55px;}
         
-        .reply-header-text { font-size: 0.75em; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;}
-        .reply-quote-outside.me .reply-header-text { margin-right: 10px; }
-        .reply-quote-outside.other .reply-header-text { margin-left: 10px; }
+        .reply-header-text { font-size: 0.75em; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;}
+        .reply-quote-outside.me .reply-header-text { margin-right: 8px; }
+        .reply-quote-outside.other .reply-header-text { margin-left: 8px; }
         
         .reply-content-box { display: flex; align-items: stretch; gap: 8px; }
         .reply-bubble-mini { 
-            background: rgba(148, 163, 184, 0.15); padding: 8px 16px; border-radius: 18px; 
-            font-size: 0.9em; color: var(--text-muted); max-width: 200px; 
+            background: rgba(148, 163, 184, 0.15); padding: 8px 14px; border-radius: 16px; 
+            font-size: 0.85em; color: var(--text-muted); max-width: 220px; 
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         body.dark-mode .reply-bubble-mini { background: rgba(255,255,255,0.1); }
-        
-        .reply-line { width: 3px; background: rgba(148, 163, 184, 0.3); border-radius: 3px; }
+        .reply-line { width: 2px; background: rgba(148, 163, 184, 0.4); border-radius: 2px; margin-top: 6px; margin-bottom: 6px;}
 
+        /* 氣泡本體設計 */
         .msg-bubble { max-width: 78%; padding: 14px 20px; font-size: 0.98em; line-height: 1.5; word-break: break-word; position: relative; z-index: 2; user-select: none; -webkit-touch-callout: none; transition: transform 0.2s ease; }
         
         .msg-bubble.me { 
@@ -261,6 +259,9 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
         }
         
+        /* 🚀 (已編輯) 小標籤美化 */
+        .edited-tag { font-size: 0.75em; opacity: 0.7; margin-left: 6px; white-space: nowrap; font-weight: 500; }
+
         .msg-bubble.system { 
             align-self: center; 
             background: rgba(148, 163, 184, 0.15); 
@@ -285,12 +286,23 @@
         .chat-date-sep { text-align: center; color: var(--text-muted); font-size: 0.75em; margin: 20px 0 10px 0; font-weight: 700; letter-spacing: 1px; align-self: center; position: relative; width: 100%; display: flex; align-items: center; justify-content: center; }
         .chat-date-sep::before, .chat-date-sep::after { content: ""; flex: 1; height: 1px; background: var(--border-color); margin: 0 15px; opacity: 0.5; }
 
-        /* 🚀 表情貼徽章設計 */
-        .reactions-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; position: relative; bottom: auto; right: auto; z-index: 5;}
-        .msg-bubble.other .reactions-wrap { right: auto; left: auto; }
-        .reaction-pill { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 10px; font-size: 0.85em; display: inline-flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); color: var(--text-main);}
-        .reaction-pill:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
-        .reaction-pill.active { background: var(--primary-color); border-color: var(--primary-color); color: white; font-weight: 800;}
+        /* 🚀 修復：絕對定位的 Badge 式表情貼重疊邊緣設計 */
+        .reactions-wrap { 
+            display: flex; flex-wrap: wrap-reverse; gap: 4px; 
+            position: absolute; bottom: -12px; right: 10px; z-index: 10;
+        }
+        .msg-bubble.other .reactions-wrap { right: auto; left: 10px; }
+        
+        .reaction-pill { 
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            border-radius: 20px; padding: 2px 6px; font-size: 0.85em; 
+            display: inline-flex; align-items: center; justify-content: center; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; 
+            color: var(--text-main); transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 30px; height: 26px;
+        }
+        .reaction-pill span { margin-left: 4px; font-size: 0.9em; font-weight: bold; }
+        .reaction-pill:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
 
         /* 毛玻璃底部輸入區 */
         .chat-input-area { display: flex; padding: 18px 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); align-items: center; position: relative; z-index: 10; flex-shrink: 0;}
@@ -310,7 +322,7 @@
         body.dark-mode .context-menu { background: rgba(30, 41, 59, 0.98); box-shadow: 0 15px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05); }
         @keyframes menuPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         
-        .context-menu .emoji-row { display: flex; justify-content: space-around; align-items: center; padding: 10px 18px 14px 18px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 26px; background: transparent;}
+        .context-menu .emoji-row { display: flex; justify-content: space-around; align-items: center; padding: 14px 18px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 26px; background: transparent;}
         body.dark-mode .context-menu .emoji-row { border-bottom-color: rgba(255,255,255,0.05); }
         .context-menu .emoji-row span { cursor: pointer; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; padding: 4px; }
         .context-menu .emoji-row span:hover { transform: scale(1.35) translateY(-3px); }
@@ -321,10 +333,9 @@
         .context-menu .action-row.danger { color: var(--danger-color); }
         .context-menu .action-row.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
 
-        /* Emoji 擴充視窗樣式 */
+        /* 全套 Emoji 擴充視窗樣式 */
         .emoji-picker-popup { border-radius: 20px !important; padding: 15px !important; }
-
-        /* 🖨️ 列印樣式支援 */
+        
         @media print {
             .navbar, .theme-toggle-float, .nav-menu, #navButtonsArea, .fc-nav, #startReviewBtn, #offlineBanner { display: none !important; }
             body, .main-content { background: white !important; color: black !important; }
@@ -638,7 +649,6 @@
                 </div>
                 
                 <div id="chatContextMenu" class="context-menu">
-                    <div style="font-size: 0.7em; color: var(--text-muted); text-align: center; padding: 10px 0 0 0; font-weight: bold;">按住可發射心情拉炮</div>
                     <div class="emoji-row">
                         <span onclick="sendReaction('❤️')">❤️</span>
                         <span onclick="sendReaction('😂')">😂</span>
@@ -646,7 +656,7 @@
                         <span onclick="sendReaction('😢')">😢</span>
                         <span onclick="sendReaction('😡')">😡</span>
                         <span onclick="sendReaction('👍')">👍</span>
-                        <span style="color: #94a3b8; font-weight: bold;" onclick="openFullEmojiPicker()">+</span>
+                        <span style="color: #94a3b8; font-weight: bold; font-size: 1.2em;" onclick="openFullEmojiPicker()">+</span>
                     </div>
                     <div class="action-row" onclick="triggerReplyFromMenu()">↩️ 回覆此訊息</div>
                     <div class="action-row" id="chatMenuEditBtn" onclick="triggerEditFromMenu()" style="display:none;">✏️ 編輯訊息</div>
@@ -1088,6 +1098,7 @@
             AppState.chat.contextMsgId = bubble.dataset.id;
             const isMe = bubble.dataset.sender === AppState.auth.user;
             
+            // 🚀 防呆機制：超過 2 小時隱藏編輯與收回按鈕
             let isExpired = false;
             const msg = AppState.chat.history.find(m => m.id === bubble.dataset.id);
             if (msg) {
@@ -1142,11 +1153,29 @@
             if (!AppState.chat.contextMsgId) return;
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if (!msg) return;
-            Swal.fire({ title: '編輯訊息', input: 'text', inputValue: msg.text.replace(' (已編輯)',''), showCancelButton: true, confirmButtonText: '儲存', cancelButtonText: '取消', background: 'var(--card-bg)', color: 'var(--text-main)' }).then(r => {
+            
+            // 抓出尚未加上已編輯後綴的原始文字
+            let rawText = msg.text;
+            if (rawText.endsWith(" (已編輯)")) rawText = rawText.replace(" (已編輯)", "");
+            
+            Swal.fire({ 
+                title: '編輯訊息', 
+                input: 'text', 
+                inputValue: rawText, 
+                showCancelButton: true, 
+                confirmButtonText: '儲存', 
+                cancelButtonText: '取消', 
+                background: 'var(--card-bg)', 
+                color: 'var(--text-main)' 
+            }).then(r => {
                 if (r.isConfirmed && r.value) {
                     msg.text = r.value + " (已編輯)";
                     syncChatUI(AppState.chat.history);
-                    apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg });
+                    
+                    AppState.chat.isSyncing = true;
+                    apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
+                        setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 1500);
+                    });
                 }
             });
         }
@@ -1160,7 +1189,13 @@
                     if(msg) {
                         msg.text = "此訊息已收回"; msg.reactions = {};
                         syncChatUI(AppState.chat.history);
-                        apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'unsend', payload: { id: AppState.chat.contextMsgId } }).then(res => { if(!res.success) { Swal.fire('收回失敗', res.message, 'error'); loadTeamChat(); } });
+                        
+                        AppState.chat.isSyncing = true;
+                        apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'unsend', payload: { id: AppState.chat.contextMsgId } }).then(res => { 
+                            if(!res.success) Swal.fire('收回失敗', res.message, 'error'); 
+                        }).finally(() => {
+                            setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 1500);
+                        });
                     }
                 }
             });
@@ -1176,15 +1211,19 @@
             const uIdx = msg.reactions[emoji].indexOf(AppState.auth.user);
             if (uIdx > -1) msg.reactions[emoji].splice(uIdx, 1); else msg.reactions[emoji].push(AppState.auth.user);
             syncChatUI(AppState.chat.history);
-            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg });
+            
+            AppState.chat.isSyncing = true;
+            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
+                setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 1500);
+            });
         }
 
-        // 🚀 完整 Emoji 選擇器
+        // 🚀 全套百種 Emoji 選擇器 (還原真實聊天軟體體驗)
         window.openFullEmojiPicker = function() {
             document.getElementById('chatContextMenu').style.display = 'none';
             if (!AppState.chat.contextMsgId) return;
             
-            const emojis = ['😀','😂','🤣','🥲','😊','🥰','😍','😘','😋','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','🙄','😯','😦','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','👽','👾','🤖','🎃','😺','😻','🙈','🙉','🙊','💋','💌','💘','💝','💖','💗','💓','💞','💕','💟','❣️','💔','❤️','🧡','💛','💚','💙','💜','🤎','🖤','🤍','💯','💢','💥','💫','💦','💨','💣','💬','💭','💤','👋','🤚','🖐','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🫀','🫁','🧠','🦷','骨','👀','👁','👅','👄'];
+            const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','👍','👎','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🤚','🖐','🖖','👋','👏','🙌','👐','🤲','🙏','🤝','💅','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁','👅','👄','💋','🩸'];
             
             let html = '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; max-height: 300px; overflow-y: auto; padding: 10px;">';
             emojis.forEach(e => {
@@ -1240,7 +1279,11 @@
             if (uIdx > -1) {
                 msg.reactions[emoji].splice(uIdx, 1);
                 syncChatUI(AppState.chat.history);
-                apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg });
+                
+                AppState.chat.isSyncing = true;
+                apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
+                    setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 1500);
+                });
                 Swal.close();
             }
         }
@@ -1267,7 +1310,7 @@
                     const isUnsent = m.text === '此訊息已收回';
                     const opacityStyle = isUnsent ? 'opacity: 0.6; font-style: italic;' : '';
                     
-                    // 🚀 全新分離式回覆 UI 結構
+                    // 🚀 全新分離式回覆 UI 結構 (引言在外面獨立)
                     let replyHtml = '';
                     if (m.replyTo && !isUnsent) {
                         const isReplyToMe = m.replyTo.sender === AppState.auth.user;
@@ -1300,13 +1343,21 @@
                     }
                     if(rxHtml) rxHtml = `<div class="reactions-wrap">${rxHtml}</div>`;
 
+                    // 🚀 解析出 "(已編輯)" 字樣並美化
+                    let displayMsgText = m.text;
+                    let isEdited = false;
+                    if (displayMsgText.endsWith(" (已編輯)")) {
+                        displayMsgText = displayMsgText.replace(" (已編輯)", "");
+                        isEdited = true;
+                    }
+
                     html += `
                         <div class="msg-bubble-wrap">
                             ${!isMe && !isUnsent ? `<div class="chat-sender-outside">${m.sender}</div>` : ''}
                             ${replyHtml}
                             <div class="msg-bubble ${isMe ? 'me' : 'other'}" style="${opacityStyle}" data-id="${m.id}" data-sender="${m.sender}">
                                 ${avHtml}
-                                <div class="msg-text">${m.text}</div>
+                                <div class="msg-text">${displayMsgText}${isEdited && !isUnsent ? '<span class="edited-tag">(已編輯)</span>' : ''}</div>
                                 <div class="chat-time">${m.time}</div>
                                 ${rxHtml}
                             </div>
@@ -1349,8 +1400,11 @@
             if (AppState.chat.replyingTo) { newMsg.replyTo = AppState.chat.replyingTo; cancelReply(); }
             
             AppState.chat.history.push(newMsg); syncChatUI(AppState.chat.history); chatBoxElem.scrollTop = chatBoxElem.scrollHeight;
+            
             AppState.chat.isSyncing = true;
-            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'send', payload: newMsg }).finally(() => { AppState.chat.isSyncing = false; loadTeamChat(); });
+            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'send', payload: newMsg }).finally(() => { 
+                setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 1500); 
+            });
         }
 
         // ==========================================
