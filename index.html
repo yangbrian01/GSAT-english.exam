@@ -747,7 +747,16 @@
             document.querySelectorAll('.view-section').forEach(view => { view.classList.remove('active'); });
             const targetView = document.getElementById(viewId); if (targetView) { targetView.classList.add('active'); }
             const navbar = document.getElementById('topNavbar');
-            if (navbar) { if (viewId === 'loginView' || viewId === 'registerView') { navbar.style.display = 'none'; } else { navbar.style.display = 'flex'; } }
+            
+            // 🚀 修復：只要進入測驗 (quizView) 或模擬考 (examTakingView)，就強制把整個 Navbar 藏起來
+            if (navbar) { 
+                if (['loginView', 'registerView', 'quizView', 'examTakingView'].includes(viewId)) { 
+                    navbar.style.display = 'none'; 
+                } else { 
+                    navbar.style.display = 'flex'; 
+                } 
+            }
+            
             const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay');
             if (menu && menu.classList.contains('show')) { menu.classList.remove('show'); if (overlay) overlay.classList.remove('show'); }
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -814,14 +823,27 @@
             await Promise.all(promises);
             const resSys = await sysPromise;
             let season = getCurrentSeason(); let examDate;
-            if (resSys && resSys.success && resSys.gsatDate) { season = resSys.season; examDate = new Date(resSys.gsatDate); } else { examDate = new Date(season + 1911, 0, 16); }
             
-            document.getElementById('currentSeasonText').textContent = season.toString(); examDate.setHours(0, 0, 0, 0); 
+            // 🚀 修復 1：確保正確解析從試算表抓下來的日期 (並處理 iOS/Safari 的日期相容性)
+            if (resSys && resSys.success && resSys.gsatDate) { 
+                season = resSys.season; 
+                examDate = new Date(resSys.gsatDate.replace(/-/g, '/')); 
+            } else { 
+                examDate = new Date(season + 1911, 0, 16); 
+            }
+            
+            document.getElementById('currentSeasonText').textContent = season.toString(); 
+            
+            // 🚀 修復 2：將時間歸零到午夜 00:00:00 再計算，精準算出絕對天數
             let today = new Date();
-            today.setHours(0, 0, 0, 0); // 將今天的時間歸零到午夜 00:00:00
-            examDate.setHours(0, 0, 0, 0); // 將考試日期的時間也歸零
+            today.setHours(0, 0, 0, 0);
+            examDate.setHours(0, 0, 0, 0);
             let diffDays = Math.round((examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)); 
-            if (diffDays >= 0) { document.getElementById('cdDays').textContent = diffDays; document.getElementById('gsatCountdown').style.display = 'block'; }
+            
+            if (diffDays >= 0) { 
+                document.getElementById('cdDays').textContent = diffDays; 
+                document.getElementById('gsatCountdown').style.display = 'block'; 
+            }
 
             if (AppState.auth.user && AppState.auth.token) {
                 const resProf = await profPromise;
@@ -1168,7 +1190,15 @@
         function loadTeamChat() {
             if (!AppState.sys.currentTeam || !navigator.onLine || AppState.chat.isSyncing) return;
             apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'get' }).then(res => {
-                if (res.success) { AppState.chat.history = res.messages; syncChatUI(AppState.chat.history); }
+                if (res.success) { 
+                    // 🚀 修復：只有在訊息真的有變動時，才重新渲染聊天室，避免畫面無限閃爍
+                    const newStr = JSON.stringify(res.messages);
+                    const oldStr = JSON.stringify(AppState.chat.history);
+                    if (newStr !== oldStr) {
+                        AppState.chat.history = res.messages; 
+                        syncChatUI(AppState.chat.history); 
+                    }
+                }
             });
         }
 
