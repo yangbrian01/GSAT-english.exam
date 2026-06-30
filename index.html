@@ -1326,7 +1326,16 @@
         // ==========================================
         function refreshProfileData() { if (!AppState.auth.user || AppState.auth.user === '訪客' || AppState.profile.isSaving || !navigator.onLine) return; apiCall('getProfileData', { username: AppState.auth.user }).then(res => { if(res.success && !AppState.profile.isSaving) { renderGlobalProfile(res); } }); }
         function toggleMenu() { const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay'); if (menu.classList.contains('show')) { menu.classList.remove('show'); overlay.classList.remove('show'); } else { menu.classList.add('show'); overlay.classList.add('show'); } }
-        function getPureWord(rawWord) { return rawWord ? rawWord.toString().replace(/\s*\([a-zA-Z.]+\)\s*/g, '').trim() : ''; }
+        function getPureWord(rawWord) { 
+            if (!rawWord) return ''; 
+            let w = rawWord.toString();
+    
+            w = w.replace(/\s*\([a-zA-Z.\/]+\)\s*/g, ''); 
+            w = w.replace(/\s+(?:(?:n|v|vi|vt)[\.\/]*|(?:adj|adv|prep|conj|pron|num|art|phr)[\.\/]+)(?:(?:n|v|vi|vt|adj|adv|prep|conj|pron|num|art|phr)[\.\/]*)*$/i, '');
+            w = w.replace(/([a-zA-Z])(?:n|v|vi|vt|adj|adv|prep|conj|pron)[\.\/]*\/[\.\/]*(?:(?:n|v|vi|vt|adj|adv|prep|conj|pron|num|art|phr)[\.\/]*)*$/i, '$1');
+    
+            return w.trim();
+        }
         function getSpellBaseWord(rawWord) { let w = getPureWord(rawWord); w = w.replace(/\(.*?\)/g, ''); w = w.split('/')[0]; return w.trim(); }
         function speakWord(text, rate = 0.85) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = rate; window.speechSynthesis.speak(u); }
 
