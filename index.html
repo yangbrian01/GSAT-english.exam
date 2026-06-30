@@ -46,9 +46,11 @@
         .splash-subtitle { font-size: 0.85em; font-weight: 700; color: var(--text-muted); letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.7; }
         .splash-laser-line { width: 0px; height: 2px; background: var(--primary-color); box-shadow: 0 0 12px var(--primary-color); animation: laserExpand 1.5s forwards; }
 
-        @keyframes shimmerShine { to { background-position: 200% center; } }
-        @keyframes splashFloat { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes laserExpand { 0% { width: 0px; opacity: 0; } 30% { opacity: 1; } 100% { width: 220px; opacity: 1; } }
+        @media (max-width: 768px) {
+            /* 修復手機版開頭動畫被切掉的問題 */
+            .splash-logo { font-size: 2.8em; letter-spacing: -1px; }
+            .splash-subtitle { font-size: 0.7em; letter-spacing: 5px; }
+        }
 
         #offlineBanner { display: none; background-color: var(--danger-color); color: white; text-align: center; padding: 8px; font-weight: bold; position: sticky; top: 0; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
@@ -199,122 +201,50 @@
         .heatmap-cell[data-level="4"] { background-color: rgba(16, 185, 129, 1); box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
         .heatmap-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.8em; color: var(--text-muted); margin-top: 8px;}
 
-        /* 💎 聊天室專用 CSS (Ultra Premium 旗艦級 UI) */
-        .chat-container { 
-            display: flex; flex-direction: column; height: 600px; 
-            background: var(--card-bg); 
-            border: 1px solid rgba(0,0,0,0.05); 
-            border-radius: 28px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05); 
-            overflow: hidden; position: relative; transition: 0.3s;
-        }
-        body.dark-mode .chat-container {
-            border: 1px solid rgba(255,255,255,0.05);
-            background: var(--bg-color);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
+        /* 🌟 重製版聊天室 CSS (全面移植你提供的 2026TCLIPb 排版與樣式) */
+        .chat-container { display: flex; flex-direction: column; height: 500px; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; position: relative; }
+        .chat-box { flex: 1; overflow-y: auto; background: var(--bg-color); padding: 15px; text-align: left; overflow-x: hidden; scroll-behavior: smooth; }
+        
+        .msg-bubble-wrap { display: flex; flex-direction: column; margin-bottom: 12px; }
+        .msg-bubble { position: relative; background: var(--card-bg); padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 0; max-width: 80%; width: fit-content; box-shadow: 0 1px 4px rgba(0,0,0,0.05); user-select: none; -webkit-touch-callout: none; border: 1px solid var(--border-color); transition: transform 0.2s; will-change: transform;}
+        .msg-bubble.mine { background: #dbeafe; margin-left: auto; border-radius: 18px; border-bottom-right-radius: 0; border-color: #bfdbfe; color: #1e3a8a;}
+        body.dark-mode .msg-bubble.mine { background: #1e3a8a; border-color: #1e40af; color: #fff;}
+        .msg-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+        .msg-text { word-break: break-all; font-size: 0.95em; line-height: 1.4; pointer-events: none;}
+        
+        /* 🚀 完全修復輸入框與預覽列，結構忠於參考專案 */
+        .chat-input-row { display: flex; gap: 8px; flex-shrink: 0; background: var(--nav-bg); padding: 12px 15px; border-top: 1px solid var(--border-color); align-items: center; position: relative;}
+        .chat-input-row input { margin: 0; flex: 1; border-radius: 20px; border: 1px solid var(--border-color); padding: 10px 15px; background: var(--bg-color); color: var(--text-main); outline: none;}
+        .chat-input-row button { width: auto; margin: 0; padding: 0 20px; border-radius: 20px; font-size: 0.95em;}
+        
+        .reply-preview-bar { display: none; background: #e0f2fe; padding: 8px 15px; border-top: 1px solid var(--border-color); border-left: 4px solid var(--primary-color); font-size: 13px; justify-content: space-between; align-items: center; z-index: 5; color: #1e293b; }
+        body.dark-mode .reply-preview-bar { background: #334155; color: #f1f5f9; border-top: none;}
+        .reply-quote-box { background: rgba(0,0,0,0.05); padding: 6px 10px; border-radius: 8px; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; border-left: 3px solid var(--text-muted); }
+        
+        /* 🚀 移除 absolute，讓表情貼乖乖排在文字下方 */
+        .reactions-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; position: static;}
+        .reaction-pill { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 2px 8px; font-size: 12px; display: inline-flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; color: var(--text-main); font-weight: 600;}
+        .reaction-pill:active { transform: scale(0.95); }
+        .reaction-pill.active { background: #e0f2fe; border-color: #bae6fd; font-weight: bold; color: var(--primary-color); }
+        body.dark-mode .reaction-pill.active { background: rgba(59,130,246,0.2); border-color: var(--primary-color); }
 
-        /* 隱藏式極簡滾動條 */
-        .chat-box { flex: 1; padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; overflow-x: hidden; background: var(--bg-color); }
-        .chat-box::-webkit-scrollbar { width: 5px; }
-        .chat-box::-webkit-scrollbar-track { background: transparent; }
-        .chat-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
-        body.dark-mode .chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
-
-        /* 訊息進場微動畫 */
-        .msg-bubble-wrap { display: flex; flex-direction: column; position: relative; margin-bottom: 5px; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* 氣泡本體設計 */
-        .msg-bubble { max-width: 78%; padding: 14px 20px; font-size: 0.98em; line-height: 1.5; word-break: break-word; position: relative; user-select: none; -webkit-touch-callout: none; transition: transform 0.2s ease; }
-        
-        /* 自己的訊息 (Apple iMessage 質感漸層) */
-        .msg-bubble.me { 
-            align-self: flex-end; 
-            background: linear-gradient(135deg, #007AFF 0%, #0056D2 100%); 
-            color: white; 
-            border-radius: 22px 22px 6px 22px; 
-            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.25); 
-        }
-        
-        /* 別人的訊息 (高級磨砂白/灰) */
-        .msg-bubble.other { 
-            align-self: flex-start; 
-            background: var(--card-bg); 
-            color: var(--text-main); 
-            border: 1px solid var(--border-color); 
-            border-radius: 22px 22px 22px 6px; 
-            margin-left: 55px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-        }
-        
-        /* 系統訊息 (Glassmorphism 膠囊) */
-        .msg-bubble.system { 
-            align-self: center; 
-            background: rgba(148, 163, 184, 0.15); 
-            color: var(--text-muted); 
-            border-radius: 40px; 
-            font-size: 0.75em; font-weight: 700; letter-spacing: 0.5px; 
-            padding: 6px 20px; margin: 10px 0; max-width: 85%; text-align: center; 
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
-            border: 1px solid rgba(148, 163, 184, 0.2); 
-        }
-        body.dark-mode .msg-bubble.other { background: #1e293b; border-color: rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
-
-        .chat-sender { font-size: 0.75em; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; margin-left: 65px; letter-spacing: 0.5px;}
-        
-        .chat-time { font-size: 0.65em; color: var(--text-muted); position: absolute; bottom: -2px; white-space: nowrap; font-weight: 600; opacity: 0.7;}
-        .msg-bubble.me .chat-time { right: 100%; margin-right: 12px; }
-        .msg-bubble.other .chat-time { left: 100%; margin-left: 12px; }
-
-        .chat-avatar { position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-bg); background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; justify-content: center; align-items: center; font-size: 1.2em; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
-        body.dark-mode .chat-avatar { background: linear-gradient(135deg, #334155, #1e293b); border-color: var(--bg-color); }
-        
-        /* 帶有漸層細線的日期分隔 */
-        .chat-date-sep { text-align: center; color: var(--text-muted); font-size: 0.75em; margin: 20px 0 10px 0; font-weight: 700; letter-spacing: 1px; align-self: center; position: relative; width: 100%; display: flex; align-items: center; justify-content: center; }
-        .chat-date-sep::before, .chat-date-sep::after { content: ""; flex: 1; height: 1px; background: var(--border-color); margin: 0 15px; opacity: 0.5; }
-
-        /* 回覆框設計 */
-        .reply-quote-box { background: rgba(0,0,0,0.1); padding: 8px 14px; border-radius: 10px; font-size: 0.85em; margin-bottom: 10px; border-left: 4px solid rgba(255,255,255,0.7); opacity: 0.9; backdrop-filter: blur(4px); }
-        .msg-bubble.other .reply-quote-box { background: rgba(0,0,0,0.03); border-left-color: var(--primary-color); }
-        body.dark-mode .msg-bubble.other .reply-quote-box { background: rgba(255,255,255,0.05); border-left-color: var(--primary-color); }
-
-        .reactions-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; position: absolute; bottom: -16px; right: 15px; z-index: 5;}
-        .msg-bubble.other .reactions-wrap { right: auto; left: 15px; }
-        .reaction-pill { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 10px; font-size: 0.85em; display: inline-flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.08); cursor: pointer; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); color: var(--text-main);}
-        .reaction-pill:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
-        .reaction-pill.active { background: var(--primary-color); border-color: var(--primary-color); color: white; font-weight: 800;}
-
-        /* 毛玻璃底部輸入區 */
-        .chat-input-area { display: flex; padding: 18px 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); align-items: center; position: relative; z-index: 10;}
-        body.dark-mode .chat-input-area { background: rgba(15, 23, 42, 0.85); border-top-color: rgba(255,255,255,0.05); }
-        
-        .chat-input { flex: 1; padding: 15px 24px; border: 1px solid var(--border-color); border-radius: 30px; font-size: 1.05em; outline: none; background: var(--bg-color); color: var(--text-main); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin:0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
-        .chat-input:focus { border-color: var(--primary-color); background: var(--card-bg); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), inset 0 2px 4px rgba(0,0,0,0.01);}
-        
-        /* 懸浮立體發送按鈕 */
-        .chat-send-btn { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; margin-left: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.3em; padding:0; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);}
-        .chat-send-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 12px 25px rgba(59, 130, 246, 0.5); }
-        .chat-send-btn:active { transform: translateY(0) scale(0.95); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
-
-        /* 預覽與右鍵選單 */
-        .reply-preview-bar { display: none; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(10px); padding: 12px 24px; border-top: 1px solid var(--border-color); font-size: 0.9em; justify-content: space-between; align-items: center; z-index: 5; color: var(--text-main); border-left: 4px solid var(--primary-color);}
-        body.dark-mode .reply-preview-bar { background: rgba(30, 41, 59, 0.95); }
-        
-        .context-menu { position: absolute; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05); display: none; flex-direction: column; z-index: 1000; overflow: hidden; width: min-content; min-width: 200px; transform-origin: top left; animation: menuPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);}
-        body.dark-mode .context-menu { background: rgba(30, 41, 59, 0.95); box-shadow: 0 15px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05); }
-        @keyframes menuPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        
-        .context-menu .emoji-row { display: flex; justify-content: space-around; padding: 14px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 26px; background: transparent;}
-        body.dark-mode .context-menu .emoji-row { border-bottom-color: rgba(255,255,255,0.05); }
-        .context-menu .emoji-row span { cursor: pointer; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .context-menu .emoji-row span:hover { transform: scale(1.35) translateY(-3px); }
-        
-        .context-menu .action-row { padding: 14px 20px; font-size: 1em; font-weight: 700; color: var(--text-main); text-align: left; cursor: pointer; transition: background 0.2s;}
-        .context-menu .action-row:hover { background: rgba(0,0,0,0.05); color: var(--primary-color);}
-        body.dark-mode .context-menu .action-row:hover { background: rgba(255,255,255,0.05); }
+        .context-menu { position: fixed; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid var(--border-color); }
+        .context-menu .emoji-row { display: flex; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border-color); font-size: 24px; background: var(--bg-color); }
+        .context-menu .emoji-row span { cursor: pointer; transition: transform 0.2s; display: inline-block; padding: 2px; }
+        .context-menu .emoji-row span:hover { transform: scale(1.3) translateY(-2px); }
+        .context-menu .action-row { padding: 12px 18px; font-size: 14px; font-weight: bold; color: var(--primary-color); text-align: center; cursor: pointer; transition: 0.2s;}
+        .context-menu .action-row:hover { background: var(--bg-color); }
         .context-menu .action-row.danger { color: var(--danger-color); }
-        .context-menu .action-row.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+        
+        /* 🚀 全新表情明細彈窗 (與 2026TCLIPb 專案完全一致) */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); z-index: 10000; opacity: 0; transition: opacity 0.3s; }
+        .modal-content { position: absolute; top: 50%; left: 50%; background: var(--card-bg); padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .close-btn { position: absolute; top: 12px; right: 18px; font-size: 26px; color: var(--text-muted); cursor: pointer; transition: color 0.2s; line-height: 1; font-weight: bold; }
+        .reaction-detail-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+        .reaction-detail-item:last-child { border-bottom: none; }
+        .reaction-user { font-size: 15px; font-weight: bold; color: var(--text-main); }
+        .reaction-emoji { font-size: 22px; }
+        .reaction-remove-btn { color: var(--danger-color); font-size: 13px; cursor: pointer; background: rgba(239, 68, 68, 0.1); padding: 6px 12px; border-radius: 8px; border: none; font-weight: bold; transition: 0.2s; margin:0; width: auto;}
 
         /* 🖨️ 列印樣式支援 */
         @media print {
@@ -352,8 +282,6 @@
             .theme-toggle-float { bottom: 20px; right: 20px; width: 45px; height: 45px; font-size: 1.2em; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
             .exam-timer-bar { padding: 12px 15px; top: 0 !important; }
             .exam-timer-text { font-size: 1.5em; }
-            .splash-logo { font-size: 2.8em; letter-spacing: -1px; }
-            .splash-subtitle { font-size: 0.7em; letter-spacing: 5px; }
             .nav-menu { width: 100%; right: -100%; }
         }
     </style>
@@ -363,7 +291,6 @@
     <div id="splashScreen">
         <div class="splash-content">
             <div class="splash-logo">VocabMaster</div>
-            <!-- 🌟 偷偷加了閃亮的符號，讓你知道真的有更新到最新版！ -->
             <div class="splash-subtitle">Premium Edition ✨</div>
             <div class="splash-laser-line"></div>
         </div>
@@ -408,13 +335,10 @@
             <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
             <button class="nav-btn" id="installAppBtn" style="display: none; color: #10b981; font-weight: 800;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
             <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
-            <!-- 🚀 修復：記憶系統呼叫更新資料 -->
             <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">📚 記憶系統</button>
             <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
-            <!-- 🚀 修復：排行榜呼叫更新資料 -->
             <button class="nav-btn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
             <button class="nav-btn" onclick="showView('analyticsView')">📈 學習數據</button>
-            <!-- 🚀 修復：戰隊大廳呼叫更新資料與滾動 -->
             <button class="nav-btn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
             <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
             <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
@@ -618,25 +542,29 @@
                     <button class="btn btn-outline" style="width: auto; padding: 8px 15px; border-color: var(--danger-color); color: var(--danger-color);" onclick="handleLeaveTeam()">退出戰隊</button>
                 </div>
 
+                <!-- 🚀 完美移植 2026TCLIPb 的聊天室架構 -->
                 <div class="chat-container">
+                    <div id="chatMessageBoard" class="chat-box" oncontextmenu="return false;"></div>
+                    
+                    <!-- 預覽列移到輸入框上方，完美解決被擋住的問題 -->
                     <div class="reply-preview-bar" id="chatReplyPreview">
                         <div>回覆給 <strong id="replyTargetName" style="color:var(--primary-color);"></strong>：<span id="replyTargetText" style="color:var(--text-muted);"></span></div>
                         <span style="cursor:pointer; font-size:20px; color:#adb5bd; line-height:1;" onclick="cancelReply()">×</span>
                     </div>
-                    <div id="chatMessageBoard" class="chat-box"></div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chatInputBox" class="chat-input" placeholder="左滑/右滑/點擊訊息可回覆..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
-                        <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
+                    
+                    <div class="chat-input-row">
+                        <input type="text" id="chatInputBox" placeholder="左滑/右滑/長按可回覆..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <button type="button" class="btn btn-primary" onclick="sendChatMessage()" style="width:auto; margin:0; padding:10px 20px;">傳送</button>
                     </div>
                 </div>
                 
                 <div id="chatContextMenu" class="context-menu">
                     <div class="emoji-row">
-                        <span onclick="sendReaction('👍')">👍</span>
-                        <span onclick="sendReaction('❤️')">❤️</span>
-                        <span onclick="sendReaction('😂')">😂</span>
-                        <span onclick="sendReaction('🔥')">🔥</span>
-                        <span onclick="sendReaction('❓')">❓</span>
+                        <span onclick="triggerReaction('👍')">👍</span>
+                        <span onclick="triggerReaction('❤️')">❤️</span>
+                        <span onclick="triggerReaction('😂')">😂</span>
+                        <span onclick="triggerReaction('🔥')">🔥</span>
+                        <span onclick="triggerReaction('❓')">❓</span>
                     </div>
                     <div class="action-row" onclick="triggerReplyFromMenu()">↩️ 回覆此訊息</div>
                     <div class="action-row" id="chatMenuEditBtn" onclick="triggerEditFromMenu()" style="display:none;">✏️ 編輯訊息</div>
@@ -708,6 +636,15 @@
             <div style="overflow-x: auto;"><div id="leaderboardTableContainer"></div></div>
         </div>
     </main>
+    
+    <!-- 🚀 全新表情明細彈窗 (完美移植 2026TCLIPb 專案) -->
+    <div id="reaction-modal-overlay" class="overlay" onclick="if(event.target.id==='reaction-modal-overlay') closeReactionModal()">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeReactionModal()">×</span>
+            <h3 style="margin-top: 0; color: var(--primary-color); font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; text-align: center;">表情貼明細</h3>
+            <div id="reaction-modal-list" style="max-height: 250px; overflow-y: auto; text-align: left;"></div>
+        </div>
+    </div>
 
     <script>
         (function initPWA() {
@@ -742,13 +679,12 @@
         }
         function toggleTheme() { AppState.sys.isDarkMode = !AppState.sys.isDarkMode; localStorage.setItem('darkMode', AppState.sys.isDarkMode); applyTheme(); }
         
-        // 🚀 修復：切換畫面時，若是戰隊大廳，強制將滾動條拉到最底
+        // 🚀 修復：切換畫面時，若是戰隊大廳，強制將滾動條拉到最底；若是測驗畫面，隱藏導覽列
         function showView(viewId, isInit = false) {
             document.querySelectorAll('.view-section').forEach(view => { view.classList.remove('active'); });
             const targetView = document.getElementById(viewId); if (targetView) { targetView.classList.add('active'); }
             const navbar = document.getElementById('topNavbar');
             
-            // 🚀 修復：只要進入測驗 (quizView) 或模擬考 (examTakingView)，就強制把整個 Navbar 藏起來
             if (navbar) { 
                 if (['loginView', 'registerView', 'quizView', 'examTakingView'].includes(viewId)) { 
                     navbar.style.display = 'none'; 
@@ -822,19 +758,22 @@
 
             await Promise.all(promises);
             const resSys = await sysPromise;
-            let season = getCurrentSeason(); let examDate;
             
-            // 🚀 修復 1：確保正確解析從試算表抓下來的日期 (並處理 iOS/Safari 的日期相容性)
+            // 🚀 修復：最強保底機制，即使試算表沒連上，也能顯示正確的倒數天數
+            let season = resSys.season || getCurrentSeason();
+            let examDate;
+            
             if (resSys && resSys.success && resSys.gsatDate) { 
-                season = resSys.season; 
-                examDate = new Date(resSys.gsatDate.replace(/-/g, '/')); 
+                examDate = new Date(String(resSys.gsatDate).replace(/-/g, '/')); 
             } else { 
-                examDate = new Date(season + 1911, 0, 16); 
+                if (season === 115) examDate = new Date('2026/01/17');
+                else if (season === 116) examDate = new Date('2027/01/22');
+                else if (season === 117) examDate = new Date('2028/01/15');
+                else examDate = new Date(season + 1911, 0, 16); 
             }
             
             document.getElementById('currentSeasonText').textContent = season.toString(); 
             
-            // 🚀 修復 2：將時間歸零到午夜 00:00:00 再計算，精準算出絕對天數
             let today = new Date();
             today.setHours(0, 0, 0, 0);
             examDate.setHours(0, 0, 0, 0);
@@ -968,7 +907,7 @@
         }
 
         // ==========================================
-        // 戰隊系統與現代化聊天室
+        // 戰隊系統與現代化聊天室 (完美移植版)
         // ==========================================
         function handleCreateTeam() {
             if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
@@ -1011,61 +950,77 @@
             return `${d.getMonth() + 1}/${d.getDate()}`;
         }
 
-        // 聊天室滑動與點擊互動
-        let touchStartX = 0, touchStartY = 0, swipingMsg = null;
+        // 🚀 完全移植 2026TCLIPb 的滑動與右鍵選單邏輯
+        let targetMsgForContext = null;
+        let touchTimer = null;
+        let touchStartX = 0, touchStartY = 0, swipingBubble = null;
         const chatBoxElem = document.getElementById('chatMessageBoard');
 
         chatBoxElem.addEventListener('touchstart', (e) => {
             const bubble = e.target.closest('.msg-bubble');
             if (!bubble || bubble.classList.contains('system')) return;
             touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
-            swipingMsg = bubble;
+            swipingBubble = bubble;
+
+            touchTimer = setTimeout(() => {
+                targetMsgForContext = bubble.dataset.id;
+                const isMe = bubble.dataset.sender === AppState.auth.user;
+                document.getElementById('chatMenuEditBtn').style.display = isMe ? 'block' : 'none';
+                document.getElementById('chatMenuUnsendBtn').style.display = isMe ? 'block' : 'none';
+                
+                const menu = document.getElementById('chatContextMenu');
+                menu.style.display = 'flex';
+                menu.style.left = Math.min(e.touches[0].clientX, window.innerWidth - 180) + 'px';
+                menu.style.top = Math.max(10, e.touches[0].clientY - 80) + 'px';
+                if(navigator.vibrate) navigator.vibrate(50);
+                swipingBubble = null; 
+            }, 500); 
         }, {passive: true});
 
         chatBoxElem.addEventListener('touchmove', (e) => {
-            if (!touchStartX || !swipingMsg) return;
+            if (!touchStartX || !swipingBubble) return;
             let diffX = e.touches[0].clientX - touchStartX;
             let diffY = e.touches[0].clientY - touchStartY;
+            
+            if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) clearTimeout(touchTimer);
+
             if (Math.abs(diffX) > Math.abs(diffY)) { 
-                let moveX = diffX; if (moveX > 60) moveX = 60; if (moveX < -60) moveX = -60;
-                swipingMsg.style.transform = `translateX(${moveX}px)`;
+                let moveX = diffX;
+                if (moveX > 80) moveX = 80; if (moveX < -80) moveX = -80;
+                swipingBubble.style.transform = `translateX(${moveX}px)`;
+                swipingBubble.style.transition = 'none';
             }
         }, {passive: true});
 
         chatBoxElem.addEventListener('touchend', (e) => {
-            if (!swipingMsg || !touchStartX) return;
+            clearTimeout(touchTimer);
+            if (!swipingBubble || !touchStartX) return;
+            
             let diffX = e.changedTouches[0].clientX - touchStartX;
-            swipingMsg.style.transform = 'translateX(0)';
-            if (Math.abs(diffX) > 40) {
-                const textNode = swipingMsg.querySelector('.msg-text');
-                const rawText = textNode ? textNode.innerText : '';
-                if(rawText !== '此訊息已收回') triggerReply(swipingMsg.dataset.id, swipingMsg.dataset.sender, rawText);
+            swipingBubble.style.transition = 'transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1)';
+            swipingBubble.style.transform = 'translateX(0)';
+
+            if (Math.abs(diffX) > 50 && swipingBubble.dataset.sender !== 'System') {
+                triggerReply(swipingBubble.dataset.id, swipingBubble.dataset.sender, swipingBubble.dataset.text);
             }
-            touchStartX = 0; swipingMsg = null;
+            touchStartX = 0; swipingBubble = null;
         });
 
-        chatBoxElem.addEventListener('click', (e) => {
+        // 電腦版右鍵與點擊支援
+        chatBoxElem.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
             const bubble = e.target.closest('.msg-bubble');
-            if (!bubble || bubble.classList.contains('system')) {
-                document.getElementById('chatContextMenu').style.display = 'none'; return;
-            }
-            const textNode = bubble.querySelector('.msg-text');
-            if(textNode && textNode.innerText === '此訊息已收回') return;
-
-            AppState.chat.contextMsgId = bubble.dataset.id;
-            const isMe = bubble.dataset.sender === AppState.auth.user;
+            if (!bubble || bubble.classList.contains('system')) return;
             
+            targetMsgForContext = bubble.dataset.id;
+            const isMe = bubble.dataset.sender === AppState.auth.user;
             document.getElementById('chatMenuEditBtn').style.display = isMe ? 'block' : 'none';
             document.getElementById('chatMenuUnsendBtn').style.display = isMe ? 'block' : 'none';
             
             const menu = document.getElementById('chatContextMenu');
             menu.style.display = 'flex';
-            
-            const rect = bubble.getBoundingClientRect();
-            menu.style.top = Math.max(10, rect.bottom + 5) + 'px';
-            menu.style.left = isMe ? Math.max(10, rect.right - menu.offsetWidth) + 'px' : Math.min(window.innerWidth - menu.offsetWidth - 10, rect.left) + 'px';
-            
-            e.stopPropagation();
+            menu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+            menu.style.top = Math.max(10, e.clientY - 80) + 'px';
         });
 
         document.addEventListener('click', (e) => {
@@ -1074,8 +1029,9 @@
             }
         });
 
+        // 🚀 表情貼與回覆機制
         function triggerReply(msgId, sender, text) {
-            AppState.chat.replyingTo = { id: msgId, sender: sender, text: text.substring(0, 15) + (text.length > 15 ? '...' : '') };
+            AppState.chat.replyingTo = { id: msgId, sender: sender, text: text.length > 15 ? text.substring(0, 15) + '...' : text };
             document.getElementById('chatReplyPreview').style.display = 'flex';
             document.getElementById('replyTargetName').innerText = sender;
             document.getElementById('replyTargetText').innerText = AppState.chat.replyingTo.text;
@@ -1084,17 +1040,85 @@
 
         function triggerReplyFromMenu() {
             document.getElementById('chatContextMenu').style.display = 'none';
-            if (!AppState.chat.contextMsgId) return;
-            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            if (!targetMsgForContext) return;
+            const msg = AppState.chat.history.find(m => m.id === targetMsgForContext);
             if (msg) triggerReply(msg.id, msg.sender, msg.text);
         }
 
         function cancelReply() { AppState.chat.replyingTo = null; document.getElementById('chatReplyPreview').style.display = 'none'; }
 
+        function triggerReaction(emoji) {
+            document.getElementById('chatContextMenu').style.display = 'none';
+            if (!targetMsgForContext || !AppState.sys.currentTeam || !navigator.onLine) return;
+            
+            let msg = AppState.chat.history.find(m => m.id === targetMsgForContext);
+            if (!msg) return;
+            
+            if (!msg.reactions) msg.reactions = {};
+            if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
+            
+            const uIdx = msg.reactions[emoji].indexOf(AppState.auth.user);
+            if (uIdx > -1) msg.reactions[emoji].splice(uIdx, 1); 
+            else msg.reactions[emoji].push(AppState.auth.user); 
+            
+            syncChatUI(AppState.chat.history);
+            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg });
+        }
+
+        // 🚀 新增：表情貼明細與移除功能 (移植自 2026TCLIPb)
+        function openReactionModal(msgId) {
+            const msg = AppState.chat.history.find(m => m.id === msgId);
+            if (!msg || !msg.reactions) return;
+
+            const listContainer = document.getElementById('reaction-modal-list');
+            listContainer.innerHTML = '';
+            let count = 0;
+
+            for (let emoji in msg.reactions) {
+                msg.reactions[emoji].forEach(user => {
+                    count++;
+                    const isMe = user === AppState.auth.user;
+                    const removeBtn = isMe ? `<button class="reaction-remove-btn" onclick="removeReaction('${msgId}', '${emoji}')">點擊移除</button>` : '';
+                    listContainer.innerHTML += `
+                    <div class="reaction-detail-item">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span class="reaction-emoji">${emoji}</span>
+                            <span class="reaction-user">${user} ${isMe ? '<span style="color:var(--text-muted); font-size:12px; font-weight:normal;">(你)</span>' : ''}</span>
+                        </div>
+                        ${removeBtn}
+                    </div>`;
+                });
+            }
+
+            if (count === 0) { closeReactionModal(); return; }
+
+            const overlay = document.getElementById('reaction-modal-overlay');
+            overlay.style.display = 'block';
+            setTimeout(() => { overlay.style.opacity = '1'; }, 10);
+        }
+
+        function closeReactionModal() {
+            const overlay = document.getElementById('reaction-modal-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 300);
+        }
+
+        function removeReaction(msgId, emoji) {
+            const msg = AppState.chat.history.find(m => m.id === msgId);
+            if (!msg || !msg.reactions || !msg.reactions[emoji]) return;
+
+            const uIdx = msg.reactions[emoji].indexOf(AppState.auth.user);
+            if (uIdx > -1) msg.reactions[emoji].splice(uIdx, 1);
+
+            syncChatUI(AppState.chat.history);
+            openReactionModal(msgId); 
+            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg });
+        }
+
         function triggerEditFromMenu() {
             document.getElementById('chatContextMenu').style.display = 'none';
-            if (!AppState.chat.contextMsgId) return;
-            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            if (!targetMsgForContext) return;
+            const msg = AppState.chat.history.find(m => m.id === targetMsgForContext);
             if (!msg) return;
             Swal.fire({ title: '編輯訊息', input: 'text', inputValue: msg.text.replace(' (已編輯)',''), showCancelButton: true, confirmButtonText: '儲存', cancelButtonText: '取消' }).then(r => {
                 if (r.isConfirmed && r.value) {
@@ -1107,82 +1131,70 @@
 
         function triggerUnsendFromMenu() {
             document.getElementById('chatContextMenu').style.display = 'none';
-            if (!AppState.chat.contextMsgId) return;
+            if (!targetMsgForContext) return;
             Swal.fire({ title:'收回訊息？', text:'(兩小時內的訊息才能收回)', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444' }).then(r => {
                 if(r.isConfirmed) {
-                    const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+                    const msg = AppState.chat.history.find(m => m.id === targetMsgForContext);
                     if(msg) {
                         msg.text = "此訊息已收回"; msg.reactions = {};
                         syncChatUI(AppState.chat.history);
-                        apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'unsend', payload: { id: AppState.chat.contextMsgId } }).then(res => { if(!res.success) { Swal.fire('收回失敗', res.message, 'error'); loadTeamChat(); } });
+                        apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'unsend', payload: { id: targetMsgForContext } }).then(res => { if(!res.success) { Swal.fire('收回失敗', res.message, 'error'); loadTeamChat(); } });
                     }
                 }
             });
         }
 
-        function sendReaction(emoji) {
-            document.getElementById('chatContextMenu').style.display = 'none';
-            if (!AppState.chat.contextMsgId || !AppState.sys.currentTeam || !navigator.onLine) return;
-            let msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
-            if (!msg) return;
-            if (!msg.reactions) msg.reactions = {};
-            if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
-            const uIdx = msg.reactions[emoji].indexOf(AppState.auth.user);
-            if (uIdx > -1) msg.reactions[emoji].splice(uIdx, 1); else msg.reactions[emoji].push(AppState.auth.user);
-            syncChatUI(AppState.chat.history);
-            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg });
-        }
-
+        // 🚀 UI 渲染邏輯同步
         function syncChatUI(messages) {
             const board = chatBoxElem;
             const isAtBottom = board.scrollHeight - board.scrollTop <= board.clientHeight + 50;
             let html = ''; let lastDateStr = '';
 
-            messages.forEach(m => {
-                const msgDateStr = formatChatDate(m.rawTime);
+            messages.forEach(msg => {
+                const msgDateStr = formatChatDate(msg.rawTime);
                 if (msgDateStr !== lastDateStr) { html += `<div class="chat-date-sep">${msgDateStr}</div>`; lastDateStr = msgDateStr; }
                 
-                if (m.sender === 'System') {
-                    html += `<div class="msg-bubble system">${m.text}</div>`;
+                if (msg.sender === 'System') {
+                    html += `<div class="msg-bubble system">${msg.text}</div>`;
                 } else {
-                    const isMe = m.sender === AppState.auth.user;
-                    let avHtml = '';
-                    if (!isMe) {
-                        if (m.avatar && (m.avatar.startsWith('data:image') || m.avatar.startsWith('http'))) { avHtml = `<img src="${m.avatar}" class="chat-avatar">`; } 
-                        else { avHtml = `<div class="chat-avatar">${m.avatar || '👤'}</div>`; }
-                    }
-                    
-                    const isUnsent = m.text === '此訊息已收回';
-                    const opacityStyle = isUnsent ? 'opacity: 0.6; font-style: italic;' : '';
+                    const isMe = msg.sender === AppState.auth.user;
+                    const msgId = msg.id;
                     let replyHtml = '';
-                    if (m.replyTo && !isUnsent) replyHtml = `<div class="reply-quote-box"><strong>${m.replyTo.sender}</strong>: ${m.replyTo.text}</div>`;
+                    if (msg.replyTo) replyHtml = `<div class="reply-quote-box"><strong>${msg.replyTo.sender}</strong>: ${msg.replyTo.text}</div>`;
                     
                     let rxHtml = '';
-                    if (m.reactions && !isUnsent) {
-                        for(let e in m.reactions) {
-                            if(m.reactions[e].length > 0) {
-                                const hasMe = m.reactions[e].includes(AppState.auth.user);
-                                rxHtml += `<span class="reaction-pill ${hasMe?'active':''}">${e} ${m.reactions[e].length}</span>`;
+                    if (msg.reactions) {
+                        for(let emoji in msg.reactions) {
+                            if (msg.reactions[emoji].length > 0) {
+                                const hasMe = msg.reactions[emoji].includes(AppState.auth.user);
+                                rxHtml += `<div class="reaction-pill ${hasMe?'active':''}" onclick="openReactionModal('${msgId}')">${emoji} ${msg.reactions[emoji].length}</div>`;
                             }
                         }
                     }
                     if(rxHtml) rxHtml = `<div class="reactions-wrap">${rxHtml}</div>`;
+                    
+                    const cleanText = (msg.text || '').replace(/"/g, '"');
+                    let displayTime = msg.time || '';
+                    if (displayTime.includes(' ')) {
+                        const parts = displayTime.split(' ');
+                        if (parts.length > 1) displayTime = parts[1].substring(0, 5);
+                    } else if (displayTime.length > 5) {
+                        displayTime = displayTime.substring(0, 5);
+                    }
+                    
+                    let opacityStyle = msg.text === '此訊息已收回' ? 'opacity: 0.6; font-style: italic;' : '';
 
                     html += `
-                        <div class="msg-bubble-wrap">
-                            <div class="msg-bubble ${isMe ? 'me' : 'other'}" style="${opacityStyle}" data-id="${m.id}" data-sender="${m.sender}">
-                                ${avHtml}
-                                ${!isMe && !isUnsent ? `<div class="chat-sender">${m.sender}</div>` : ''}
-                                ${replyHtml}
-                                <div class="msg-text">${m.text}</div>
-                                <div class="chat-time">${m.time}</div>
-                                ${rxHtml}
-                            </div>
+                    <div class="msg-bubble-wrap" style="${opacityStyle}">
+                        <div class="msg-bubble ${isMe ? 'mine' : 'other'}" data-id="${msgId}" data-sender="${msg.sender}" data-text="${cleanText}">
+                            ${!isMe ? `<div class="msg-sender">${msg.sender} <span style="font-size: 10px; color:var(--text-muted); margin-left:6px; font-weight:normal;">${displayTime}</span></div>` : `<div class="msg-sender" style="text-align:right;"><span style="font-size: 10px; color:var(--text-muted); margin-right:6px; font-weight:normal;">${displayTime}</span></div>`}
+                            ${replyHtml}
+                            <div class="msg-text">${msg.text}</div>
+                            ${msg.text !== '此訊息已收回' ? rxHtml : ''}
                         </div>
-                    `;
+                    </div>`;
                 }
             });
-            // 🚀 修復：將原本隱形的白色 fallback 文字改成系統文字色
             board.innerHTML = html || '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-weight:bold;">尚無對話，來打聲招呼吧！</div>';
             if (isAtBottom) board.scrollTop = board.scrollHeight;
         }
@@ -1202,7 +1214,6 @@
             });
         }
 
-        // 🚀 修復：移除不支援的 Utilities，確保時間格式生成正確
         function sendChatMessage() {
             const input = document.getElementById('chatInputBox'); const msgText = input.value.trim();
             if (!msgText || !AppState.sys.currentTeam || !navigator.onLine) return;
@@ -1453,7 +1464,7 @@
         function refreshProfileData() { if (!AppState.auth.user || AppState.auth.user === '訪客' || AppState.profile.isSaving || !navigator.onLine) return; apiCall('getProfileData', { username: AppState.auth.user }).then(res => { if(res.success && !AppState.profile.isSaving) { renderGlobalProfile(res); } }); }
         function toggleMenu() { const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay'); if (menu.classList.contains('show')) { menu.classList.remove('show'); overlay.classList.remove('show'); } else { menu.classList.add('show'); overlay.classList.add('show'); } }
         
-        // 🚀 修復：強大的 Regex 過濾掉不需要的詞性標記，讓拼字與選項更乾淨
+        // 🚀 強大的 Regex 過濾掉不需要的詞性標記，讓拼字與選項更乾淨
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
             let w = rawWord.toString().trim();
@@ -1509,7 +1520,7 @@
         function changeFlashcard(delta) { const newIdx = AppState.review.currentIndex + delta; if (newIdx >= 0 && newIdx < AppState.review.cards.length) { AppState.review.currentIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
         function renderListMode() { let html = ''; AppState.review.cards.forEach((q, i) => { const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; const hasChinese = /[\u4E00-\u9FFF]/.test(String(q.question || '')); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const cleanWord = getPureWord(enWord); const safeEnWord = cleanWord.replace(/'/g, "\\'"); html += `<div class="review-list-item" style="opacity: ${q.isDue ? '1' : '0.6'};"><div style="flex: 1;"><strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br><span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${cleanWord}</span></div><button class="list-speak-btn" onclick="speakWord('${safeEnWord}')">🔊</button></div>`; }); document.getElementById('listModeContainer').innerHTML = html; }
 
-        function handleAvatarFile(event) { if(!navigator.onLine) return Swal.fire('離線中', '上傳頭像需要網路連線。', 'error'); const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); const MAX_SIZE = 400; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height); const base64Data = canvas.toDataURL('image/jpeg', 0.9); document.getElementById('profileAvatarPreview').innerHTML = `<img src="${base64Data}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; showLoading('上傳至雲端空間中...'); apiCall('uploadAvatarToDrive', { username: AppState.auth.user, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) { Swal.fire('成功', '大頭貼已上傳並產生網址！', 'success'); if(AppState.profile.cache) AppState.profile.cache.avatar = r.url; } else Swal.fire('失敗', r.message, 'error'); }); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
+        function handleAvatarFile(event) { if(!navigator.onLine) return Swal.fire('離線中', '上傳頭像需要網路連線。', 'error'); const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); const MAX_SIZE = 400; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height); const base64Data = canvas.toDataURL('image/jpeg', 0.9); document.getElementById('profileAvatarPreview').innerHTML = `<img src="${base64Data}" stylewidth:100px; height:100px; border-radius:50%; object-fit:cover;">`; showLoading('上傳至雲端空間中...'); apiCall('uploadAvatarToDrive', { username: AppState.auth.user, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) { Swal.fire('成功', '大頭貼已上傳並產生網址！', 'success'); if(AppState.profile.cache) AppState.profile.cache.avatar = r.url; } else Swal.fire('失敗', r.message, 'error'); }); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
         function handleApiKeyUpdate() { if(!navigator.onLine) return Swal.fire('離線中', '綁定金鑰需要網路連線。', 'error'); const k = document.getElementById('profApiKey').value.trim(); if (!k || !k.startsWith('AIza')) return Swal.fire('格式錯誤', '請輸入有效的 API Key (以 AIza 開頭)', 'warning'); showLoading('綁定中...'); apiCall('updateApiKey', { username: AppState.auth.user, apiKey: k }).then(res => { if(res.success) { Swal.fire('成功', res.message, 'success'); refreshProfileData(); document.getElementById('profApiKey').value=''; } else Swal.fire('失敗', '綁定失敗', 'error'); }); }
 
         async function fetchExamData(year) { if(!navigator.onLine) return Swal.fire('離線中', '歷屆試題需要網路連線才能下載喔！', 'warning'); document.getElementById('examLobby').style.display = 'none'; document.getElementById('examPreRoom').style.display = 'none'; document.getElementById('examLoading').style.display = 'block'; try { const url = `https://yangbrian01.github.io/GSAT-english.exam/assets/exams/${year}.json?t=${new Date().getTime()}`; const response = await fetch(url); if (!response.ok) throw new Error(`考卷 (${year}.json) 還沒準備好喔！`); AppState.exam.data = await response.json(); document.getElementById('examLoading').style.display = 'none'; document.getElementById('examTitle').textContent = AppState.exam.data.title || `${year} 學年度 英文考科`; document.getElementById('examPreRoom').style.display = 'block'; } catch (e) { document.getElementById('examLoading').style.display = 'none'; document.getElementById('examLobby').style.display = 'grid'; Swal.fire('讀取失敗', e.message, 'error'); } }
