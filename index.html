@@ -200,7 +200,7 @@
         .heatmap-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.8em; color: var(--text-muted); margin-top: 8px;}
 
         /* 💬 聊天室專用 CSS (LINE 風格 + 操作整合) */
-        .chat-container { display: flex; flex-direction: column; height: 500px; background: #8ba9c7; border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; position: relative;}
+        .chat-container { display: flex; flex-direction: column; height: 500px; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; position: relative;}
         body.dark-mode .chat-container { background: #1e293b; border-color: #334155; }
         .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; overflow-x: hidden;}
         
@@ -1090,7 +1090,16 @@
             if (!msgText || !AppState.sys.currentTeam || !navigator.onLine) return;
             input.value = ''; 
             
-            const newMsg = { id: 'msg_' + Date.now() + Math.floor(Math.random()*1000), sender: AppState.auth.user, text: msgText, time: Utilities.formatDate(new Date(), "Asia/Taipei", "HH:mm") || new Date().toLocaleTimeString('zh-TW', {hour12:false, hour:'2-digit', minute:'2-digit'}), rawTime: new Date().toISOString(), reactions: {} };
+            // 🚀 修正：移除後端專用的 Utilities，改用純前端的 toLocaleTimeString 抓取本地時間
+            const newMsg = { 
+                id: 'msg_' + Date.now() + Math.floor(Math.random()*1000), 
+                sender: AppState.auth.user, 
+                text: msgText, 
+                time: new Date().toLocaleTimeString('zh-TW', {hour12:false, hour:'2-digit', minute:'2-digit'}), 
+                rawTime: new Date().toISOString(), 
+                reactions: {} 
+            };
+            
             if (AppState.chat.replyingTo) { newMsg.replyTo = AppState.chat.replyingTo; cancelReply(); }
             
             AppState.chat.history.push(newMsg); syncChatUI(AppState.chat.history); chatBoxElem.scrollTop = chatBoxElem.scrollHeight;
