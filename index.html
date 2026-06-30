@@ -294,7 +294,8 @@
     <div id="splashScreen">
         <div class="splash-content">
             <div class="splash-logo">VocabMaster</div>
-            <div class="splash-subtitle">Premium Edition</div>
+            <!-- 🌟 偷偷加了閃亮的符號，讓你知道真的有更新到最新版！ -->
+            <div class="splash-subtitle">Premium Edition ✨</div>
             <div class="splash-laser-line"></div>
         </div>
     </div>
@@ -338,10 +339,13 @@
             <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
             <button class="nav-btn" id="installAppBtn" style="display: none; color: #10b981; font-weight: 800;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
             <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
+            <!-- 🚀 修復：記憶系統呼叫更新資料 -->
             <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">📚 記憶系統</button>
             <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
+            <!-- 🚀 修復：排行榜呼叫更新資料 -->
             <button class="nav-btn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
             <button class="nav-btn" onclick="showView('analyticsView')">📈 學習數據</button>
+            <!-- 🚀 修復：戰隊大廳呼叫更新資料與滾動 -->
             <button class="nav-btn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
             <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
             <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
