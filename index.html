@@ -218,7 +218,6 @@
 
         .chat-sender { font-size: 0.75em; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; margin-left: 55px; }
         
-        /* 時間移到泡泡外部，排版更純粹乾淨 */
         .chat-time { font-size: 0.7em; color: var(--text-muted) !important; position: absolute; bottom: 4px; white-space: nowrap; font-weight: 500;}
         .msg-bubble.me .chat-time { right: 100%; margin-right: 10px; text-shadow: none; }
         .msg-bubble.other .chat-time { left: 100%; margin-left: 10px; text-shadow: none; }
@@ -234,7 +233,6 @@
         .reaction-pill { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2px 8px; font-size: 0.85em; display: inline-flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; color: var(--text-main);}
         .reaction-pill.active { background: var(--primary-color); border-color: var(--primary-hover); color: white; font-weight: bold;}
 
-        /* 底部輸入區域大升級 */
         .chat-input-area { display: flex; padding: 15px 20px; background: var(--nav-bg); border-top: 1px solid var(--border-color); align-items: center; position: relative; z-index: 10;}
         .chat-input { flex: 1; padding: 14px 20px; border: 2px solid transparent; border-radius: 30px; font-size: 1em; outline: none; background: var(--bg-color); color: var(--text-main); transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); margin:0;}
         .chat-input:focus { border-color: var(--primary-color); background: var(--card-bg); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);}
@@ -242,7 +240,6 @@
         .chat-send-btn { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 48px; height: 48px; margin-left: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.2em; padding:0; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);}
         .chat-send-btn:hover { transform: scale(1.08) translateY(-2px); background: var(--primary-hover); box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);}
 
-        /* 選單與回覆區 */
         .reply-preview-bar { display: none; background: var(--bg-color); padding: 10px 15px; border-top: 1px solid var(--border-color); font-size: 0.85em; justify-content: space-between; align-items: center; z-index: 5; color: var(--text-main);}
         .context-menu { position: absolute; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid var(--border-color); width: max-content;}
         .context-menu .emoji-row { display: flex; gap: 8px; padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-size: 24px; justify-content: center; background: var(--bg-color);}
@@ -345,7 +342,7 @@
             <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
             <button class="nav-btn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
             <button class="nav-btn" onclick="showView('analyticsView')">📈 學習數據</button>
-            <button class="nav-btn" onclick="showView('teamView')">🤝 戰隊大廳</button>
+            <button class="nav-btn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
             <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
             <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
             <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
@@ -672,6 +669,7 @@
         }
         function toggleTheme() { AppState.sys.isDarkMode = !AppState.sys.isDarkMode; localStorage.setItem('darkMode', AppState.sys.isDarkMode); applyTheme(); }
         
+        // 🚀 修復：切換畫面時，若是戰隊大廳，強制將滾動條拉到最底
         function showView(viewId, isInit = false) {
             document.querySelectorAll('.view-section').forEach(view => { view.classList.remove('active'); });
             const targetView = document.getElementById(viewId); if (targetView) { targetView.classList.add('active'); }
@@ -680,6 +678,13 @@
             const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay');
             if (menu && menu.classList.contains('show')) { menu.classList.remove('show'); if (overlay) overlay.classList.remove('show'); }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (viewId === 'teamView') {
+                setTimeout(() => {
+                    const board = document.getElementById('chatMessageBoard');
+                    if (board) board.scrollTop = board.scrollHeight;
+                }, 100);
+            }
         }
 
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed: ', err)); }); }
@@ -865,7 +870,7 @@
         }
 
         // ==========================================
-        // 戰隊系統與 LINE 風格聊天室
+        // 戰隊系統與現代化聊天室
         // ==========================================
         function handleCreateTeam() {
             if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
@@ -1079,7 +1084,8 @@
                     `;
                 }
             });
-            board.innerHTML = html || '<div style="text-align:center; color:rgba(255,255,255,0.7); margin-top:20px; font-weight:bold;">尚無對話，來打聲招呼吧！</div>';
+            // 🚀 修復：將原本隱形的白色 fallback 文字改成系統文字色
+            board.innerHTML = html || '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-weight:bold;">尚無對話，來打聲招呼吧！</div>';
             if (isAtBottom) board.scrollTop = board.scrollHeight;
         }
 
@@ -1090,12 +1096,12 @@
             });
         }
 
+        // 🚀 修復：移除不支援的 Utilities，確保時間格式生成正確
         function sendChatMessage() {
             const input = document.getElementById('chatInputBox'); const msgText = input.value.trim();
             if (!msgText || !AppState.sys.currentTeam || !navigator.onLine) return;
             input.value = ''; 
             
-            // 🚀 修正：移除後端專用的 Utilities，改用純前端的 toLocaleTimeString 抓取本地時間
             const newMsg = { 
                 id: 'msg_' + Date.now() + Math.floor(Math.random()*1000), 
                 sender: AppState.auth.user, 
@@ -1340,16 +1346,17 @@
         // ==========================================
         function refreshProfileData() { if (!AppState.auth.user || AppState.auth.user === '訪客' || AppState.profile.isSaving || !navigator.onLine) return; apiCall('getProfileData', { username: AppState.auth.user }).then(res => { if(res.success && !AppState.profile.isSaving) { renderGlobalProfile(res); } }); }
         function toggleMenu() { const menu = document.getElementById('navMenu'); const overlay = document.getElementById('navMenuOverlay'); if (menu.classList.contains('show')) { menu.classList.remove('show'); overlay.classList.remove('show'); } else { menu.classList.add('show'); overlay.classList.add('show'); } }
+        
+        // 🚀 修復：強大的 Regex 過濾掉不需要的詞性標記，讓拼字與選項更乾淨
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
             let w = rawWord.toString();
-    
             w = w.replace(/\s*\([a-zA-Z.\/]+\)\s*/g, ''); 
             w = w.replace(/\s+(?:(?:n|v|vi|vt)[\.\/]*|(?:adj|adv|prep|conj|pron|num|art|phr)[\.\/]+)(?:(?:n|v|vi|vt|adj|adv|prep|conj|pron|num|art|phr)[\.\/]*)*$/i, '');
             w = w.replace(/([a-zA-Z])(?:n|v|vi|vt|adj|adv|prep|conj|pron)[\.\/]*\/[\.\/]*(?:(?:n|v|vi|vt|adj|adv|prep|conj|pron|num|art|phr)[\.\/]*)*$/i, '$1');
-    
-            return w.trim();
+            return w.trim(); 
         }
+
         function getSpellBaseWord(rawWord) { let w = getPureWord(rawWord); w = w.replace(/\(.*?\)/g, ''); w = w.split('/')[0]; return w.trim(); }
         function speakWord(text, rate = 0.85) { if (!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = rate; window.speechSynthesis.speak(u); }
 
