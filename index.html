@@ -199,55 +199,122 @@
         .heatmap-cell[data-level="4"] { background-color: rgba(16, 185, 129, 1); box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
         .heatmap-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 0.8em; color: var(--text-muted); margin-top: 8px;}
 
-        /* 💬 聊天室專用 CSS (Premium 現代質感 UI) */
-        .chat-container { display: flex; flex-direction: column; height: 550px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; position: relative; transition: 0.3s;}
-        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; overflow-x: hidden;}
-        
-        /* 訂製極簡滾動條 */
-        .chat-box::-webkit-scrollbar { width: 6px; }
+        /* 💎 聊天室專用 CSS (Ultra Premium 旗艦級 UI) */
+        .chat-container { 
+            display: flex; flex-direction: column; height: 600px; 
+            background: var(--card-bg); 
+            border: 1px solid rgba(0,0,0,0.05); 
+            border-radius: 28px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05); 
+            overflow: hidden; position: relative; transition: 0.3s;
+        }
+        body.dark-mode .chat-container {
+            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--bg-color);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        /* 隱藏式極簡滾動條 */
+        .chat-box { flex: 1; padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; overflow-x: hidden; background: var(--bg-color); }
+        .chat-box::-webkit-scrollbar { width: 5px; }
         .chat-box::-webkit-scrollbar-track { background: transparent; }
-        .chat-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
-        body.dark-mode .chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+        .chat-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
+        body.dark-mode .chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
 
-        .msg-bubble-wrap { display: flex; flex-direction: column; position: relative; margin-bottom: 8px; }
-        .msg-bubble { max-width: 75%; padding: 12px 18px; font-size: 0.95em; line-height: 1.5; word-break: break-word; position: relative; user-select: none; -webkit-touch-callout: none; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1); box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
-        .msg-bubble.me { align-self: flex-end; background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); color: white; border-radius: 20px 20px 4px 20px;}
-        .msg-bubble.other { align-self: flex-start; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 20px 20px 20px 4px; margin-left: 45px;}
-        .msg-bubble.system { align-self: center; background: rgba(100, 116, 139, 0.1); color: var(--text-muted); border-radius: 30px; font-size: 0.8em; font-weight: 600; padding: 6px 16px; margin: 15px 0; max-width: 80%; text-align: center; border: 1px solid rgba(100, 116, 139, 0.2); backdrop-filter: blur(4px);}
-        body.dark-mode .msg-bubble.other { background: var(--card-bg); border-color: var(--border-color);}
+        /* 訊息進場微動畫 */
+        .msg-bubble-wrap { display: flex; flex-direction: column; position: relative; margin-bottom: 5px; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .chat-sender { font-size: 0.75em; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; margin-left: 55px; }
+        /* 氣泡本體設計 */
+        .msg-bubble { max-width: 78%; padding: 14px 20px; font-size: 0.98em; line-height: 1.5; word-break: break-word; position: relative; user-select: none; -webkit-touch-callout: none; transition: transform 0.2s ease; }
         
-        .chat-time { font-size: 0.7em; color: var(--text-muted) !important; position: absolute; bottom: 4px; white-space: nowrap; font-weight: 500;}
-        .msg-bubble.me .chat-time { right: 100%; margin-right: 10px; text-shadow: none; }
-        .msg-bubble.other .chat-time { left: 100%; margin-left: 10px; text-shadow: none; }
-
-        .chat-avatar { position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-bg); background: var(--bg-color); display: flex; justify-content: center; align-items: center; font-size: 1.2em; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.08);}
-        .chat-date-sep { text-align: center; color: var(--text-muted); font-size: 0.8em; margin: 15px 0 10px 0; font-weight: bold; background: var(--border-color); padding: 4px 12px; border-radius: 20px; align-self: center; opacity: 0.7;}
-
-        .reply-quote-box { background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 8px; font-size: 0.85em; color: inherit; margin-bottom: 8px; border-left: 4px solid rgba(255,255,255,0.5); opacity: 0.9;}
-        .msg-bubble.other .reply-quote-box { background: var(--bg-color); border-left-color: var(--primary-color); color: var(--text-muted);}
-
-        .reactions-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; position: absolute; bottom: -12px; right: 10px; z-index: 5;}
-        .msg-bubble.other .reactions-wrap { right: auto; left: 10px; }
-        .reaction-pill { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2px 8px; font-size: 0.85em; display: inline-flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; color: var(--text-main);}
-        .reaction-pill.active { background: var(--primary-color); border-color: var(--primary-hover); color: white; font-weight: bold;}
-
-        .chat-input-area { display: flex; padding: 15px 20px; background: var(--nav-bg); border-top: 1px solid var(--border-color); align-items: center; position: relative; z-index: 10;}
-        .chat-input { flex: 1; padding: 14px 20px; border: 2px solid transparent; border-radius: 30px; font-size: 1em; outline: none; background: var(--bg-color); color: var(--text-main); transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); margin:0;}
-        .chat-input:focus { border-color: var(--primary-color); background: var(--card-bg); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);}
+        /* 自己的訊息 (Apple iMessage 質感漸層) */
+        .msg-bubble.me { 
+            align-self: flex-end; 
+            background: linear-gradient(135deg, #007AFF 0%, #0056D2 100%); 
+            color: white; 
+            border-radius: 22px 22px 6px 22px; 
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.25); 
+        }
         
-        .chat-send-btn { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 48px; height: 48px; margin-left: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.2em; padding:0; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);}
-        .chat-send-btn:hover { transform: scale(1.08) translateY(-2px); background: var(--primary-hover); box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);}
+        /* 別人的訊息 (高級磨砂白/灰) */
+        .msg-bubble.other { 
+            align-self: flex-start; 
+            background: var(--card-bg); 
+            color: var(--text-main); 
+            border: 1px solid var(--border-color); 
+            border-radius: 22px 22px 22px 6px; 
+            margin-left: 55px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+        }
+        
+        /* 系統訊息 (Glassmorphism 膠囊) */
+        .msg-bubble.system { 
+            align-self: center; 
+            background: rgba(148, 163, 184, 0.15); 
+            color: var(--text-muted); 
+            border-radius: 40px; 
+            font-size: 0.75em; font-weight: 700; letter-spacing: 0.5px; 
+            padding: 6px 20px; margin: 10px 0; max-width: 85%; text-align: center; 
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
+            border: 1px solid rgba(148, 163, 184, 0.2); 
+        }
+        body.dark-mode .msg-bubble.other { background: #1e293b; border-color: rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
 
-        .reply-preview-bar { display: none; background: var(--bg-color); padding: 10px 15px; border-top: 1px solid var(--border-color); font-size: 0.85em; justify-content: space-between; align-items: center; z-index: 5; color: var(--text-main);}
-        .context-menu { position: absolute; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid var(--border-color); width: max-content;}
-        .context-menu .emoji-row { display: flex; gap: 8px; padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-size: 24px; justify-content: center; background: var(--bg-color);}
-        .context-menu .emoji-row span { cursor: pointer; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; padding: 4px; }
-        .context-menu .emoji-row span:hover { transform: scale(1.3) translateY(-2px); }
-        .context-menu .action-row { padding: 14px 20px; font-size: 0.95em; font-weight: 700; color: var(--primary-color); text-align: left; cursor: pointer; transition: 0.2s;}
-        .context-menu .action-row:hover { background: var(--bg-color); padding-left: 25px;}
+        .chat-sender { font-size: 0.75em; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; margin-left: 65px; letter-spacing: 0.5px;}
+        
+        .chat-time { font-size: 0.65em; color: var(--text-muted); position: absolute; bottom: -2px; white-space: nowrap; font-weight: 600; opacity: 0.7;}
+        .msg-bubble.me .chat-time { right: 100%; margin-right: 12px; }
+        .msg-bubble.other .chat-time { left: 100%; margin-left: 12px; }
+
+        .chat-avatar { position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--card-bg); background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; justify-content: center; align-items: center; font-size: 1.2em; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+        body.dark-mode .chat-avatar { background: linear-gradient(135deg, #334155, #1e293b); border-color: var(--bg-color); }
+        
+        /* 帶有漸層細線的日期分隔 */
+        .chat-date-sep { text-align: center; color: var(--text-muted); font-size: 0.75em; margin: 20px 0 10px 0; font-weight: 700; letter-spacing: 1px; align-self: center; position: relative; width: 100%; display: flex; align-items: center; justify-content: center; }
+        .chat-date-sep::before, .chat-date-sep::after { content: ""; flex: 1; height: 1px; background: var(--border-color); margin: 0 15px; opacity: 0.5; }
+
+        /* 回覆框設計 */
+        .reply-quote-box { background: rgba(0,0,0,0.1); padding: 8px 14px; border-radius: 10px; font-size: 0.85em; margin-bottom: 10px; border-left: 4px solid rgba(255,255,255,0.7); opacity: 0.9; backdrop-filter: blur(4px); }
+        .msg-bubble.other .reply-quote-box { background: rgba(0,0,0,0.03); border-left-color: var(--primary-color); }
+        body.dark-mode .msg-bubble.other .reply-quote-box { background: rgba(255,255,255,0.05); border-left-color: var(--primary-color); }
+
+        .reactions-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; position: absolute; bottom: -16px; right: 15px; z-index: 5;}
+        .msg-bubble.other .reactions-wrap { right: auto; left: 15px; }
+        .reaction-pill { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 10px; font-size: 0.85em; display: inline-flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.08); cursor: pointer; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); color: var(--text-main);}
+        .reaction-pill:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
+        .reaction-pill.active { background: var(--primary-color); border-color: var(--primary-color); color: white; font-weight: 800;}
+
+        /* 毛玻璃底部輸入區 */
+        .chat-input-area { display: flex; padding: 18px 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); align-items: center; position: relative; z-index: 10;}
+        body.dark-mode .chat-input-area { background: rgba(15, 23, 42, 0.85); border-top-color: rgba(255,255,255,0.05); }
+        
+        .chat-input { flex: 1; padding: 15px 24px; border: 1px solid var(--border-color); border-radius: 30px; font-size: 1.05em; outline: none; background: var(--bg-color); color: var(--text-main); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin:0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
+        .chat-input:focus { border-color: var(--primary-color); background: var(--card-bg); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), inset 0 2px 4px rgba(0,0,0,0.01);}
+        
+        /* 懸浮立體發送按鈕 */
+        .chat-send-btn { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; margin-left: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.3em; padding:0; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);}
+        .chat-send-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 12px 25px rgba(59, 130, 246, 0.5); }
+        .chat-send-btn:active { transform: translateY(0) scale(0.95); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+
+        /* 預覽與右鍵選單 */
+        .reply-preview-bar { display: none; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(10px); padding: 12px 24px; border-top: 1px solid var(--border-color); font-size: 0.9em; justify-content: space-between; align-items: center; z-index: 5; color: var(--text-main); border-left: 4px solid var(--primary-color);}
+        body.dark-mode .reply-preview-bar { background: rgba(30, 41, 59, 0.95); }
+        
+        .context-menu { position: absolute; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05); display: none; flex-direction: column; z-index: 1000; overflow: hidden; width: min-content; min-width: 200px; transform-origin: top left; animation: menuPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);}
+        body.dark-mode .context-menu { background: rgba(30, 41, 59, 0.95); box-shadow: 0 15px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05); }
+        @keyframes menuPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .context-menu .emoji-row { display: flex; justify-content: space-around; padding: 14px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 26px; background: transparent;}
+        body.dark-mode .context-menu .emoji-row { border-bottom-color: rgba(255,255,255,0.05); }
+        .context-menu .emoji-row span { cursor: pointer; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .context-menu .emoji-row span:hover { transform: scale(1.35) translateY(-3px); }
+        
+        .context-menu .action-row { padding: 14px 20px; font-size: 1em; font-weight: 700; color: var(--text-main); text-align: left; cursor: pointer; transition: background 0.2s;}
+        .context-menu .action-row:hover { background: rgba(0,0,0,0.05); color: var(--primary-color);}
+        body.dark-mode .context-menu .action-row:hover { background: rgba(255,255,255,0.05); }
         .context-menu .action-row.danger { color: var(--danger-color); }
+        .context-menu .action-row.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
 
         /* 🖨️ 列印樣式支援 */
         @media print {
