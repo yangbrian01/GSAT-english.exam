@@ -352,6 +352,8 @@
             .theme-toggle-float { bottom: 20px; right: 20px; width: 45px; height: 45px; font-size: 1.2em; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
             .exam-timer-bar { padding: 12px 15px; top: 0 !important; }
             .exam-timer-text { font-size: 1.5em; }
+            .splash-logo { font-size: 2.8em; letter-spacing: -1px; }
+            .splash-subtitle { font-size: 0.7em; letter-spacing: 5px; }
             .nav-menu { width: 100%; right: -100%; }
         }
     </style>
@@ -815,7 +817,10 @@
             if (resSys && resSys.success && resSys.gsatDate) { season = resSys.season; examDate = new Date(resSys.gsatDate); } else { examDate = new Date(season + 1911, 0, 16); }
             
             document.getElementById('currentSeasonText').textContent = season.toString(); examDate.setHours(0, 0, 0, 0); 
-            let diffDays = Math.floor((examDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)); 
+            let today = new Date();
+            today.setHours(0, 0, 0, 0); // 將今天的時間歸零到午夜 00:00:00
+            examDate.setHours(0, 0, 0, 0); // 將考試日期的時間也歸零
+            let diffDays = Math.round((examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)); 
             if (diffDays >= 0) { document.getElementById('cdDays').textContent = diffDays; document.getElementById('gsatCountdown').style.display = 'block'; }
 
             if (AppState.auth.user && AppState.auth.token) {
@@ -1421,10 +1426,9 @@
         // 🚀 修復：強大的 Regex 過濾掉不需要的詞性標記，讓拼字與選項更乾淨
         function getPureWord(rawWord) { 
             if (!rawWord) return ''; 
-            let w = rawWord.toString();
-            w = w.replace(/\s*\([a-zA-Z.\/]+\)\s*/g, ''); 
-            w = w.replace(/\s+(?:(?:n|v|vi|vt)[\.\/]*|(?:adj|adv|prep|conj|pron|num|art|phr)[\.\/]+)(?:(?:n|v|vi|vt|adj|adv|prep|conj|pron|num|art|phr)[\.\/]*)*$/i, '');
-            w = w.replace(/([a-zA-Z])(?:n|v|vi|vt|adj|adv|prep|conj|pron)[\.\/]*\/[\.\/]*(?:(?:n|v|vi|vt|adj|adv|prep|conj|pron|num|art|phr)[\.\/]*)*$/i, '$1');
+            let w = rawWord.toString().trim();
+            w = w.replace(/\s*\((?:n|v|vi|vt|adj|adv|prep|conj|pron|num|art|phr|sb|sth|u|c)[\.\/]*\)\s*$/i, '');
+            w = w.replace(/\s*(?:n|v|vi|vt|adj|adv|prep|conj|pron|num|art|phr|sb|sth|u|c)[\.\/]+(?:n|v|vi|vt|adj|adv|prep|conj|pron|num|art|phr|sb|sth|u|c|[\.\/])*$/i, '');
             return w.trim(); 
         }
 
