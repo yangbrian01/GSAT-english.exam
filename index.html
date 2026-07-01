@@ -39,12 +39,16 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; transition: background-color 0.3s, color 0.3s;}
 
-        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); background-image: radial-gradient(circle at center, rgba(59, 130, 246, 0.08) 0%, transparent 60%); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.7s, transform 0.7s, filter 0.7s, visibility 0.7s; }
-        #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.15); filter: blur(15px); }
+        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); background-image: radial-gradient(circle at center, rgba(59, 130, 246, 0.08) 0%, transparent 60%); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s, visibility 0.5s; }
+        #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .splash-content { display: flex; flex-direction: column; align-items: center; width: 100%; animation: splashFloat 1.2s forwards; }
         .splash-logo { font-size: 4.5em; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 2px; background: linear-gradient(110deg, var(--text-main) 0%, var(--text-muted) 35%, var(--primary-color) 50%, var(--text-muted) 65%, var(--text-main) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerShine 2.5s linear infinite; }
         .splash-subtitle { font-size: 0.85em; font-weight: 700; color: var(--text-muted); letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.7; }
         .splash-laser-line { width: 0px; height: 2px; background: var(--primary-color); box-shadow: 0 0 12px var(--primary-color); animation: laserExpand 1.5s forwards; }
+
+        @keyframes shimmerShine { to { background-position: 200% center; } }
+        @keyframes splashFloat { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes laserExpand { 0% { width: 0px; opacity: 0; } 30% { opacity: 1; } 100% { width: 220px; opacity: 1; } }
 
         #offlineBanner { display: none; background-color: var(--danger-color); color: white; text-align: center; padding: 8px; font-weight: bold; position: sticky; top: 0; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
@@ -223,34 +227,36 @@
 
         /* 🚀 全新 Flexbox 聊天架構 & 封殺系統預設觸控行為 */
         .chat-row { 
-            display: flex; align-items: flex-end; width: 100%; gap: 8px; margin-bottom: 8px; position: relative; 
+            display: flex; flex-direction: column; width: 100%; margin-bottom: 8px; position: relative; 
             animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; /* 徹底封殺 iPad 長按反白 */
+            -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
         }
-        .chat-row.me { flex-direction: row-reverse; }
+        .chat-row.me { align-items: flex-end; }
+        .chat-row.other { align-items: flex-start; }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 🚀 資訊列 (名字 + 已編輯) - 完美避開氣泡 */
+        .chat-meta-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; padding: 0 10px; margin-left: 45px;}
+        .chat-row.me .chat-meta-row { flex-direction: row-reverse; margin-left: 0; padding: 0; }
+        .chat-name { font-size: 0.75em; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; }
+        .chat-edited { font-size: 0.7em; color: var(--primary-color); font-weight: 600; opacity: 0.8; }
+        .chat-row.me .chat-edited { color: var(--text-muted); }
+
+        /* 氣泡與頭像的橫向容器 */
+        .chat-bubble-wrapper { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; }
+        .chat-row.me .chat-bubble-wrapper { flex-direction: row-reverse; }
 
         .chat-avatar-container { width: 36px; height: 36px; flex-shrink: 0; }
         .chat-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; justify-content: center; align-items: center; font-size: 1.2em; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
         body.dark-mode .chat-avatar { background: linear-gradient(135deg, #334155, #1e293b); }
         
-        .chat-content { display: flex; flex-direction: column; max-width: 72%; position: relative; }
+        .chat-content { display: flex; flex-direction: column; position: relative; }
         .chat-row.me .chat-content { align-items: flex-end; }
         .chat-row.other .chat-content { align-items: flex-start; }
 
-        .chat-name { font-size: 0.75em; color: var(--text-muted); margin-bottom: 4px; margin-left: 6px; font-weight: 700; letter-spacing: 0.5px;}
-
-        /* 🚀 (已編輯) 完美復刻懸浮標籤，不佔用氣泡內部空間 */
-        .chat-edited { 
-            position: absolute; top: -18px; font-size: 0.7em; font-weight: 600; 
-            color: var(--primary-color); opacity: 0.8; white-space: nowrap; 
-        }
-        .chat-row.me .chat-edited { right: 5px; color: var(--text-muted); }
-        .chat-row.other .chat-edited { left: 5px; }
-
         /* 氣泡本體設計 */
         .chat-bubble { padding: 12px 16px; font-size: 0.98em; line-height: 1.5; word-break: break-word; border-radius: 20px; position: relative; transition: 0.2s ease; pointer-events: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .msg-text { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; } /* 防反白 */
+        .msg-text { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         
         .chat-row.me .chat-bubble { background: linear-gradient(135deg, #007AFF, #0056D2); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.25); }
         .chat-row.other .chat-bubble { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
@@ -260,7 +266,7 @@
         .chat-time-col { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 4px; }
         .chat-time { font-size: 0.65em; color: var(--text-muted); opacity: 0.8; white-space: nowrap; font-weight: 500; }
 
-        /* 🚀 絕對定位在底部的表情貼徽章 (Badge 樣式完美重疊) */
+        /* 🚀 絕對定位在底部的表情貼徽章 */
         .reactions-wrap { position: absolute; bottom: -12px; display: flex; gap: 4px; z-index: 10; padding: 2px; }
         .chat-row.me .reactions-wrap { right: 5px; }
         .chat-row.other .reactions-wrap { left: 5px; }
@@ -273,7 +279,7 @@
         /* 獨立於氣泡之外的引用框 */
         .reply-quote-outside { display: flex; flex-direction: column; margin-bottom: 4px; width: 100%; position: relative; z-index: 1;}
         .chat-row.me .reply-quote-outside { align-items: flex-end; }
-        .chat-row.other .reply-quote-outside { align-items: flex-start; }
+        .chat-row.other .reply-quote-outside { align-items: flex-start; margin-left: 45px; }
         .reply-header-text { font-size: 0.75em; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;}
         .reply-content-box { display: flex; align-items: center; gap: 6px; }
         .reply-bubble-mini { background: rgba(148, 163, 184, 0.15); padding: 6px 12px; border-radius: 14px; font-size: 0.85em; color: var(--text-muted); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -369,6 +375,7 @@
             .exam-timer-text { font-size: 1.5em; }
             .nav-menu { width: 100%; right: -100%; }
 
+            /* 開頭動畫完美相容 */
             .splash-logo { font-size: 15vw; letter-spacing: -1px; width: 100%; text-align: center; white-space: nowrap; }
             .splash-subtitle { font-size: 3vw; letter-spacing: 5px; }
         }
@@ -673,7 +680,7 @@
                             <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 複製
                         </div>
                         <div class="context-menu-item" onclick="translateMsgFromMenu()">
-                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg> 翻譯
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19c0 1.1.9 2 2 2h13c1.1 0 2-.9 2-2V9a2 2 0 0 0-2-2h-3l-2-2h-6L6 7H4a2 2 0 0 0-2 2v10z"></path><circle cx="12" cy="13" r="3"></circle></svg> 翻譯
                         </div>
                         <div class="context-menu-item" onclick="pinMsgFromMenu()">
                             <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.1 2.9a3 3 0 0 0-4.2 0l-4.7 4.7a2 2 0 0 0-.5 2l-3.3 3.3a2 2 0 0 0-.5 2.1l-5.6 5.6a1 1 0 0 0 1.4 1.4l5.6-5.6a2 2 0 0 0 2.1-.5l3.3-3.3a2 2 0 0 0 2-.5l4.7-4.7a3 3 0 0 0 0-4.2z"></path></svg> 釘選
@@ -799,6 +806,7 @@
                     navbar.style.display = 'none'; 
                 } else { 
                     navbar.style.display = 'flex'; 
+                    // 🚀 測驗與模擬考畫面，強制隱藏季節橫幅與首頁按鈕
                     if (viewId === 'quizView' || viewId === 'examTakingView') {
                         if(seasonGrp) seasonGrp.style.display = 'none';
                         if(toolsGrp) toolsGrp.style.display = 'none';
@@ -861,6 +869,7 @@
             if (localStorage.getItem('user')) document.getElementById('loginUsername').value = localStorage.getItem('user');
 
             const promises = []; 
+            // 🚀 動畫完整播完再隱藏
             promises.push(new Promise(resolve => setTimeout(resolve, 1500))); 
             const sysPromise = apiCall('getSystemInfo'); promises.push(sysPromise);
 
@@ -892,8 +901,11 @@
             
             document.getElementById('currentSeasonText').textContent = season.toString(); 
             
-            // 🚀 倒數天數：移除影響精準度的歸零設定，直接用 Math.floor 計算
-            let diffDays = Math.floor((examDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)); 
+            // 🚀 倒數天數：利用純日期物件運算，杜絕任何時分秒干擾
+            let today = new Date();
+            let d1 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            let d2 = new Date(examDate.getFullYear(), examDate.getMonth(), examDate.getDate());
+            let diffDays = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)); 
             
             if (diffDays >= 0) { 
                 document.getElementById('cdDays').textContent = diffDays; 
@@ -929,7 +941,7 @@
         function showGradeUpdatePopup() {
             Swal.fire({
                 title: '🚀 系統大升級：賽季天梯啟動！',
-                html: `<div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴我們你<b>現在的年級</b>：</div><select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;"><option value="0">高三 (Senior 3)</option><option value="1">高二 (Senior 2)</option><option value="2">高一 (Senior 1)</option><option value="3">國三 (Junior 3)</option><option value="4">國二 (Junior 2)</option><option value="5">國一 (Junior 1)</option><option value="-1">已畢業 (隱藏排行榜)</option></select>`,
+                html: `<div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴 মাতৃ現在的年級</b>：</div><select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;"><option value="0">高三 (Senior 3)</option><option value="1">高二 (Senior 2)</option><option value="2">高一 (Senior 1)</option><option value="3">國三 (Junior 3)</option><option value="4">國二 (Junior 2)</option><option value="5">國一 (Junior 1)</option><option value="-1">已畢業 (隱藏排行榜)</option></select>`,
                 confirmButtonText: '進入新賽季！', allowOutsideClick: false, allowEscapeKey: false,
                 preConfirm: () => { const g = document.getElementById('swal-upgrade-grade').value; if (!g) Swal.showValidationMessage('請選擇年級！'); return g; }
             }).then((result) => {
@@ -1066,12 +1078,13 @@
             return `${d.getMonth() + 1}/${d.getDate()}`;
         }
 
+        // 🚀 觸控螢幕處理 (徹底防反白與防原生選單)
         let pressTimer = null;
         let isTouchDevice = false;
         const chatBoxElem = document.getElementById('chatMessageBoard');
 
         chatBoxElem.addEventListener('contextmenu', (e) => {
-            if (e.target.closest('.msg-bubble')) {
+            if (e.target.closest('.chat-row')) {
                 e.preventDefault(); 
             }
         });
@@ -1153,23 +1166,24 @@
             const menu = document.getElementById('chatContextMenuWrapper');
             menu.style.display = 'flex';
             
-            const rect = bubble.getBoundingClientRect();
+            // 🚀 定位演算法：讓選單緊貼滑鼠游標
+            menu.style.transform = 'none'; // 重置所有可能影響定位的變形
             
             if (isMobile) {
                 if(navigator.vibrate) navigator.vibrate(50);
-                menu.style.left = Math.max(10, Math.min(rect.left, window.innerWidth - menu.offsetWidth - 10)) + 'px';
+                menu.style.left = Math.max(10, Math.min(clientX - menu.offsetWidth/2, window.innerWidth - menu.offsetWidth - 10)) + 'px';
+                // 手機版：出現在按住位置的偏上方
+                let t = clientY - menu.offsetHeight - 20;
+                if(t < 10) t = clientY + 20;
+                menu.style.top = t + 'px';
             } else {
-                menu.style.left = isMe ? Math.max(10, rect.left - menu.offsetWidth + 30) + 'px' : Math.min(window.innerWidth - menu.offsetWidth - 10, rect.right - 30) + 'px';
-            }
-
-            // 判斷上方是否有空間，若無則往下開
-            if (rect.top > menu.offsetHeight + 20) {
-                menu.style.top = (rect.top - menu.offsetHeight - 10) + 'px';
-            } else if (rect.bottom + menu.offsetHeight + 20 < window.innerHeight) {
-                menu.style.top = (rect.bottom + 10) + 'px';
-            } else {
-                menu.style.top = '50%';
-                menu.style.transform = 'translateY(-50%)';
+                // 電腦版：出現在滑鼠點擊位置的旁邊
+                menu.style.left = isMe ? Math.max(10, clientX - menu.offsetWidth - 10) + 'px' : Math.min(window.innerWidth - menu.offsetWidth - 10, clientX + 10) + 'px';
+                let t = clientY;
+                if(t + menu.offsetHeight > window.innerHeight - 20) {
+                    t = window.innerHeight - menu.offsetHeight - 20;
+                }
+                menu.style.top = t + 'px';
             }
         }
 
@@ -1184,7 +1198,7 @@
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if(msg && navigator.clipboard) {
-                let txt = msg.text.replace(" (已編輯)", "");
+                let txt = msg.text;
                 navigator.clipboard.writeText(txt).then(() => Swal.fire({toast:true, position:'top-end', icon:'success', title:'已複製到剪貼簿', showConfirmButton:false, timer:1500}));
             }
         };
@@ -1193,10 +1207,10 @@
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if(msg) {
-                let txt = msg.text.replace(" (已編輯)", "");
+                let txt = msg.text;
                 Swal.fire({ title: '翻譯中...', allowOutsideClick: false, background: 'var(--card-bg)', color: 'var(--text-main)', didOpen: () => { Swal.showLoading(); }});
                 try {
-                    // 直接使用 Google 翻譯的開放 API 獲取結果
+                    // 直接使用 Google 翻譯 API 獲取結果
                     let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(txt)}`);
                     let data = await res.json();
                     let translated = data[0].map(x => x[0]).join('');
@@ -1211,7 +1225,7 @@
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if(msg) {
-                let txt = msg.text.replace(" (已編輯)", "");
+                let txt = msg.text;
                 document.getElementById('pinnedText').innerText = msg.sender + ': ' + txt;
                 document.getElementById('pinnedMessageBar').style.display = 'flex';
                 Swal.fire({toast:true, position:'top-end', icon:'success', title:'已釘選此訊息', showConfirmButton:false, timer:1500});
@@ -1242,7 +1256,6 @@
             if (!msg) return;
             
             let rawText = msg.text;
-            if (rawText.endsWith(" (已編輯)")) rawText = rawText.replace(" (已編輯)", "");
             
             Swal.fire({ 
                 title: '編輯訊息', 
@@ -1252,10 +1265,12 @@
                 confirmButtonText: '儲存', 
                 cancelButtonText: '取消', 
                 background: 'var(--card-bg)', 
-                color: 'var(--text-main)' 
+                color: 'var(--text-main)',
+                customClass: { input: 'swal2-input' }
             }).then(r => {
                 if (r.isConfirmed && r.value) {
-                    msg.text = r.value + " (已編輯)";
+                    msg.text = r.value;
+                    msg.isEdited = true; // 透過屬性標記，而非修改本文
                     syncChatUI(AppState.chat.history);
                     
                     AppState.chat.isSyncing = true;
@@ -1273,7 +1288,7 @@
                 if(r.isConfirmed) {
                     const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
                     if(msg) {
-                        msg.text = "此訊息已收回"; msg.reactions = {};
+                        msg.text = "此訊息已收回"; msg.reactions = {}; msg.isEdited = false;
                         syncChatUI(AppState.chat.history);
                         
                         AppState.chat.isSyncing = true;
@@ -1395,13 +1410,15 @@
                     const isConsecutive = (m.sender === lastSender && !m.replyTo);
                     lastSender = m.sender;
 
+                    // 🚀 已編輯不再黏在文字後綴，改抓取 isEdited 屬性，或相容舊的
                     let displayMsgText = m.text;
-                    let isEdited = false;
+                    let isEdited = m.isEdited === true;
                     if (displayMsgText.endsWith(" (已編輯)")) {
                         displayMsgText = displayMsgText.replace(" (已編輯)", "");
                         isEdited = true;
                     }
 
+                    // 處理回覆區塊
                     let replyHtml = '';
                     if (m.replyTo && !isUnsent) {
                         const isReplyToMe = m.replyTo.sender === AppState.auth.user;
@@ -1409,10 +1426,8 @@
                         if (isMe) { replyHeaderText = isReplyToMe ? '你回覆了自己' : `你回覆了 ${m.replyTo.sender}`; } 
                         else { replyHeaderText = isReplyToMe ? `${m.sender} 回覆了你` : `${m.sender} 回覆了 ${m.replyTo.sender}`; }
                         
-                        const alignClass = isMe ? 'me' : 'other';
-                        
                         replyHtml = `
-                            <div class="reply-quote-outside ${alignClass}">
+                            <div class="reply-quote-outside">
                                 <div class="reply-header-text">${replyHeaderText}</div>
                                 <div class="reply-content-box">
                                     ${isMe ? '' : '<div class="reply-line"></div>'}
@@ -1423,6 +1438,7 @@
                         `;
                     }
                     
+                    // 處理表情貼徽章
                     let rxHtml = '';
                     if (m.reactions && !isUnsent) {
                         for(let e in m.reactions) {
@@ -1435,7 +1451,6 @@
                     if(rxHtml) rxHtml = `<div class="reactions-wrap">${rxHtml}</div>`;
 
                     const alignClass = isMe ? 'me' : 'other';
-                    const mbStyle = rxHtml ? 'margin-bottom: 16px;' : ''; 
 
                     html += `
                         <div class="chat-row ${alignClass}" data-id="${m.id}" data-sender="${m.sender}">
@@ -1445,18 +1460,29 @@
                                 </div>
                             ` : ''}
                             
-                            <div class="chat-content" style="${mbStyle}">
-                                ${!isMe && !isConsecutive && !isUnsent ? `<div class="chat-name">${m.sender}</div>` : ''}
+                            <div class="chat-content">
+                                ${!isMe && !isConsecutive && !isUnsent ? `
+                                    <div class="chat-meta-row">
+                                        <span class="chat-name">${m.sender}</span>
+                                        ${isEdited ? `<span class="chat-edited">已編輯</span>` : ''}
+                                    </div>
+                                ` : ''}
+                                
+                                ${isMe && isEdited && !isUnsent ? `
+                                    <div class="chat-meta-row">
+                                        <span class="chat-edited">已編輯</span>
+                                    </div>
+                                ` : ''}
+
                                 ${replyHtml}
-                                ${isEdited && !isUnsent ? `<div class="chat-edited">已編輯</div>` : ''}
-                                <div class="chat-bubble ${isUnsent ? 'unsent' : ''}">
-                                    <div class="msg-text">${displayMsgText}</div>
-                                    ${rxHtml}
+                                
+                                <div class="chat-bubble-wrapper">
+                                    <div class="chat-bubble ${isUnsent ? 'unsent' : ''}">
+                                        <div class="msg-text">${displayMsgText}</div>
+                                        ${rxHtml}
+                                    </div>
+                                    <div class="chat-time-col"><span class="chat-time">${m.time}</span></div>
                                 </div>
-                            </div>
-                            
-                            <div class="chat-time-col">
-                                <span class="chat-time">${m.time}</span>
                             </div>
                         </div>
                     `;
