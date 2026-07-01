@@ -215,7 +215,11 @@
             background: var(--bg-color);
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
-        
+
+        <div id="minimizedPinIcon" style="display:none; position: absolute; top: 15px; right: 15px; z-index: 30; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); justify-content: center; align-items: center;" onclick="restorePinnedBar(event)">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--primary-color)" stroke-width="2" fill="none" style="transform: rotate(45deg);"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-6 0v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+        </div>
+
         #pinnedMessageBar { background: var(--card-bg); margin: 10px 15px; width: calc(100% - 30px); border-radius: 12px; font-size: 0.95em; display: none; flex-direction: column; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid var(--border-color); flex-shrink: 0; }
         .pinned-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.2s; }
         .pinned-item:hover { background: rgba(0,0,0,0.03); }
@@ -652,8 +656,7 @@
                     <div id="pinnedExpanded" style="display: none; flex-direction: column;">
                         <div id="pinnedList" style="display: flex; flex-direction: column; max-height: 300px; overflow-y: auto;"></div>
                         <div style="display: flex; align-items: center; padding: 12px 16px; border-top: 1px solid var(--border-color);">
-                            <span style="color: var(--text-muted); font-size: 0.9em; cursor: pointer; margin-right: 20px;" onclick="hidePinnedBar(event)">不再顯示</span>
-                            <span style="color: var(--text-muted); font-size: 0.9em; flex: 1; cursor: pointer;" onclick="togglePinnedList(event)">最小化</span>
+                            <span style="color: var(--text-muted); font-size: 0.9em; flex: 1; cursor: pointer;" onclick="minimizePinnedBar(event)">最小化</span>
                             <span style="color:var(--text-muted); display: flex; align-items: center; cursor: pointer;" onclick="togglePinnedList(event)">
                                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
                             </span>
@@ -888,7 +891,7 @@
         }
 
         function getCurrentSeason() { let now = new Date(); return (now.getMonth() >= 1) ? (now.getFullYear() - 1911) + 1 : (now.getFullYear() - 1911); }
-        function getBaseAcadYear() { let now = new Date(); return (now.getMonth() >= 7) ? (now.getFullYear() - 1911) : (now.getFullYear() - 1912); }
+        function getBaseAcadYear() { let now = new Date(); return (now.getMonth() >= 5) ? (now.getFullYear() - 1911) : (now.getFullYear() - 1912); }
         function calculateTargetYear(offsetStr) { let offset = parseInt(offsetStr); if(isNaN(offset) || offset === -1) return 0; return getBaseAcadYear() + 1 + offset; }
 
         window.onload = async () => { 
@@ -1333,10 +1336,18 @@
             }
         };
 
-        window.hidePinnedBar = function(event) {
+        window.minimizePinnedBar = function(event) {
             if (event) event.stopPropagation();
-            window.isPinnedBarHidden = true; // 暫時隱藏
+            window.isPinnedBarHidden = true; 
             document.getElementById('pinnedMessageBar').style.display = 'none';
+            document.getElementById('minimizedPinIcon').style.display = 'flex';
+        };
+
+        window.restorePinnedBar = function(event) {
+            if (event) event.stopPropagation();
+            window.isPinnedBarHidden = false;
+            document.getElementById('minimizedPinIcon').style.display = 'none';
+            document.getElementById('pinnedMessageBar').style.display = 'flex';
         };
 
         window.scrollToMessage = function(msgId) {
@@ -1610,11 +1621,17 @@
             const pinLatest = document.getElementById('pinnedLatest');
             const pinExpanded = document.getElementById('pinnedExpanded');
 
-            if (pinnedMsgs.length === 0 || window.isPinnedBarHidden) {
+            const minIcon = document.getElementById('minimizedPinIcon');
+            if (pinnedMsgs.length === 0) {
                 pinBar.style.display = 'none';
+                if(minIcon) minIcon.style.display = 'none';
                 pinList.innerHTML = '';
+            } else if (window.isPinnedBarHidden) {
+                pinBar.style.display = 'none';
+                if(minIcon) minIcon.style.display = 'flex';
             } else {
                 pinBar.style.display = 'flex';
+                if(minIcon) minIcon.style.display = 'none';
                 const latestMsg = pinnedMsgs[pinnedMsgs.length - 1];
                 pinLatestTxt.innerText = latestMsg.text; // 縮小版只顯示文字
                 pinLatestTxt.dataset.msgId = latestMsg.id;
