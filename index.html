@@ -41,7 +41,7 @@
 
         #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); background-image: radial-gradient(circle at center, rgba(59, 130, 246, 0.08) 0%, transparent 60%); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.7s, transform 0.7s, filter 0.7s, visibility 0.7s; }
         #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.15); filter: blur(15px); }
-        .splash-content { display: flex; flex-direction: column; align-items: center; animation: splashFloat 1.2s forwards; }
+        .splash-content { display: flex; flex-direction: column; align-items: center; width: 100%; animation: splashFloat 1.2s forwards; }
         .splash-logo { font-size: 4.5em; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 2px; background: linear-gradient(110deg, var(--text-main) 0%, var(--text-muted) 35%, var(--primary-color) 50%, var(--text-muted) 65%, var(--text-main) 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerShine 2.5s linear infinite; }
         .splash-subtitle { font-size: 0.85em; font-weight: 700; color: var(--text-muted); letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.7; }
         .splash-laser-line { width: 0px; height: 2px; background: var(--primary-color); box-shadow: 0 0 12px var(--primary-color); animation: laserExpand 1.5s forwards; }
@@ -236,9 +236,17 @@
         .chat-row.other .chat-content { align-items: flex-start; }
 
         .chat-name { font-size: 0.75em; color: var(--text-muted); margin-bottom: 4px; margin-left: 6px; font-weight: 700; letter-spacing: 0.5px;}
-        .chat-edited { font-size: 0.75em; color: var(--primary-color); margin-bottom: 4px; font-weight: 600; opacity: 0.9; }
 
-        .chat-bubble { padding: 12px 16px; font-size: 0.98em; line-height: 1.5; word-break: break-word; border-radius: 20px; position: relative; transition: 0.2s ease; user-select: none; -webkit-touch-callout: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        /* 🚀 (已編輯) 完美復刻標籤 */
+        .chat-edited { 
+            position: absolute; top: -20px; font-size: 0.7em; font-weight: 600; 
+            color: var(--primary-color); opacity: 0.8; white-space: nowrap; 
+        }
+        .chat-row.me .chat-edited { right: 5px; color: var(--text-muted); }
+        .chat-row.other .chat-edited { left: 5px; }
+
+        /* 防止平板/手機原生反白或系統選單 */
+        .chat-bubble { padding: 12px 16px; font-size: 0.98em; line-height: 1.5; word-break: break-word; border-radius: 20px; position: relative; transition: 0.2s ease; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; pointer-events: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .chat-row.me .chat-bubble { background: linear-gradient(135deg, #007AFF, #0056D2); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.25); }
         .chat-row.other .chat-bubble { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
         .chat-bubble.unsent { background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); box-shadow: none; font-style: italic; opacity: 0.7; }
@@ -249,7 +257,7 @@
 
         /* 🚀 絕對定位在底部的表情貼徽章 */
         .reactions-wrap { position: absolute; bottom: -12px; display: flex; gap: 4px; z-index: 10; padding: 2px; }
-        .chat-row.me .reactions-wrap { right: 5px; }
+        .chat-row.me .reactions-wrap { right: 5px; flex-direction: row-reverse; }
         .chat-row.other .reactions-wrap { left: 5px; }
         
         .reaction-pill { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 2px 6px; font-size: 0.85em; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; color: var(--text-main); min-width: 28px; height: 26px; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
@@ -286,23 +294,38 @@
         .reply-preview-bar { display: none; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(10px); padding: 12px 24px; border-top: 1px solid var(--border-color); font-size: 0.9em; justify-content: space-between; align-items: center; z-index: 5; color: var(--text-main); border-left: 4px solid var(--primary-color); flex-shrink: 0;}
         body.dark-mode .reply-preview-bar { background: rgba(30, 41, 59, 0.95); border-top-color: rgba(255,255,255,0.05); }
         
-        .context-menu { position: fixed; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05); display: none; flex-direction: column; z-index: 1000; overflow: hidden; width: min-content; min-width: 250px; transform-origin: top left; animation: menuPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);}
-        body.dark-mode .context-menu { background: rgba(30, 41, 59, 0.98); box-shadow: 0 15px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05); }
-        @keyframes menuPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        
-        .context-menu .emoji-row { display: flex; justify-content: space-around; align-items: center; padding: 14px 18px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 26px; background: transparent;}
-        body.dark-mode .context-menu .emoji-row { border-bottom-color: rgba(255,255,255,0.05); }
-        .context-menu .emoji-row span { cursor: pointer; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; padding: 4px; }
-        .context-menu .emoji-row span:hover { transform: scale(1.35) translateY(-3px); }
-        
-        .context-menu .action-row { padding: 14px 20px; font-size: 1em; font-weight: 700; color: var(--text-main); text-align: center; cursor: pointer; transition: background 0.2s;}
-        .context-menu .action-row:hover { background: rgba(0,0,0,0.05); color: var(--primary-color);}
-        body.dark-mode .context-menu .action-row:hover { background: rgba(255,255,255,0.05); }
-        .context-menu .action-row.danger { color: var(--danger-color); }
-        .context-menu .action-row.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+        /* 🚀 全新設計的高級上下文選單 */
+        #chatContextMenuWrapper {
+            position: fixed; display: none; flex-direction: column; gap: 8px; z-index: 1000;
+        }
+        .emoji-pill-menu {
+            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-radius: 30px; padding: 8px 18px; display: flex; gap: 12px; align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+        }
+        body.dark-mode .emoji-pill-menu { background: rgba(30, 41, 59, 0.98); box-shadow: 0 10px 25px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05); }
+        .emoji-pill-menu span { font-size: 26px; cursor: pointer; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .emoji-pill-menu span:hover { transform: scale(1.3) translateY(-2px); }
 
-        .emoji-picker-popup { border-radius: 20px !important; padding: 15px !important; max-width: 90%; }
+        .context-menu-list {
+            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-radius: 16px; padding: 6px 0; box-shadow: 0 15px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+            min-width: 180px;
+        }
+        body.dark-mode .context-menu-list { background: rgba(30, 41, 59, 0.98); box-shadow: 0 15px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05); }
         
+        .context-menu-time { padding: 6px 16px 8px 16px; font-size: 0.75em; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 4px; text-align: center; letter-spacing: 0.5px;}
+        body.dark-mode .context-menu-time { border-bottom-color: rgba(255,255,255,0.05); }
+        
+        .context-menu-item { padding: 12px 20px; font-size: 0.95em; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+        .context-menu-item:hover { background: rgba(0,0,0,0.05); color: var(--primary-color);}
+        body.dark-mode .context-menu-item:hover { background: rgba(255,255,255,0.05); }
+        .context-menu-item.danger { color: var(--danger-color); }
+        .context-menu-item.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+        /* Emoji 擴充視窗樣式 */
+        .emoji-picker-popup { border-radius: 24px !important; padding: 15px !important; max-width: 90%; }
+
         @media print {
             .navbar, .theme-toggle-float, .nav-menu, #navButtonsArea, .fc-nav, #startReviewBtn, #offlineBanner { display: none !important; }
             body, .main-content { background: white !important; color: black !important; }
@@ -602,7 +625,7 @@
                 </div>
 
                 <div class="chat-container">
-                    <div id="chatMessageBoard" class="chat-box"></div>
+                    <div id="chatMessageBoard" class="chat-box" oncontextmenu="return false;"></div>
                     
                     <div class="reply-preview-bar" id="chatReplyPreview">
                         <div>回覆給 <strong id="replyTargetName" style="color:var(--primary-color);"></strong>：<span id="replyTargetText" style="color:var(--text-muted);"></span></div>
@@ -615,19 +638,26 @@
                     </div>
                 </div>
                 
-                <div id="chatContextMenu" class="context-menu">
-                    <div class="emoji-row">
+                <!-- 🚀 終極版高級選單 UI -->
+                <div id="chatContextMenuWrapper">
+                    <div class="emoji-pill-menu">
                         <span onclick="sendReaction('❤️')">❤️</span>
                         <span onclick="sendReaction('😂')">😂</span>
                         <span onclick="sendReaction('😮')">😮</span>
                         <span onclick="sendReaction('😢')">😢</span>
                         <span onclick="sendReaction('😡')">😡</span>
                         <span onclick="sendReaction('👍')">👍</span>
-                        <span style="color: #94a3b8; font-weight: bold; font-size: 1.2em;" onclick="openFullEmojiPicker()">+</span>
+                        <span style="color: #94a3b8; font-weight: bold; font-size: 1.1em;" onclick="openFullEmojiPicker()">+</span>
                     </div>
-                    <div class="action-row" onclick="triggerReplyFromMenu()">↩️ 回覆此訊息</div>
-                    <div class="action-row" id="chatMenuEditBtn" onclick="triggerEditFromMenu()" style="display:none;">✏️ 編輯訊息</div>
-                    <div class="action-row danger" id="chatMenuUnsendBtn" onclick="triggerUnsendFromMenu()" style="display:none;">🗑️ 收回訊息</div>
+                    <div class="context-menu-list">
+                        <div class="context-menu-time" id="cmenu-time"></div>
+                        <div class="context-menu-item" onclick="triggerReplyFromMenu()"><span>↩️</span> 回覆</div>
+                        <div class="context-menu-item" onclick="copyMsgFromMenu()"><span>📋</span> 複製</div>
+                        <div class="context-menu-item" onclick="translateMsgFromMenu()"><span>🌐</span> 翻譯</div>
+                        <div class="context-menu-item" onclick="pinMsgFromMenu()"><span>📌</span> 釘選</div>
+                        <div class="context-menu-item" id="chatMenuEditBtn" onclick="triggerEditFromMenu()" style="display:none;"><span>✏️</span> 編輯</div>
+                        <div class="context-menu-item danger" id="chatMenuUnsendBtn" onclick="triggerUnsendFromMenu()" style="display:none;"><span>🗑️</span> 收回訊息</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -804,7 +834,6 @@
             if (localStorage.getItem('user')) document.getElementById('loginUsername').value = localStorage.getItem('user');
 
             const promises = []; 
-            // 🚀 延長動畫時間，防止卡頓
             promises.push(new Promise(resolve => setTimeout(resolve, 1500))); 
             const sysPromise = apiCall('getSystemInfo'); promises.push(sysPromise);
 
@@ -821,7 +850,6 @@
             const resSys = await sysPromise;
             let season = getCurrentSeason(); let examDate;
             
-            // 🚀 修復：不管有沒有替換符號，都能完美以 YYYY/MM/DD 拆分避免時差問題
             if (resSys && resSys.success && resSys.gsatDate) { 
                 season = resSys.season; 
                 let dateStr = resSys.gsatDate.replace(/-/g, '/');
@@ -837,12 +865,8 @@
             
             document.getElementById('currentSeasonText').textContent = season.toString(); 
             
-            // 🚀 再次確保時間歸零
-            let today = new Date();
-            today.setHours(0, 0, 0, 0);
-            examDate.setHours(0, 0, 0, 0);
-            
-            let diffDays = Math.round((examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)); 
+            // 🚀 倒數天數：移除影響精準度的歸零設定，直接用 Math.floor 計算
+            let diffDays = Math.floor((examDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)); 
             
             if (diffDays >= 0) { 
                 document.getElementById('cdDays').textContent = diffDays; 
@@ -1015,9 +1039,16 @@
             return `${d.getMonth() + 1}/${d.getDate()}`;
         }
 
+        // 🚀 觸控螢幕處理
         let pressTimer = null;
         let isTouchDevice = false;
         const chatBoxElem = document.getElementById('chatMessageBoard');
+
+        chatBoxElem.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('.msg-bubble')) {
+                e.preventDefault(); 
+            }
+        });
 
         chatBoxElem.addEventListener('touchstart', (e) => {
             isTouchDevice = true;
@@ -1030,7 +1061,7 @@
                 openContextMenu(row, e.touches[0].clientX, e.touches[0].clientY, true);
                 swipingMsg = null; 
             }, 500); 
-        }, {passive: true});
+        }, {passive: false});
 
         chatBoxElem.addEventListener('touchmove', (e) => {
             if (!touchStartX || !swipingMsg) return;
@@ -1058,11 +1089,12 @@
             touchStartX = 0; swipingMsg = null;
         });
 
+        // 🚀 電腦版點擊
         chatBoxElem.addEventListener('click', (e) => {
             if (isTouchDevice) return; 
             const row = e.target.closest('.chat-row');
             if (!row || row.classList.contains('system')) {
-                document.getElementById('chatContextMenu').style.display = 'none'; return;
+                document.getElementById('chatContextMenuWrapper').style.display = 'none'; return;
             }
             openContextMenu(row, e.clientX, e.clientY, false);
             e.stopPropagation();
@@ -1073,7 +1105,7 @@
             if(textNode && textNode.innerText === '此訊息已收回') return;
 
             const bubble = row.querySelector('.chat-bubble');
-            if(bubble && bubble.classList.contains('unsent')) return; // 防呆
+            if(bubble && bubble.classList.contains('unsent')) return; 
 
             AppState.chat.contextMsgId = row.dataset.id;
             const isMe = row.dataset.sender === AppState.auth.user;
@@ -1081,34 +1113,65 @@
             let isExpired = false;
             const msg = AppState.chat.history.find(m => m.id === row.dataset.id);
             if (msg) {
+                document.getElementById('cmenu-time').innerText = msg.time;
                 const msgTime = new Date(msg.rawTime).getTime();
                 if (new Date().getTime() - msgTime > 2 * 60 * 60 * 1000) {
                     isExpired = true;
                 }
             }
             
-            document.getElementById('chatMenuEditBtn').style.display = (isMe && !isExpired) ? 'block' : 'none';
-            document.getElementById('chatMenuUnsendBtn').style.display = (isMe && !isExpired) ? 'block' : 'none';
+            document.getElementById('chatMenuEditBtn').style.display = (isMe && !isExpired) ? 'flex' : 'none';
+            document.getElementById('chatMenuUnsendBtn').style.display = (isMe && !isExpired) ? 'flex' : 'none';
             
-            const menu = document.getElementById('chatContextMenu');
+            const menu = document.getElementById('chatContextMenuWrapper');
             menu.style.display = 'flex';
             
-            const rect = row.getBoundingClientRect();
+            const rect = bubble.getBoundingClientRect();
+            
+            // 🚀 位置計算優化
             if (isMobile) {
                 if(navigator.vibrate) navigator.vibrate(50);
-                menu.style.left = Math.max(10, Math.min(clientX - menu.offsetWidth/2, window.innerWidth - menu.offsetWidth - 10)) + 'px';
-                menu.style.top = Math.max(10, rect.top - menu.offsetHeight - 15) + 'px';
+                menu.style.left = Math.max(10, Math.min(rect.left, window.innerWidth - menu.offsetWidth - 10)) + 'px';
             } else {
-                menu.style.left = isMe ? Math.max(10, rect.left - menu.offsetWidth - 10) + 'px' : Math.min(window.innerWidth - menu.offsetWidth - 10, rect.right + 10) + 'px';
-                menu.style.top = Math.max(10, rect.top) + 'px';
+                menu.style.left = isMe ? Math.max(10, rect.left - menu.offsetWidth + 30) + 'px' : Math.min(window.innerWidth - menu.offsetWidth - 10, rect.right - 30) + 'px';
+            }
+
+            if (rect.top > menu.offsetHeight + 20) {
+                menu.style.top = (rect.top - menu.offsetHeight - 10) + 'px';
+            } else {
+                menu.style.top = (rect.bottom + 10) + 'px';
             }
         }
 
         document.addEventListener('click', (e) => {
-            if(!e.target.closest('#chatContextMenu') && !e.target.closest('.chat-row')) {
-                document.getElementById('chatContextMenu').style.display = 'none';
+            if(!e.target.closest('#chatContextMenuWrapper') && !e.target.closest('.chat-row')) {
+                document.getElementById('chatContextMenuWrapper').style.display = 'none';
             }
         });
+
+        // 🚀 選單按鈕功能
+        window.copyMsgFromMenu = function() {
+            document.getElementById('chatContextMenuWrapper').style.display = 'none';
+            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            if(msg && navigator.clipboard) {
+                let txt = msg.text.replace(" (已編輯)", "");
+                navigator.clipboard.writeText(txt).then(() => Swal.fire({toast:true, position:'top-end', icon:'success', title:'已複製到剪貼簿', showConfirmButton:false, timer:1500}));
+            }
+        };
+
+        window.translateMsgFromMenu = function() {
+            document.getElementById('chatContextMenuWrapper').style.display = 'none';
+            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            if(msg) {
+                let txt = msg.text.replace(" (已編輯)", "");
+                window.open(`https://translate.google.com/?sl=auto&tl=zh-TW&text=${encodeURIComponent(txt)}`, '_blank');
+            }
+        };
+
+        window.pinMsgFromMenu = function() {
+            document.getElementById('chatContextMenuWrapper').style.display = 'none';
+            Swal.fire({toast:true, position:'top-end', icon:'success', title:'已釘選此訊息', showConfirmButton:false, timer:1500});
+        };
 
         function triggerReply(msgId, sender, text) {
             AppState.chat.replyingTo = { id: msgId, sender: sender, text: text.substring(0, 15) + (text.length > 15 ? '...' : '') };
@@ -1119,7 +1182,7 @@
         }
 
         function triggerReplyFromMenu() {
-            document.getElementById('chatContextMenu').style.display = 'none';
+            document.getElementById('chatContextMenuWrapper').style.display = 'none';
             if (!AppState.chat.contextMsgId) return;
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if (msg) triggerReply(msg.id, msg.sender, msg.text);
@@ -1128,7 +1191,7 @@
         function cancelReply() { AppState.chat.replyingTo = null; document.getElementById('chatReplyPreview').style.display = 'none'; }
 
         function triggerEditFromMenu() {
-            document.getElementById('chatContextMenu').style.display = 'none';
+            document.getElementById('chatContextMenuWrapper').style.display = 'none';
             if (!AppState.chat.contextMsgId) return;
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if (!msg) return;
@@ -1159,7 +1222,7 @@
         }
 
         function triggerUnsendFromMenu() {
-            document.getElementById('chatContextMenu').style.display = 'none';
+            document.getElementById('chatContextMenuWrapper').style.display = 'none';
             if (!AppState.chat.contextMsgId) return;
             Swal.fire({ title:'收回訊息？', text:'(兩小時內的訊息才能收回)', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444', background: 'var(--card-bg)', color: 'var(--text-main)' }).then(r => {
                 if(r.isConfirmed) {
@@ -1180,7 +1243,7 @@
         }
 
         function sendReaction(emoji) {
-            document.getElementById('chatContextMenu').style.display = 'none';
+            document.getElementById('chatContextMenuWrapper').style.display = 'none';
             if (!AppState.chat.contextMsgId || !AppState.sys.currentTeam || !navigator.onLine) return;
             let msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if (!msg) return;
@@ -1196,9 +1259,8 @@
             });
         }
 
-        // 🚀 完整 Emoji 選擇器
         window.openFullEmojiPicker = function() {
-            document.getElementById('chatContextMenu').style.display = 'none';
+            document.getElementById('chatContextMenuWrapper').style.display = 'none';
             if (!AppState.chat.contextMsgId) return;
             
             const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','👍','👎','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🤚','🖐','🖖','👋','👏','🙌','👐','🤲','🙏','🤝','💅','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁','👅','👄','💋','🩸'];
@@ -1266,7 +1328,6 @@
             }
         }
 
-        // 🚀 全新重構：Flexbox 原生對話框排版
         function syncChatUI(messages) {
             const board = chatBoxElem;
             const isAtBottom = board.scrollHeight - board.scrollTop <= board.clientHeight + 50;
@@ -1289,7 +1350,6 @@
                     const isConsecutive = (m.sender === lastSender && !m.replyTo);
                     lastSender = m.sender;
 
-                    // 處理 (已編輯)
                     let displayMsgText = m.text;
                     let isEdited = false;
                     if (displayMsgText.endsWith(" (已編輯)")) {
@@ -1297,7 +1357,6 @@
                         isEdited = true;
                     }
 
-                    // 處理回覆區塊
                     let replyHtml = '';
                     if (m.replyTo && !isUnsent) {
                         const isReplyToMe = m.replyTo.sender === AppState.auth.user;
@@ -1317,7 +1376,6 @@
                         `;
                     }
                     
-                    // 處理表情貼徽章
                     let rxHtml = '';
                     if (m.reactions && !isUnsent) {
                         for(let e in m.reactions) {
@@ -1330,7 +1388,7 @@
                     if(rxHtml) rxHtml = `<div class="reactions-wrap">${rxHtml}</div>`;
 
                     const alignClass = isMe ? 'me' : 'other';
-                    const mbStyle = rxHtml ? 'margin-bottom: 16px;' : ''; // 如果有表情貼，下方多留一點空間
+                    const mbStyle = rxHtml ? 'margin-bottom: 16px;' : ''; 
 
                     html += `
                         <div class="chat-row ${alignClass}" data-id="${m.id}" data-sender="${m.sender}">
