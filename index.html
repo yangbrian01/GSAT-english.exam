@@ -78,6 +78,17 @@
         .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; padding: 16px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
         .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); padding-left: 25px;}
 
+        details.nav-group summary { padding: 14px 20px; font-weight: 800; color: var(--text-muted); cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); background: var(--bg-color); font-size: 0.85em; letter-spacing: 1px; transition: 0.2s; user-select: none;}
+        details.nav-group summary:hover { color: var(--primary-color); }
+        details.nav-group summary::after { content: '▼'; font-size: 0.8em; transition: transform 0.2s; }
+        details.nav-group[open] summary::after { transform: rotate(180deg); }
+        details.nav-group summary::-webkit-details-marker { display: none; }
+        details.nav-group .nav-group-items { display: flex; flex-direction: column; background: rgba(0,0,0,0.02); }
+        body.dark-mode details.nav-group .nav-group-items { background: rgba(255,255,255,0.02); }
+        details.nav-group .nav-btn { border-bottom: none; border-left: 3px solid transparent; padding-left: 25px; }
+        details.nav-group .nav-btn:hover { border-left-color: var(--primary-color); padding-left: 30px; background: rgba(0,0,0,0.04); }
+        body.dark-mode details.nav-group .nav-btn:hover { background: rgba(255,255,255,0.05); }
+
         .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; overflow: visible !important; }
         .view-container { width: 100%; max-width: 650px; text-align: left; animation: fadeIn 0.3s ease-out; }
         .centered-view { text-align: center; max-width: 450px; margin: 0 auto; }
@@ -412,17 +423,40 @@
                 <button class="close-menu-btn" onclick="toggleMenu()">✖</button>
             </div>
             
-            <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
-            <button class="nav-btn" id="installAppBtn" style="display: none; color: #10b981; font-weight: 800;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
-            <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
-            <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">📚 記憶系統</button>
-            <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
-            <button class="nav-btn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
-            <button class="nav-btn" onclick="showView('analyticsView')">📈 學習數據</button>
-            <button class="nav-btn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
-            <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
-            <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
-            <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
+            <details class="nav-group" open>
+                <summary>🎓 核心學習</summary>
+                <div class="nav-group-items">
+                    <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
+                    <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
+                    <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">📚 記憶系統</button>
+                    <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
+                </div>
+            </details>
+
+            <details class="nav-group">
+                <summary>🏆 戰績與社群</summary>
+                <div class="nav-group-items">
+                    <button class="nav-btn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
+                    <button class="nav-btn" onclick="showView('analyticsView')">📈 學習數據</button>
+                    <button class="nav-btn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
+                </div>
+            </details>
+
+            <details class="nav-group">
+                <summary>✨ AI 專業輔助</summary>
+                <div class="nav-group-items">
+                    <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
+                    <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
+                </div>
+            </details>
+
+            <details class="nav-group">
+                <summary>⚙️ 系統與設定</summary>
+                <div class="nav-group-items">
+                    <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
+                    <button class="nav-btn" id="installAppBtn" style="display: none; color: #10b981; font-weight: 800;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
+                </div>
+            </details>
             
             <div style="height: 1px; background-color: var(--border-color); margin: 5px 0;"></div>
             <div style="padding: 10px 20px 5px 20px; font-size: 0.75em; font-weight: 800; color: var(--text-muted); letter-spacing: 1.5px;">YANG TECHNOLOGY 家族</div>
@@ -1099,7 +1133,9 @@
             apiCall('createTeam', { username: AppState.auth.user, teamName: tName }).then(res => {
                 if (res.success) {
                     Swal.fire({ title: '戰隊建立成功！', html: `專屬戰隊代碼：<br><br><strong style="font-size:2.5em; color:var(--primary-color); letter-spacing: 5px;">${res.code}</strong>`, icon: 'success' });
-                    document.getElementById('profCreateTeamName').value = ''; refreshProfileData(); showView('teamView'); 
+                    document.getElementById('profCreateTeamName').value = ''; 
+                    if(AppState.profile.cache) { AppState.profile.cache.teamName = res.teamName; AppState.profile.cache.teamCode = res.code; renderGlobalProfile(AppState.profile.cache); }
+                    refreshProfileData(); showView('teamView'); 
                 } else Swal.fire('失敗', res.message, 'error');
             });
         }
@@ -1110,7 +1146,12 @@
             if (!tCode) return Swal.fire('錯誤', '請輸入戰隊代碼', 'warning');
             showLoading('加入戰隊中...');
             apiCall('joinTeam', { username: AppState.auth.user, teamCode: tCode }).then(res => {
-                if (res.success) { Swal.fire('成功', res.message, 'success'); document.getElementById('profJoinTeamCode').value = ''; refreshProfileData(); showView('teamView'); } else Swal.fire('失敗', res.message, 'error');
+                if (res.success) { 
+                    Swal.fire('成功', res.message, 'success'); 
+                    document.getElementById('profJoinTeamCode').value = ''; 
+                    if(AppState.profile.cache) { AppState.profile.cache.teamName = res.teamName; renderGlobalProfile(AppState.profile.cache); }
+                    refreshProfileData(); showView('teamView'); 
+                } else Swal.fire('失敗', res.message, 'error');
             });
         }
 
@@ -1732,7 +1773,7 @@
             }
 
             let filteredData = AppState.sys.leaderboard.filter(p => {
-                if (cohortType === 'peer' && window.userTargetYear) { if (p.targetYear !== window.userTargetYear) return false; }
+                if (cohortType === 'peer' && AppState.profile.targetYear) { if (p.targetYear !== AppState.profile.targetYear) return false; }
                 if (rankType === 'all') return true; 
                 if (rankType === 'king' && p.level >= 26) return true;
                 if (rankType === 'silver' && p.level >= 11 && p.level <= 25) return true;
