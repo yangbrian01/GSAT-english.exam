@@ -215,7 +215,6 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
         
-        /* 📌 釘選訊息橫幅 */
         #pinnedMessageBar { background: var(--bg-color); padding: 12px 20px; border-bottom: 1px solid var(--border-color); font-size: 0.85em; display: none; align-items: center; gap: 12px; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.05);}
         #pinnedMessageBar svg { color: var(--primary-color); flex-shrink: 0; }
 
@@ -225,50 +224,47 @@
         .chat-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
         body.dark-mode .chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
 
-        /* 🚀 全新 Flexbox 聊天架構 & 封殺系統預設觸控行為 */
+        /* 🚀 徹底還原的水平 Flexbox 對話排版 */
         .chat-row { 
-            display: flex; flex-direction: column; width: 100%; margin-bottom: 8px; position: relative; 
+            display: flex; align-items: flex-end; gap: 8px; width: 100%; margin-bottom: 12px; 
             animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
         }
-        .chat-row.me { align-items: flex-end; }
-        .chat-row.other { align-items: flex-start; }
+        .chat-row.me { flex-direction: row-reverse; }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* 🚀 資訊列 (名字 + 已編輯) - 完美避開氣泡 */
-        .chat-meta-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; padding: 0 10px; margin-left: 45px;}
-        .chat-row.me .chat-meta-row { flex-direction: row-reverse; margin-left: 0; padding: 0; }
-        .chat-name { font-size: 0.75em; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; }
-        .chat-edited { font-size: 0.7em; color: var(--primary-color); font-weight: 600; opacity: 0.8; }
-        .chat-row.me .chat-edited { color: var(--text-muted); }
-
-        /* 氣泡與頭像的橫向容器 */
-        .chat-bubble-wrapper { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; }
-        .chat-row.me .chat-bubble-wrapper { flex-direction: row-reverse; }
 
         .chat-avatar-container { width: 36px; height: 36px; flex-shrink: 0; }
         .chat-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; justify-content: center; align-items: center; font-size: 1.2em; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
         body.dark-mode .chat-avatar { background: linear-gradient(135deg, #334155, #1e293b); }
         
-        .chat-content { display: flex; flex-direction: column; position: relative; }
-        .chat-row.me .chat-content { align-items: flex-end; }
-        .chat-row.other .chat-content { align-items: flex-start; }
+        .chat-content { display: flex; flex-direction: column; max-width: 72%; position: relative; }
 
-        /* 氣泡本體設計 */
-        .chat-bubble { padding: 12px 16px; font-size: 0.98em; line-height: 1.5; word-break: break-word; border-radius: 20px; position: relative; transition: 0.2s ease; pointer-events: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .msg-text { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        /* 🚀 資訊列 (名字 與 已編輯 完美並排，不再遮擋) */
+        .chat-meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; width: 100%; }
+        .chat-row.me .chat-meta-row { justify-content: flex-end; }
+        .chat-row.other .chat-meta-row { justify-content: flex-start; margin-left: 2px;}
+        .chat-name { font-size: 0.75em; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px;}
+        .chat-edited { font-size: 0.7em; color: var(--primary-color); font-weight: 600; opacity: 0.8; }
+        .chat-row.me .chat-edited { color: var(--text-muted); }
+
+        /* 氣泡與時間橫向排列 */
+        .chat-bubble-wrapper { display: flex; align-items: flex-end; gap: 8px; }
+        .chat-row.me .chat-bubble-wrapper { flex-direction: row-reverse; }
+
+        /* 防原生長按干擾 */
+        .chat-bubble { padding: 12px 16px; font-size: 0.98em; line-height: 1.5; word-break: break-word; border-radius: 20px; position: relative; transition: transform 0.2s ease; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .msg-text { pointer-events: none; } 
         
         .chat-row.me .chat-bubble { background: linear-gradient(135deg, #007AFF, #0056D2); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.25); }
         .chat-row.other .chat-bubble { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
-        .chat-bubble.unsent { background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); box-shadow: none; font-style: italic; opacity: 0.7; }
+        .chat-bubble.unsent { background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); box-shadow: none; font-style: italic; opacity: 0.7; cursor: default;}
         body.dark-mode .chat-row.other .chat-bubble { background: #1e293b; border-color: rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
 
         .chat-time-col { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 4px; }
         .chat-time { font-size: 0.65em; color: var(--text-muted); opacity: 0.8; white-space: nowrap; font-weight: 500; }
 
-        /* 🚀 絕對定位在底部的表情貼徽章 */
+        /* 表情貼徽章重疊設計 */
         .reactions-wrap { position: absolute; bottom: -12px; display: flex; gap: 4px; z-index: 10; padding: 2px; }
-        .chat-row.me .reactions-wrap { right: 5px; }
+        .chat-row.me .reactions-wrap { right: 5px; flex-direction: row-reverse; }
         .chat-row.other .reactions-wrap { left: 5px; }
         
         .reaction-pill { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 2px 6px; font-size: 0.85em; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; color: var(--text-main); min-width: 28px; height: 26px; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
@@ -276,22 +272,20 @@
         .reaction-pill:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .reaction-pill.active { background: var(--primary-color); border-color: var(--primary-color); color: white; }
 
-        /* 獨立於氣泡之外的引用框 */
+        /* 獨立引用框 */
         .reply-quote-outside { display: flex; flex-direction: column; margin-bottom: 4px; width: 100%; position: relative; z-index: 1;}
         .chat-row.me .reply-quote-outside { align-items: flex-end; }
-        .chat-row.other .reply-quote-outside { align-items: flex-start; margin-left: 45px; }
+        .chat-row.other .reply-quote-outside { align-items: flex-start; margin-left: 2px; }
         .reply-header-text { font-size: 0.75em; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;}
         .reply-content-box { display: flex; align-items: center; gap: 6px; }
         .reply-bubble-mini { background: rgba(148, 163, 184, 0.15); padding: 6px 12px; border-radius: 14px; font-size: 0.85em; color: var(--text-muted); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         body.dark-mode .reply-bubble-mini { background: rgba(255,255,255,0.1); }
         .reply-line { width: 2px; height: 20px; background: rgba(148, 163, 184, 0.4); border-radius: 2px; }
 
-        /* 系統訊息與分隔線 */
         .msg-bubble.system { align-self: center; background: rgba(148, 163, 184, 0.15); color: var(--text-muted); border-radius: 40px; font-size: 0.75em; font-weight: 700; padding: 6px 20px; margin: 15px auto; max-width: 85%; text-align: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(148, 163, 184, 0.2); }
         .chat-date-sep { text-align: center; color: var(--text-muted); font-size: 0.75em; margin: 20px 0 10px 0; font-weight: 700; letter-spacing: 1px; align-self: center; position: relative; width: 100%; display: flex; align-items: center; justify-content: center; }
         .chat-date-sep::before, .chat-date-sep::after { content: ""; flex: 1; height: 1px; background: var(--border-color); margin: 0 15px; opacity: 0.5; }
 
-        /* 毛玻璃底部輸入區 */
         .chat-input-area { display: flex; padding: 18px 24px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); align-items: center; position: relative; z-index: 10; flex-shrink: 0;}
         body.dark-mode .chat-input-area { background: rgba(15, 23, 42, 0.85); border-top-color: rgba(255,255,255,0.05); }
         
@@ -305,7 +299,7 @@
         .reply-preview-bar { display: none; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(10px); padding: 12px 24px; border-top: 1px solid var(--border-color); font-size: 0.9em; justify-content: space-between; align-items: center; z-index: 5; color: var(--text-main); border-left: 4px solid var(--primary-color); flex-shrink: 0;}
         body.dark-mode .reply-preview-bar { background: rgba(30, 41, 59, 0.95); border-top-color: rgba(255,255,255,0.05); }
         
-        /* 🚀 全新設計的高級上下文選單 (SVG 線條圖示) */
+        /* 🚀 高級 SVG 選單 */
         #chatContextMenuWrapper {
             position: fixed; display: none; flex-direction: column; gap: 8px; z-index: 1000;
         }
@@ -335,7 +329,6 @@
         .context-menu-item.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
         .context-menu-item svg { width: 18px; height: 18px; }
 
-        /* Emoji 擴充視窗樣式 */
         .emoji-picker-popup { border-radius: 24px !important; padding: 15px !important; max-width: 90%; }
 
         @media print {
@@ -375,7 +368,6 @@
             .exam-timer-text { font-size: 1.5em; }
             .nav-menu { width: 100%; right: -100%; }
 
-            /* 開頭動畫完美相容 */
             .splash-logo { font-size: 15vw; letter-spacing: -1px; width: 100%; text-align: center; white-space: nowrap; }
             .splash-subtitle { font-size: 3vw; letter-spacing: 5px; }
         }
@@ -680,10 +672,10 @@
                             <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 複製
                         </div>
                         <div class="context-menu-item" onclick="translateMsgFromMenu()">
-                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19c0 1.1.9 2 2 2h13c1.1 0 2-.9 2-2V9a2 2 0 0 0-2-2h-3l-2-2h-6L6 7H4a2 2 0 0 0-2 2v10z"></path><circle cx="12" cy="13" r="3"></circle></svg> 翻譯
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 5h7M9 3v2c0 4.418-2.259 7.328-5.602 9.058M5.398 14.058A15.922 15.922 0 009 17.5M16 21l-5-10-5 10M14 18h6"/></svg> 翻譯
                         </div>
                         <div class="context-menu-item" onclick="pinMsgFromMenu()">
-                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.1 2.9a3 3 0 0 0-4.2 0l-4.7 4.7a2 2 0 0 0-.5 2l-3.3 3.3a2 2 0 0 0-.5 2.1l-5.6 5.6a1 1 0 0 0 1.4 1.4l5.6-5.6a2 2 0 0 0 2.1-.5l3.3-3.3a2 2 0 0 0 2-.5l4.7-4.7a3 3 0 0 0 0-4.2z"></path></svg> 釘選
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" style="transform: rotate(45deg);"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-6 0v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg> 釘選
                         </div>
                         <div class="context-menu-item" id="chatMenuEditBtn" onclick="triggerEditFromMenu()" style="display:none;">
                             <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 編輯
@@ -806,7 +798,7 @@
                     navbar.style.display = 'none'; 
                 } else { 
                     navbar.style.display = 'flex'; 
-                    // 🚀 測驗與模擬考畫面，強制隱藏季節橫幅與首頁按鈕
+                    // 測驗與模擬考畫面，強制隱藏季節橫幅與首頁按鈕
                     if (viewId === 'quizView' || viewId === 'examTakingView') {
                         if(seasonGrp) seasonGrp.style.display = 'none';
                         if(toolsGrp) toolsGrp.style.display = 'none';
@@ -869,8 +861,7 @@
             if (localStorage.getItem('user')) document.getElementById('loginUsername').value = localStorage.getItem('user');
 
             const promises = []; 
-            // 🚀 動畫完整播完再隱藏
-            promises.push(new Promise(resolve => setTimeout(resolve, 1500))); 
+            promises.push(new Promise(resolve => setTimeout(resolve, 1500))); // 🚀 動畫完整播完
             const sysPromise = apiCall('getSystemInfo'); promises.push(sysPromise);
 
             let profPromise = null;
@@ -901,11 +892,8 @@
             
             document.getElementById('currentSeasonText').textContent = season.toString(); 
             
-            // 🚀 倒數天數：利用純日期物件運算，杜絕任何時分秒干擾
-            let today = new Date();
-            let d1 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            let d2 = new Date(examDate.getFullYear(), examDate.getMonth(), examDate.getDate());
-            let diffDays = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)); 
+            // 🚀 倒數天數：還原回最初始、絕對精準的 204 天演算法
+            let diffDays = Math.floor((examDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)); 
             
             if (diffDays >= 0) { 
                 document.getElementById('cdDays').textContent = diffDays; 
@@ -941,7 +929,7 @@
         function showGradeUpdatePopup() {
             Swal.fire({
                 title: '🚀 系統大升級：賽季天梯啟動！',
-                html: `<div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴 মাতৃ現在的年級</b>：</div><select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;"><option value="0">高三 (Senior 3)</option><option value="1">高二 (Senior 2)</option><option value="2">高一 (Senior 1)</option><option value="3">國三 (Junior 3)</option><option value="4">國二 (Junior 2)</option><option value="5">國一 (Junior 1)</option><option value="-1">已畢業 (隱藏排行榜)</option></select>`,
+                html: `<div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴我們你<b>現在的年級</b>：</div><select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;"><option value="0">高三 (Senior 3)</option><option value="1">高二 (Senior 2)</option><option value="2">高一 (Senior 1)</option><option value="3">國三 (Junior 3)</option><option value="4">國二 (Junior 2)</option><option value="5">國一 (Junior 1)</option><option value="-1">已畢業 (隱藏排行榜)</option></select>`,
                 confirmButtonText: '進入新賽季！', allowOutsideClick: false, allowEscapeKey: false,
                 preConfirm: () => { const g = document.getElementById('swal-upgrade-grade').value; if (!g) Swal.showValidationMessage('請選擇年級！'); return g; }
             }).then((result) => {
@@ -1083,21 +1071,21 @@
         let isTouchDevice = false;
         const chatBoxElem = document.getElementById('chatMessageBoard');
 
+        // 完全阻擋原生的右鍵與長按選單
         chatBoxElem.addEventListener('contextmenu', (e) => {
-            if (e.target.closest('.chat-row')) {
-                e.preventDefault(); 
-            }
+            if (e.target.closest('.chat-bubble')) e.preventDefault(); 
         });
 
         chatBoxElem.addEventListener('touchstart', (e) => {
             isTouchDevice = true;
-            const row = e.target.closest('.chat-row');
-            if (!row || row.classList.contains('system')) return;
+            const bubble = e.target.closest('.chat-bubble');
+            if (!bubble || bubble.classList.contains('system') || bubble.classList.contains('unsent')) return;
+            
             touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
-            swipingMsg = row;
+            swipingMsg = bubble;
 
             pressTimer = setTimeout(() => {
-                openContextMenu(row, e.touches[0].clientX, e.touches[0].clientY, true);
+                openContextMenu(bubble, e.touches[0].clientX, e.touches[0].clientY, true);
                 swipingMsg = null; 
             }, 500); 
         }, {passive: false});
@@ -1120,10 +1108,12 @@
             if (!swipingMsg || !touchStartX) return;
             let diffX = e.changedTouches[0].clientX - touchStartX;
             swipingMsg.style.transform = 'translateX(0)';
+            
             if (Math.abs(diffX) > 40) {
                 const textNode = swipingMsg.querySelector('.msg-text');
                 const rawText = textNode ? textNode.innerText : '';
-                if(rawText !== '此訊息已收回') triggerReply(swipingMsg.dataset.id, swipingMsg.dataset.sender, rawText);
+                const row = swipingMsg.closest('.chat-row');
+                if(rawText !== '此訊息已收回' && row) triggerReply(row.dataset.id, row.dataset.sender, rawText);
             }
             touchStartX = 0; swipingMsg = null;
         });
@@ -1131,22 +1121,20 @@
         // 🚀 電腦版點擊
         chatBoxElem.addEventListener('click', (e) => {
             if (isTouchDevice) return; 
-            const row = e.target.closest('.chat-row');
-            if (!row || row.classList.contains('system')) {
+            const bubble = e.target.closest('.chat-bubble');
+            if (!bubble || bubble.classList.contains('system') || bubble.classList.contains('unsent')) {
                 document.getElementById('chatContextMenuWrapper').style.display = 'none'; return;
             }
-            openContextMenu(row, e.clientX, e.clientY, false);
+            openContextMenu(bubble, e.clientX, e.clientY, false);
             e.stopPropagation();
         });
 
-        // 🚀 防溢出智慧定位選單
-        function openContextMenu(row, clientX, clientY, isMobile) {
-            const textNode = row.querySelector('.msg-text');
+        // 🚀 防溢出智慧定位選單 (以 Bubble 為定位基準)
+        function openContextMenu(bubble, clientX, clientY, isMobile) {
+            const textNode = bubble.querySelector('.msg-text');
             if(textNode && textNode.innerText === '此訊息已收回') return;
 
-            const bubble = row.querySelector('.chat-bubble');
-            if(bubble && bubble.classList.contains('unsent')) return; 
-
+            const row = bubble.closest('.chat-row');
             AppState.chat.contextMsgId = row.dataset.id;
             const isMe = row.dataset.sender === AppState.auth.user;
             
@@ -1166,39 +1154,38 @@
             const menu = document.getElementById('chatContextMenuWrapper');
             menu.style.display = 'flex';
             
-            // 🚀 定位演算法：讓選單緊貼滑鼠游標
-            menu.style.transform = 'none'; // 重置所有可能影響定位的變形
+            const rect = bubble.getBoundingClientRect();
             
             if (isMobile) {
                 if(navigator.vibrate) navigator.vibrate(50);
                 menu.style.left = Math.max(10, Math.min(clientX - menu.offsetWidth/2, window.innerWidth - menu.offsetWidth - 10)) + 'px';
-                // 手機版：出現在按住位置的偏上方
-                let t = clientY - menu.offsetHeight - 20;
-                if(t < 10) t = clientY + 20;
-                menu.style.top = t + 'px';
             } else {
-                // 電腦版：出現在滑鼠點擊位置的旁邊
-                menu.style.left = isMe ? Math.max(10, clientX - menu.offsetWidth - 10) + 'px' : Math.min(window.innerWidth - menu.offsetWidth - 10, clientX + 10) + 'px';
-                let t = clientY;
-                if(t + menu.offsetHeight > window.innerHeight - 20) {
-                    t = window.innerHeight - menu.offsetHeight - 20;
-                }
-                menu.style.top = t + 'px';
+                menu.style.left = isMe ? Math.max(10, rect.left - menu.offsetWidth - 10) + 'px' : Math.min(window.innerWidth - menu.offsetWidth - 10, rect.right + 10) + 'px';
+            }
+
+            // 判斷上方空間是否足夠，不夠就放下面
+            if (rect.top > menu.offsetHeight + 20) {
+                menu.style.top = (rect.top - menu.offsetHeight - 10) + 'px';
+            } else if (rect.bottom + menu.offsetHeight + 20 < window.innerHeight) {
+                menu.style.top = (rect.bottom + 10) + 'px';
+            } else {
+                menu.style.top = '50%';
+                menu.style.transform = 'translateY(-50%)';
             }
         }
 
         document.addEventListener('click', (e) => {
-            if(!e.target.closest('#chatContextMenuWrapper') && !e.target.closest('.chat-row')) {
+            if(!e.target.closest('#chatContextMenuWrapper') && !e.target.closest('.chat-bubble')) {
                 document.getElementById('chatContextMenuWrapper').style.display = 'none';
             }
         });
 
-        // 🚀 選單按鈕功能 (包含直接翻譯 API 與釘選橫幅)
+        // 🚀 選單按鈕功能
         window.copyMsgFromMenu = function() {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if(msg && navigator.clipboard) {
-                let txt = msg.text;
+                let txt = msg.text.replace(" (已編輯)", "");
                 navigator.clipboard.writeText(txt).then(() => Swal.fire({toast:true, position:'top-end', icon:'success', title:'已複製到剪貼簿', showConfirmButton:false, timer:1500}));
             }
         };
@@ -1207,10 +1194,10 @@
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if(msg) {
-                let txt = msg.text;
+                let txt = msg.text.replace(" (已編輯)", "");
                 Swal.fire({ title: '翻譯中...', allowOutsideClick: false, background: 'var(--card-bg)', color: 'var(--text-main)', didOpen: () => { Swal.showLoading(); }});
                 try {
-                    // 直接使用 Google 翻譯 API 獲取結果
+                    // 直接使用 API 不跳轉
                     let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(txt)}`);
                     let data = await res.json();
                     let translated = data[0].map(x => x[0]).join('');
@@ -1225,7 +1212,7 @@
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if(msg) {
-                let txt = msg.text;
+                let txt = msg.text.replace(" (已編輯)", "");
                 document.getElementById('pinnedText').innerText = msg.sender + ': ' + txt;
                 document.getElementById('pinnedMessageBar').style.display = 'flex';
                 Swal.fire({toast:true, position:'top-end', icon:'success', title:'已釘選此訊息', showConfirmButton:false, timer:1500});
@@ -1256,6 +1243,7 @@
             if (!msg) return;
             
             let rawText = msg.text;
+            if (rawText.endsWith(" (已編輯)")) rawText = rawText.replace(" (已編輯)", "");
             
             Swal.fire({ 
                 title: '編輯訊息', 
@@ -1269,8 +1257,7 @@
                 customClass: { input: 'swal2-input' }
             }).then(r => {
                 if (r.isConfirmed && r.value) {
-                    msg.text = r.value;
-                    msg.isEdited = true; // 透過屬性標記，而非修改本文
+                    msg.text = r.value + " (已編輯)";
                     syncChatUI(AppState.chat.history);
                     
                     AppState.chat.isSyncing = true;
@@ -1288,7 +1275,7 @@
                 if(r.isConfirmed) {
                     const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
                     if(msg) {
-                        msg.text = "此訊息已收回"; msg.reactions = {}; msg.isEdited = false;
+                        msg.text = "此訊息已收回"; msg.reactions = {};
                         syncChatUI(AppState.chat.history);
                         
                         AppState.chat.isSyncing = true;
@@ -1388,6 +1375,7 @@
             }
         }
 
+        // 🚀 完整還原的排版結構：Flex-row 設計
         function syncChatUI(messages) {
             const board = chatBoxElem;
             const isAtBottom = board.scrollHeight - board.scrollTop <= board.clientHeight + 50;
@@ -1410,15 +1398,13 @@
                     const isConsecutive = (m.sender === lastSender && !m.replyTo);
                     lastSender = m.sender;
 
-                    // 🚀 已編輯不再黏在文字後綴，改抓取 isEdited 屬性，或相容舊的
                     let displayMsgText = m.text;
-                    let isEdited = m.isEdited === true;
+                    let isEdited = false;
                     if (displayMsgText.endsWith(" (已編輯)")) {
                         displayMsgText = displayMsgText.replace(" (已編輯)", "");
                         isEdited = true;
                     }
 
-                    // 處理回覆區塊
                     let replyHtml = '';
                     if (m.replyTo && !isUnsent) {
                         const isReplyToMe = m.replyTo.sender === AppState.auth.user;
@@ -1438,7 +1424,6 @@
                         `;
                     }
                     
-                    // 處理表情貼徽章
                     let rxHtml = '';
                     if (m.reactions && !isUnsent) {
                         for(let e in m.reactions) {
@@ -1461,18 +1446,10 @@
                             ` : ''}
                             
                             <div class="chat-content">
-                                ${!isMe && !isConsecutive && !isUnsent ? `
-                                    <div class="chat-meta-row">
-                                        <span class="chat-name">${m.sender}</span>
-                                        ${isEdited ? `<span class="chat-edited">已編輯</span>` : ''}
-                                    </div>
-                                ` : ''}
-                                
-                                ${isMe && isEdited && !isUnsent ? `
-                                    <div class="chat-meta-row">
-                                        <span class="chat-edited">已編輯</span>
-                                    </div>
-                                ` : ''}
+                                <div class="chat-meta-row">
+                                    ${!isMe && !isConsecutive && !isUnsent ? `<span class="chat-name">${m.sender}</span>` : ''}
+                                    ${isEdited && !isUnsent ? `<span class="chat-edited">已編輯</span>` : ''}
+                                </div>
 
                                 ${replyHtml}
                                 
