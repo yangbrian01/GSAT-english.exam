@@ -102,7 +102,7 @@
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: var(--text-main); }
         .input-desc { font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
-        input[type="text"], input[type="password"], input[type="number"], select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1em; background-color: var(--card-bg); color: var(--text-main); transition: 0.2s; font-family: inherit; }
+        input[type="text"], input[type="password"], input[type="number"], input[type="email"], select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1em; background-color: var(--card-bg); color: var(--text-main); transition: 0.2s; font-family: inherit; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); }
         textarea { resize: vertical; min-height: 120px; }
 
@@ -1850,7 +1850,33 @@
             
             apiCall('loginUser', { username: u, password: p }).then(res => {
                 if(res.success){
-                    AppState.auth.user = res.user; AppState.auth.token = res.token; localStorage.setItem('user', u); localStorage.setItem('token', res.token); Swal.close(); showView('setupView'); applyTheme(); 
+                    const executeLogin = () => {
+                        AppState.auth.user = res.user; AppState.auth.token = res.token; localStorage.setItem('user', u); localStorage.setItem('token', res.token); Swal.close(); showView('setupView'); applyTheme(); 
+                    };
+
+                    if(res.needsEmail) {
+                        Swal.fire({
+                            title: '系統安全性升級',
+                            text: '偵測到您的舊帳號尚未綁定信箱。為確保日後能找回密碼，請立即綁定 Email：',
+                            input: 'email',
+                            inputPlaceholder: '請輸入您的電子信箱',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            confirmButtonText: '綁定並登入',
+                            background: 'var(--card-bg)',
+                            color: 'var(--text-main)'
+                        }).then(r => {
+                            if(r.isConfirmed && r.value) {
+                                showLoading('綁定中...');
+                                apiCall('bindEmail', { username: u, email: r.value, sessionToken: res.token }).then(bindRes => {
+                                    if(bindRes.success) { Swal.fire('綁定成功', '感謝您的配合！', 'success'); executeLogin(); }
+                                    else { Swal.fire('錯誤', bindRes.message, 'error'); handleLogout(); }
+                                });
+                            }
+                        });
+                    } else {
+                        executeLogin();
+                    }
                 } else { Swal.fire('失敗', res.message, 'error'); }
             }); 
         }
@@ -2187,24 +2213,22 @@
             if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
             Swal.fire({
                 title: '忘記密碼',
-                html: '<input id="swal-fp-user" class="swal2-input" placeholder="請輸入您的帳號">' +
-                      '<input id="swal-fp-email" type="email" class="swal2-input" placeholder="請輸入註冊時綁定的 Email">',
+                html: '<input id="swal-fp-user" class="swal2-input" placeholder="請輸入您的帳號">',
                 focusConfirm: false,
                 showCancelButton: true,
-                confirmButtonText: '寄送新密碼',
+                confirmButtonText: '寄送新密碼至綁定信箱',
                 cancelButtonText: '取消',
                 background: 'var(--card-bg)',
                 color: 'var(--text-main)',
                 preConfirm: () => {
                     const u = document.getElementById('swal-fp-user').value.trim();
-                    const e = document.getElementById('swal-fp-email').value.trim();
-                    if (!u || !e) Swal.showValidationMessage('帳號與信箱不能為空！');
-                    return { user: u, email: e };
+                    if (!u) Swal.showValidationMessage('請輸入帳號！');
+                    return u;
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    showLoading('正在重置密碼並寄送信件...');
-                    apiCall('forgotPassword', { username: result.value.user, email: result.value.email }).then(res => {
+                    showLoading('正在產生新密碼並寄送信件...');
+                    apiCall('forgotPassword', { username: result.value }).then(res => {
                         if(res.success) Swal.fire('寄送成功！', res.message, 'success');
                         else Swal.fire('失敗', res.message, 'error');
                     });
