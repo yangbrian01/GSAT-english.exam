@@ -457,6 +457,7 @@
                 <div class="nav-group-items">
                     <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
                     <button class="nav-btn" id="installAppBtn" style="display: none; color: #10b981; font-weight: 800;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
+                    <button class="nav-btn" onclick="handleFeedback()">💬 意見回饋 / 勘錯</button>
                 </div>
             </details>
             
@@ -478,6 +479,7 @@
             <div class="input-group"><input type="password" id="loginPassword" placeholder="密碼 (Password)" required></div>
             <button class="btn btn-primary" onclick="handleLogin()">安全登入</button>
             <button class="btn btn-secondary" onclick="showView('registerView')">建立新帳號</button>
+            <button class="btn btn-outline" style="border: none; font-size: 0.9em; margin-top: -5px;" onclick="handleForgotPassword()">忘記密碼？點此重置</button>
         </div>
         
         <div id="registerView" class="view-section view-container centered-view">
@@ -495,6 +497,7 @@
                 </select>
                 <p class="input-desc" style="color:#d97706;">系統會自動為您推算學測目標年度與自動升級。</p>
             </div>
+            <div class="input-group"><input type="email" id="regEmail" placeholder="電子郵件 (忘記密碼時用來接收密碼)" required></div>
             <div class="input-group"><input type="text" id="regUsername" placeholder="中英文或數字皆可 (帳號)" required></div>
             <div class="input-group"><input type="password" id="regPassword" placeholder="長度至少 4 碼 (密碼)" required></div>
             <button class="btn btn-primary" onclick="handleRegister()">立即註冊</button>
