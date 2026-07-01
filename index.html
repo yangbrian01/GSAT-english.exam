@@ -1823,17 +1823,19 @@
         // ==========================================
         function handleRegister() { 
             if(!navigator.onLine) return Swal.fire('離線中', '註冊需要網路連線。', 'error');
+            const eMail = document.getElementById('regEmail').value.trim();
             const u = document.getElementById('regUsername').value.trim(); 
             const p = document.getElementById('regPassword').value; 
             const gradeOffset = document.getElementById('regGrade').value; 
             
+            if(!eMail || !eMail.includes('@')) return Swal.fire('錯誤','請輸入有效的電子郵件','warning');
             if(u.length < 3 || p.length < 4) return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); 
             showLoading('安全註冊中...'); 
             let tYear = calculateTargetYear(gradeOffset);
             
-            apiCall('registerUser', { username: u, password: p, targetYear: tYear }).then(res => {
+            apiCall('registerUser', { username: u, password: p, targetYear: tYear, email: eMail }).then(res => {
                 if(res.success){
-                    Swal.fire('成功','請登入','success');
+                    Swal.fire('成功','註冊成功！請登入','success');
                     showView('loginView');
                     document.getElementById('loginUsername').value = u;
                 } else Swal.fire('失敗',res.message,'error');
@@ -2181,6 +2183,57 @@
         function renderExamPaper() { const container = document.getElementById('examPaperContent'); let html = ''; if(AppState.exam.data && AppState.exam.data.examData) { AppState.exam.data.examData.forEach(part => { html += `<h2 class="exam-section-title">${part.section}</h2>`; if(part.questions && !part.topics && !part.article) { part.questions.forEach(q => { html += buildExamQuestionHtml(q); }); } if(part.topics) { part.topics.forEach(topic => { let groupId = 'topic_' + (topic.id ? topic.id.replace(/\W/g, '_') : Math.floor(Math.random()*1000)); html += buildPassageSection(topic, groupId); }); } if(part.article && !part.topics) { let groupId = 'part_' + Math.floor(Math.random()*1000); html += buildPassageSection(part, groupId); } if(part.translation) { html += `<div class="exam-topic-split"><div class="exam-topic-left" style="border:none;"><h3 style="margin-bottom:15px;">中譯英</h3>`; part.translation.forEach(t => { html += `<p style="font-weight:bold; margin-bottom:10px;">${t.id}. ${t.chinese}</p><textarea class="exam-text-input" id="exam_ans_${t.id}" onchange="AppState.exam.answers['${t.id}'] = this.value" placeholder="請在此輸入英文翻譯..."></textarea>`; }); html += `</div></div>`; } if(part.essay) { html += `<div class="exam-topic-split" style="flex-direction:column;"><h3 style="margin-bottom:10px;">英文作文: ${part.essay.topic}</h3><p style="margin-bottom:15px; color:var(--text-muted);">${part.essay.description}</p>`; if(part.essay.imageUrls) { html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`; part.essay.imageUrls.forEach(img => html += `<img src="${img}" style="max-width:30%; border-radius:8px;">`); html += `</div>`; } html += `<textarea class="exam-text-input" id="exam_ans_essay" style="min-height:250px;" onchange="AppState.exam.answers['essay'] = this.value" placeholder="請在此撰寫您的英文作文..."></textarea></div>`; } }); } container.innerHTML = html; }
         function buildExamQuestionHtml(q, sharedOptions, groupId) { let qTitleText = q.question ? q.question.replace(/\/n|\n/g, '<br>') : '請依據左文選出 / 填寫最適當的答案：'; let qHtml = `<div class="exam-q-block"><div class="exam-q-title">${q.id}. ${qTitleText}</div>`; if(q.questionImageUrl) qHtml += `<img src="${q.questionImageUrl}" style="max-width:100%; border-radius:8px; margin-bottom:10px;">`; if (q.answers) { Object.keys(q.answers).forEach(k => { qHtml += `<div style="margin-bottom: 10px; display:flex; align-items:center; gap: 10px;"><strong style="font-size: 1.1em; color:var(--primary-color);">${k}.</strong> <input type="text" class="exam-text-input" style="margin-bottom: 0;" placeholder="輸入第 ${k} 格答案" onchange="AppState.exam.answers['${k}'] = this.value"></div>`; }); } else if (q.options) { q.options.forEach((opt, idx) => { let optContent = opt; if(q.optionImageUrls && q.optionImageUrls[idx]) { optContent = `<span>${opt}</span><br><img src="${q.optionImageUrls[idx]}" style="max-width:150px; margin-top:5px; border-radius:5px;">`; } let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt; qHtml += `<label class="exam-radio-label"><input type="radio" name="exam_q_${q.id}" value="${val}" onchange="AppState.exam.answers['${q.id}'] = this.value"> <span>${optContent}</span></label>`; }); } else if (sharedOptions && sharedOptions.length > 0) { qHtml += `<select class="exam-text-input shared-dropdown-${groupId}" onchange="handleSharedDropdownChange('${groupId}', '${q.id}', this)" style="cursor:pointer; background-color: var(--card-bg);"><option value="">請選擇...</option>`; sharedOptions.forEach(opt => { let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt.split(' ')[0]; qHtml += `<option value="${val}">${opt}</option>`; }); qHtml += `</select>`; } else { qHtml += `<input type="text" class="exam-text-input" placeholder="輸入答案 (如 ADE 或單字)" onchange="AppState.exam.answers['${q.id}'] = this.value">`; } return qHtml + `</div>`; }
         function handleSharedDropdownChange(groupId, qId, selectElem) { AppState.exam.answers[qId] = selectElem.value; let selects = document.querySelectorAll(`.shared-dropdown-${groupId}`); let selectedValues = []; selects.forEach(s => { if(s.value) selectedValues.push(s.value); }); selects.forEach(s => { let options = s.querySelectorAll('option'); options.forEach(opt => { if (opt.value === "") return; if (selectedValues.includes(opt.value) && s.value !== opt.value) { opt.disabled = true; opt.style.color = '#94a3b8'; } else { opt.disabled = false; opt.style.color = ''; } }); }); }
+        function handleForgotPassword() {
+            if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
+            Swal.fire({
+                title: '忘記密碼',
+                html: '<input id="swal-fp-user" class="swal2-input" placeholder="請輸入您的帳號">' +
+                      '<input id="swal-fp-email" type="email" class="swal2-input" placeholder="請輸入註冊時綁定的 Email">',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: '寄送新密碼',
+                cancelButtonText: '取消',
+                background: 'var(--card-bg)',
+                color: 'var(--text-main)',
+                preConfirm: () => {
+                    const u = document.getElementById('swal-fp-user').value.trim();
+                    const e = document.getElementById('swal-fp-email').value.trim();
+                    if (!u || !e) Swal.showValidationMessage('帳號與信箱不能為空！');
+                    return { user: u, email: e };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoading('正在重置密碼並寄送信件...');
+                    apiCall('forgotPassword', { username: result.value.user, email: result.value.email }).then(res => {
+                        if(res.success) Swal.fire('寄送成功！', res.message, 'success');
+                        else Swal.fire('失敗', res.message, 'error');
+                    });
+                }
+            });
+        }
+
+        function handleFeedback() {
+            if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
+            Swal.fire({
+                title: '意見回饋 / 勘錯',
+                input: 'textarea',
+                inputPlaceholder: '請描述您遇到的問題、錯誤或想給我們的建議...',
+                showCancelButton: true,
+                confirmButtonText: '送出回饋',
+                cancelButtonText: '取消',
+                background: 'var(--card-bg)',
+                color: 'var(--text-main)',
+                inputValidator: (value) => { if (!value) return '內容不能為空喔！'; }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    showLoading('傳送中...');
+                    apiCall('submitFeedback', { username: AppState.auth.user, message: result.value }).then(res => {
+                        if (res.success) Swal.fire('感謝您的回饋！', res.message, 'success');
+                        else Swal.fire('傳送失敗', res.message, 'error');
+                    });
+                }
+            });
+        }
 
     </script>
 </body>
