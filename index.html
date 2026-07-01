@@ -46,10 +46,6 @@
         .splash-subtitle { font-size: 0.85em; font-weight: 700; color: var(--text-muted); letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.7; }
         .splash-laser-line { width: 0px; height: 2px; background: var(--primary-color); box-shadow: 0 0 12px var(--primary-color); animation: laserExpand 1.5s forwards; }
 
-        @keyframes shimmerShine { to { background-position: 200% center; } }
-        @keyframes splashFloat { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes laserExpand { 0% { width: 0px; opacity: 0; } 30% { opacity: 1; } 100% { width: 220px; opacity: 1; } }
-
         #offlineBanner { display: none; background-color: var(--danger-color); color: white; text-align: center; padding: 8px; font-weight: bold; position: sticky; top: 0; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         .navbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); z-index: 100; transition: 0.3s;}
@@ -185,7 +181,6 @@
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95em;}
         .data-table th, .data-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: top;}
         
-        /* 🚀 修正：防止編輯輸入框超出畫面 */
         body.dark-mode .swal2-popup { background: var(--card-bg); color: var(--text-main); }
         body.dark-mode .swal2-title, body.dark-mode .swal2-html-container { color: var(--text-main); }
         .swal2-input { max-width: 90% !important; box-sizing: border-box !important; margin: 1em auto !important; }
@@ -215,6 +210,10 @@
             background: var(--bg-color);
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
+        
+        /* 📌 釘選訊息橫幅 */
+        #pinnedMessageBar { background: var(--bg-color); padding: 12px 20px; border-bottom: 1px solid var(--border-color); font-size: 0.85em; display: none; align-items: center; gap: 12px; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.05);}
+        #pinnedMessageBar svg { color: var(--primary-color); flex-shrink: 0; }
 
         .chat-box { flex: 1; padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; scroll-behavior: smooth; overflow-x: hidden; background: var(--bg-color); }
         .chat-box::-webkit-scrollbar { width: 5px; }
@@ -222,8 +221,12 @@
         .chat-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
         body.dark-mode .chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
 
-        /* 🚀 全新 Flexbox 聊天架構 */
-        .chat-row { display: flex; align-items: flex-end; width: 100%; gap: 8px; margin-bottom: 8px; position: relative; animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);}
+        /* 🚀 全新 Flexbox 聊天架構 & 封殺系統預設觸控行為 */
+        .chat-row { 
+            display: flex; align-items: flex-end; width: 100%; gap: 8px; margin-bottom: 8px; position: relative; 
+            animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; /* 徹底封殺 iPad 長按反白 */
+        }
         .chat-row.me { flex-direction: row-reverse; }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -237,16 +240,18 @@
 
         .chat-name { font-size: 0.75em; color: var(--text-muted); margin-bottom: 4px; margin-left: 6px; font-weight: 700; letter-spacing: 0.5px;}
 
-        /* 🚀 (已編輯) 完美復刻標籤 */
+        /* 🚀 (已編輯) 完美復刻懸浮標籤，不佔用氣泡內部空間 */
         .chat-edited { 
-            position: absolute; top: -20px; font-size: 0.7em; font-weight: 600; 
+            position: absolute; top: -18px; font-size: 0.7em; font-weight: 600; 
             color: var(--primary-color); opacity: 0.8; white-space: nowrap; 
         }
         .chat-row.me .chat-edited { right: 5px; color: var(--text-muted); }
         .chat-row.other .chat-edited { left: 5px; }
 
-        /* 防止平板/手機原生反白或系統選單 */
-        .chat-bubble { padding: 12px 16px; font-size: 0.98em; line-height: 1.5; word-break: break-word; border-radius: 20px; position: relative; transition: 0.2s ease; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; pointer-events: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        /* 氣泡本體設計 */
+        .chat-bubble { padding: 12px 16px; font-size: 0.98em; line-height: 1.5; word-break: break-word; border-radius: 20px; position: relative; transition: 0.2s ease; pointer-events: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .msg-text { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; } /* 防反白 */
+        
         .chat-row.me .chat-bubble { background: linear-gradient(135deg, #007AFF, #0056D2); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.25); }
         .chat-row.other .chat-bubble { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
         .chat-bubble.unsent { background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); box-shadow: none; font-style: italic; opacity: 0.7; }
@@ -255,9 +260,9 @@
         .chat-time-col { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 4px; }
         .chat-time { font-size: 0.65em; color: var(--text-muted); opacity: 0.8; white-space: nowrap; font-weight: 500; }
 
-        /* 🚀 絕對定位在底部的表情貼徽章 */
+        /* 🚀 絕對定位在底部的表情貼徽章 (Badge 樣式完美重疊) */
         .reactions-wrap { position: absolute; bottom: -12px; display: flex; gap: 4px; z-index: 10; padding: 2px; }
-        .chat-row.me .reactions-wrap { right: 5px; flex-direction: row-reverse; }
+        .chat-row.me .reactions-wrap { right: 5px; }
         .chat-row.other .reactions-wrap { left: 5px; }
         
         .reaction-pill { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 2px 6px; font-size: 0.85em; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; color: var(--text-main); min-width: 28px; height: 26px; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
@@ -265,7 +270,7 @@
         .reaction-pill:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .reaction-pill.active { background: var(--primary-color); border-color: var(--primary-color); color: white; }
 
-        /* 🚀 獨立於氣泡之外的引用框 */
+        /* 獨立於氣泡之外的引用框 */
         .reply-quote-outside { display: flex; flex-direction: column; margin-bottom: 4px; width: 100%; position: relative; z-index: 1;}
         .chat-row.me .reply-quote-outside { align-items: flex-end; }
         .chat-row.other .reply-quote-outside { align-items: flex-start; }
@@ -294,7 +299,7 @@
         .reply-preview-bar { display: none; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(10px); padding: 12px 24px; border-top: 1px solid var(--border-color); font-size: 0.9em; justify-content: space-between; align-items: center; z-index: 5; color: var(--text-main); border-left: 4px solid var(--primary-color); flex-shrink: 0;}
         body.dark-mode .reply-preview-bar { background: rgba(30, 41, 59, 0.95); border-top-color: rgba(255,255,255,0.05); }
         
-        /* 🚀 全新設計的高級上下文選單 */
+        /* 🚀 全新設計的高級上下文選單 (SVG 線條圖示) */
         #chatContextMenuWrapper {
             position: fixed; display: none; flex-direction: column; gap: 8px; z-index: 1000;
         }
@@ -322,6 +327,7 @@
         body.dark-mode .context-menu-item:hover { background: rgba(255,255,255,0.05); }
         .context-menu-item.danger { color: var(--danger-color); }
         .context-menu-item.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+        .context-menu-item svg { width: 18px; height: 18px; }
 
         /* Emoji 擴充視窗樣式 */
         .emoji-picker-popup { border-radius: 24px !important; padding: 15px !important; max-width: 90%; }
@@ -625,6 +631,13 @@
                 </div>
 
                 <div class="chat-container">
+                    <!-- 🚀 釘選橫幅 -->
+                    <div id="pinnedMessageBar">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.1 2.9a3 3 0 0 0-4.2 0l-4.7 4.7a2 2 0 0 0-.5 2l-3.3 3.3a2 2 0 0 0-.5 2.1l-5.6 5.6a1 1 0 0 0 1.4 1.4l5.6-5.6a2 2 0 0 0 2.1-.5l3.3-3.3a2 2 0 0 0 2-.5l4.7-4.7a3 3 0 0 0 0-4.2z"></path></svg>
+                        <span id="pinnedText" style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text-main); font-weight:600;"></span>
+                        <span style="cursor:pointer; color:var(--text-muted); font-size:1.2em;" onclick="this.parentElement.style.display='none'">×</span>
+                    </div>
+
                     <div id="chatMessageBoard" class="chat-box" oncontextmenu="return false;"></div>
                     
                     <div class="reply-preview-bar" id="chatReplyPreview">
@@ -634,11 +647,13 @@
 
                     <div class="chat-input-area">
                         <input type="text" id="chatInputBox" class="chat-input" placeholder="左滑/右滑快速回覆..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
-                        <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
+                        <button class="chat-send-btn" onclick="sendChatMessage()">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" style="margin-left:-2px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
                     </div>
                 </div>
                 
-                <!-- 🚀 終極版高級選單 UI -->
+                <!-- 🚀 終極版高級 SVG 選單 -->
                 <div id="chatContextMenuWrapper">
                     <div class="emoji-pill-menu">
                         <span onclick="sendReaction('❤️')">❤️</span>
@@ -651,12 +666,24 @@
                     </div>
                     <div class="context-menu-list">
                         <div class="context-menu-time" id="cmenu-time"></div>
-                        <div class="context-menu-item" onclick="triggerReplyFromMenu()"><span>↩️</span> 回覆</div>
-                        <div class="context-menu-item" onclick="copyMsgFromMenu()"><span>📋</span> 複製</div>
-                        <div class="context-menu-item" onclick="translateMsgFromMenu()"><span>🌐</span> 翻譯</div>
-                        <div class="context-menu-item" onclick="pinMsgFromMenu()"><span>📌</span> 釘選</div>
-                        <div class="context-menu-item" id="chatMenuEditBtn" onclick="triggerEditFromMenu()" style="display:none;"><span>✏️</span> 編輯</div>
-                        <div class="context-menu-item danger" id="chatMenuUnsendBtn" onclick="triggerUnsendFromMenu()" style="display:none;"><span>🗑️</span> 收回訊息</div>
+                        <div class="context-menu-item" onclick="triggerReplyFromMenu()">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 10h10a8 8 0 0 1 8 8v2M3 10l6 6m-6-6l6-6"/></svg> 回覆
+                        </div>
+                        <div class="context-menu-item" onclick="copyMsgFromMenu()">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 複製
+                        </div>
+                        <div class="context-menu-item" onclick="translateMsgFromMenu()">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg> 翻譯
+                        </div>
+                        <div class="context-menu-item" onclick="pinMsgFromMenu()">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.1 2.9a3 3 0 0 0-4.2 0l-4.7 4.7a2 2 0 0 0-.5 2l-3.3 3.3a2 2 0 0 0-.5 2.1l-5.6 5.6a1 1 0 0 0 1.4 1.4l5.6-5.6a2 2 0 0 0 2.1-.5l3.3-3.3a2 2 0 0 0 2-.5l4.7-4.7a3 3 0 0 0 0-4.2z"></path></svg> 釘選
+                        </div>
+                        <div class="context-menu-item" id="chatMenuEditBtn" onclick="triggerEditFromMenu()" style="display:none;">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 編輯
+                        </div>
+                        <div class="context-menu-item danger" id="chatMenuUnsendBtn" onclick="triggerUnsendFromMenu()" style="display:none;">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg> 收回訊息
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1039,7 +1066,6 @@
             return `${d.getMonth() + 1}/${d.getDate()}`;
         }
 
-        // 🚀 觸控螢幕處理
         let pressTimer = null;
         let isTouchDevice = false;
         const chatBoxElem = document.getElementById('chatMessageBoard');
@@ -1100,6 +1126,7 @@
             e.stopPropagation();
         });
 
+        // 🚀 防溢出智慧定位選單
         function openContextMenu(row, clientX, clientY, isMobile) {
             const textNode = row.querySelector('.msg-text');
             if(textNode && textNode.innerText === '此訊息已收回') return;
@@ -1128,7 +1155,6 @@
             
             const rect = bubble.getBoundingClientRect();
             
-            // 🚀 位置計算優化
             if (isMobile) {
                 if(navigator.vibrate) navigator.vibrate(50);
                 menu.style.left = Math.max(10, Math.min(rect.left, window.innerWidth - menu.offsetWidth - 10)) + 'px';
@@ -1136,10 +1162,14 @@
                 menu.style.left = isMe ? Math.max(10, rect.left - menu.offsetWidth + 30) + 'px' : Math.min(window.innerWidth - menu.offsetWidth - 10, rect.right - 30) + 'px';
             }
 
+            // 判斷上方是否有空間，若無則往下開
             if (rect.top > menu.offsetHeight + 20) {
                 menu.style.top = (rect.top - menu.offsetHeight - 10) + 'px';
-            } else {
+            } else if (rect.bottom + menu.offsetHeight + 20 < window.innerHeight) {
                 menu.style.top = (rect.bottom + 10) + 'px';
+            } else {
+                menu.style.top = '50%';
+                menu.style.transform = 'translateY(-50%)';
             }
         }
 
@@ -1149,7 +1179,7 @@
             }
         });
 
-        // 🚀 選單按鈕功能
+        // 🚀 選單按鈕功能 (包含直接翻譯 API 與釘選橫幅)
         window.copyMsgFromMenu = function() {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
@@ -1159,18 +1189,33 @@
             }
         };
 
-        window.translateMsgFromMenu = function() {
+        window.translateMsgFromMenu = async function() {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
             if(msg) {
                 let txt = msg.text.replace(" (已編輯)", "");
-                window.open(`https://translate.google.com/?sl=auto&tl=zh-TW&text=${encodeURIComponent(txt)}`, '_blank');
+                Swal.fire({ title: '翻譯中...', allowOutsideClick: false, background: 'var(--card-bg)', color: 'var(--text-main)', didOpen: () => { Swal.showLoading(); }});
+                try {
+                    // 直接使用 Google 翻譯的開放 API 獲取結果
+                    let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(txt)}`);
+                    let data = await res.json();
+                    let translated = data[0].map(x => x[0]).join('');
+                    Swal.fire({ title: '翻譯結果', text: translated, icon: 'info', background: 'var(--card-bg)', color: 'var(--text-main)' });
+                } catch(e) {
+                    Swal.fire({ title: '翻譯失敗', text: '請檢查網路連線', icon: 'error', background: 'var(--card-bg)', color: 'var(--text-main)' });
+                }
             }
         };
 
         window.pinMsgFromMenu = function() {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
-            Swal.fire({toast:true, position:'top-end', icon:'success', title:'已釘選此訊息', showConfirmButton:false, timer:1500});
+            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            if(msg) {
+                let txt = msg.text.replace(" (已編輯)", "");
+                document.getElementById('pinnedText').innerText = msg.sender + ': ' + txt;
+                document.getElementById('pinnedMessageBar').style.display = 'flex';
+                Swal.fire({toast:true, position:'top-end', icon:'success', title:'已釘選此訊息', showConfirmButton:false, timer:1500});
+            }
         };
 
         function triggerReply(msgId, sender, text) {
@@ -1364,8 +1409,10 @@
                         if (isMe) { replyHeaderText = isReplyToMe ? '你回覆了自己' : `你回覆了 ${m.replyTo.sender}`; } 
                         else { replyHeaderText = isReplyToMe ? `${m.sender} 回覆了你` : `${m.sender} 回覆了 ${m.replyTo.sender}`; }
                         
+                        const alignClass = isMe ? 'me' : 'other';
+                        
                         replyHtml = `
-                            <div class="reply-quote-outside">
+                            <div class="reply-quote-outside ${alignClass}">
                                 <div class="reply-header-text">${replyHeaderText}</div>
                                 <div class="reply-content-box">
                                     ${isMe ? '' : '<div class="reply-line"></div>'}
