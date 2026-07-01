@@ -78,8 +78,8 @@
         .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; padding: 16px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
         .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); padding-left: 25px;}
 
-        details.nav-group summary { padding: 14px 20px; font-weight: 800; color: var(--text-muted); cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); background: var(--bg-color); font-size: 0.85em; letter-spacing: 1px; transition: 0.2s; user-select: none;}
-        details.nav-group summary:hover { color: var(--primary-color); }
+        details.nav-group summary { padding: 16px 20px; font-weight: 800; color: var(--primary-color); cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); background: var(--bg-color); font-size: 1.15em; letter-spacing: 1px; transition: 0.2s; user-select: none;}
+        details.nav-group summary:hover { color: var(--primary-hover); background: rgba(0,0,0,0.02); }
         details.nav-group summary::after { content: '▼'; font-size: 0.8em; transition: transform 0.2s; }
         details.nav-group[open] summary::after { transform: rotate(180deg); }
         details.nav-group summary::-webkit-details-marker { display: none; }
@@ -422,6 +422,8 @@
                 </div>
                 <button class="close-menu-btn" onclick="toggleMenu()">✖</button>
             </div>
+            
+            <button class="nav-btn" id="installAppBtnTop" style="display: none; color: #10b981; font-weight: 800; border-bottom: 4px solid var(--border-color); background: rgba(16,185,129,0.05); font-size: 1.15em;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
             
             <details class="nav-group" open>
                 <summary>🎓 核心學習</summary>
@@ -830,11 +832,27 @@
         })();
 
         let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; const installBtn = document.getElementById('installAppBtn'); if(installBtn) installBtn.style.display = 'block'; });
+        window.addEventListener('beforeinstallprompt', (e) => { 
+            e.preventDefault(); 
+            deferredPrompt = e; 
+            const btn1 = document.getElementById('installAppBtn'); 
+            if(btn1) btn1.style.display = 'block'; 
+            const btn2 = document.getElementById('installAppBtnTop'); 
+            if(btn2) btn2.style.display = 'block'; 
+        });
 
         async function installPWA() {
-            if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; document.getElementById('installAppBtn').style.display = 'none'; } 
-            else { Swal.fire({ title: '📱 安裝說明', html: '請點擊瀏覽器的 <b>「安裝應用程式」</b> 或分享按鈕的 <b>「加到主畫面」</b>', icon: 'info', confirmButtonText: '了解' }); }
+            if (deferredPrompt) { 
+                deferredPrompt.prompt(); 
+                await deferredPrompt.userChoice; 
+                deferredPrompt = null; 
+                const btn1 = document.getElementById('installAppBtn');
+                if(btn1) btn1.style.display = 'none'; 
+                const btn2 = document.getElementById('installAppBtnTop');
+                if(btn2) btn2.style.display = 'none';
+            } else { 
+                Swal.fire({ title: '📱 安裝說明', html: '請點擊瀏覽器的 <b>「安裝應用程式」</b> 或分享按鈕的 <b>「加到主畫面」</b>', icon: 'info', confirmButtonText: '了解' }); 
+            }
         }
 
         const AppState = {
@@ -2006,7 +2024,64 @@
         function toggleFavOnCard(word, meaning) { const btn = document.getElementById('cardFavBtn'); const isFav = AppState.vocab.favorites.has(word); if (isFav) { AppState.vocab.favorites.delete(word); btn.textContent = '🤍'; btn.style.color = '#cbd5e1'; } else { AppState.vocab.favorites.add(word); btn.textContent = '❤️'; btn.style.color = '#ef4444'; } apiCall('toggleFavorite', { username: AppState.auth.user, word: word, meaning: meaning, isAdding: !isFav }); }
         function loadAiForCard(pureWord) { if(!navigator.onLine) return Swal.fire('離線中', 'AI 字典需要網路連線。', 'error'); const btn = document.getElementById(`aiBtn-${pureWord}`); const block = document.getElementById(`aiBlock-${pureWord}`); const spinner = document.getElementById(`aiSpinner-${pureWord}`); const content = document.getElementById(`aiContent-${pureWord}`); if (btn) btn.style.display = 'none'; block.style.display = 'block'; if (content.innerHTML !== '') return; apiCall('aiDictionary', { username: AppState.auth.user, word: pureWord }).then(res => { spinner.style.display = 'none'; if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>📌 意思：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🌱 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 例句：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:var(--text-muted); margin-top:5px;">⚡ 快取秒讀</div>' : ''}`; content.style.display = 'block'; } else { content.innerHTML = `<span style="color:var(--danger-color);">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; } }); }
 
-        function gradeAiEssay() { if(!navigator.onLine) return Swal.fire('離線中', 'AI 批改需要網路連線。', 'error'); const text = document.getElementById('essayInput').value.trim(); const topic = document.getElementById('essayTopicInput').value.trim(); if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block'; apiCall('aiEssayGrading', { username: AppState.auth.user, topic: topic, essayText: text }).then(res => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; if (res.success && res.data && res.data.scores) { document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`; document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`; document.getElementById('resEssayOverall').textContent = res.data.overallComment; document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`; document.getElementById('a-content').textContent = res.data.scores.content.analysis; document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`; document.getElementById('a-org').textContent = res.data.scores.organization.analysis; document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`; document.getElementById('a-lang').textContent = res.data.scores.language.analysis; document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`; document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis; document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`; document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis; document.getElementById('resEssaySuggestions').textContent = res.data.suggestions; document.getElementById('resEssayKey').innerHTML = (res.data.keyImprovements || "").replace(/\n/g, '<br>'); document.getElementById('essayResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
+        function gradeAiEssay() { 
+            if(!navigator.onLine) return Swal.fire('離線中', 'AI 批改需要網路連線。', 'error'); 
+            const text = document.getElementById('essayInput').value.trim(); 
+            const topic = document.getElementById('essayTopicInput').value.trim(); 
+            if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); 
+            
+            const btn = document.getElementById('btnGradeEssay'); 
+            btn.disabled = true; 
+            document.getElementById('essayResult').style.display = 'none'; 
+            document.getElementById('essayLoading').style.display = 'block'; 
+            
+            apiCall('aiEssayGrading', { username: AppState.auth.user, topic: topic, essayText: text })
+            .then(res => { 
+                btn.disabled = false; 
+                document.getElementById('essayLoading').style.display = 'none'; 
+                
+                if (res.success && res.data) { 
+                    // 加入安全防護：即便 AI 漏給某個物件，也不會引發 TypeError
+                    const scores = res.data.scores || {};
+                    const content = scores.content || {};
+                    const org = scores.organization || {};
+                    const lang = scores.language || {};
+                    const gram = scores.grammar || {};
+                    const spell = scores.spelling || {};
+                    
+                    document.getElementById('resEssayScore').textContent = `${scores.total || '--'} / 20`; 
+                    document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level || '無'}`; 
+                    document.getElementById('resEssayOverall').textContent = res.data.overallComment || '無評語'; 
+                    document.getElementById('s-content').textContent = `${content.score || 0} / 5`; 
+                    document.getElementById('a-content').textContent = content.analysis || ''; 
+                    document.getElementById('s-org').textContent = `${org.score || 0} / 5`; 
+                    document.getElementById('a-org').textContent = org.analysis || ''; 
+                    document.getElementById('s-lang').textContent = `${lang.score || 0} / 4`; 
+                    document.getElementById('a-lang').textContent = lang.analysis || ''; 
+                    document.getElementById('s-gram').textContent = `${gram.score || 0} / 3`; 
+                    document.getElementById('a-gram').textContent = gram.analysis || ''; 
+                    document.getElementById('s-spell').textContent = `${spell.score || 0} / 3`; 
+                    document.getElementById('a-spell').textContent = spell.analysis || ''; 
+                    document.getElementById('resEssaySuggestions').textContent = res.data.suggestions || ''; 
+                    
+                    let keys = res.data.keyImprovements || "";
+                    if (Array.isArray(keys)) keys = keys.join('<br>');
+                    else keys = String(keys).replace(/\n/g, '<br>');
+                    document.getElementById('resEssayKey').innerHTML = keys; 
+                    
+                    document.getElementById('essayResult').style.display = 'block'; 
+                    refreshProfileData(); 
+                } else { 
+                    Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); 
+                } 
+            })
+            .catch(e => { 
+                console.error("AI 處理錯誤:", e);
+                btn.disabled = false; 
+                document.getElementById('essayLoading').style.display = 'none'; 
+                Swal.fire('系統提示', '資料渲染時發生異常，請確認伺服器回應格式或重新提交！', 'error'); 
+            }); 
+        }
         function askAiTutor() { if(!navigator.onLine) return Swal.fire('離線中', 'AI 家教需要網路連線。', 'error'); const context = document.getElementById('tutorContextInput').value.trim(); const doubt = document.getElementById('tutorDoubtInput').value.trim(); if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning'); const btn = document.getElementById('btnAskTutor'); btn.disabled = true; document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block'; apiCall('aiTutor', { username: AppState.auth.user, question: context, doubt: doubt }).then(res => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; if (res.success && res.data) { document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>'); document.getElementById('tutorResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('呼叫老師失敗', res.message, 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
 
         function setupReviewUI() { let dueCount = 0, pendingCount = 0; AppState.review.cards.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; else document.getElementById('startReviewBtn').style.display = 'none'; AppState.review.currentIndex = 0; renderReviewUI(); }
